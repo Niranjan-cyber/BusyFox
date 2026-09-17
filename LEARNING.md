@@ -37,6 +37,11 @@ Kept from Day 1 per the event rules (learning is a scored judging criterion). On
 - PRD §8.1's scenario format mixes lines the simulator should generate itself with lines tagged `(real)` that live collectors (GitHub/HN/Tavily) are expected to find independently, inside the *same* `generator_effects` list for one planted truth. Missing that tag would have double-counted signals for the same opportunity (one simulated, one live) once Lane A's pipeline runs both feeds together — worth flagging since it's easy to read the scenario as "everything here is ours to generate."
 - Wrote the scenario as JSON instead of the PRD's YAML sample — stdlib `json` covers a static data file with no new dependency (`pyyaml`), and nothing about the format is load-bearing for judging.
 
+**App Store + Product Hunt collectors (Task 11)**
+- Product Hunt's OAuth app-registration form silently rejects an `http://` redirect URI (`redirect_uri must be an HTTPS/SSL URI`), even though the redirect is never actually used for this read-only, no-browser-flow case — swapping to any syntactically valid `https://` placeholder was enough to create the app.
+- The app's **Client Secret** is not a usable API token: sending it as `Authorization: Bearer <secret>` against the v2 GraphQL endpoint returns `401 invalid_oauth_token`. The account-scoped **Developer Token** shown separately on the same app page is the one that actually authenticates — easy to grab the wrong field since both are just opaque strings with no visual distinction.
+- Both collectors (App Store RSS, Product Hunt GraphQL) were verified with one real live round-trip each against actual named-competitor data (Datadog reviews, Sentry launch comments) before being marked done — same "prove the failure/success shape once, live" standard as Task 5's Tavily probe, not just unit tests against a fake fetch.
+
 ## Day 2 — Sept 18, 2026
 
 **Contract lock (Tasks 1–2)**
