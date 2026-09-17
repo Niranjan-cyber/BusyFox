@@ -26,7 +26,7 @@ Full detail and rationale for each task: `tasks/plan.md`. Check items off here a
 
 ### Lane C — Floating
 - [x] Task 10: PulseStack simulator (scenario + generator + seed), `Signal`/`Evidence`-shaped output
-- [ ] Task 11: App Store RSS fetch (one competitor) + Product Hunt token registered
+- [x] Task 11: App Store RSS fetch (one competitor) + Product Hunt token registered
 - [ ] Task 12: LEARNING.md — first real entry
 
 ### Checkpoint: End of Day 1
