@@ -14,7 +14,7 @@ Full detail and rationale for each task: `tasks/plan.md`. Check items off here a
 ## Phase 1 — Day 1 remainder
 
 ### Lane A — Backend/Agents
-- [ ] Task 3: GitHub REST collector → `Signal`-shaped output
+- [x] Task 3: GitHub REST collector → `Signal`-shaped output
 - [ ] Task 4: HN Algolia collector → `Signal`-shaped output
 - [ ] Task 5: One live Tavily round-trip — characterize failure modes
 - [ ] Task 6: Skeleton AWS deploy (Amplify + API Gateway + Step Functions + stub Lambda)
