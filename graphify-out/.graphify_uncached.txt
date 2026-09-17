@@ -1,7 +1,0 @@
-C:\Career\Hackathons\First Commit\BusyFox\AGENTS.md
-C:\Career\Hackathons\First Commit\BusyFox\BUILD_PLAN.md
-C:\Career\Hackathons\First Commit\BusyFox\README.md
-C:\Career\Hackathons\First Commit\BusyFox\hackathon (1).md
-C:\Career\Hackathons\First Commit\BusyFox\opportunity_engine_prd_v8.md
-C:\Career\Hackathons\First Commit\BusyFox\tasks\plan.md
-C:\Career\Hackathons\First Commit\BusyFox\tasks\todo.md

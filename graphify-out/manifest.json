@@ -1,0 +1,68 @@
+{
+  ".agents/skills/idea-refine/scripts/idea-refine.sh": {
+    "mtime": 1789623890.4838436,
+    "seen": 1789637346.6495676,
+    "ast_hash": "7d09d06b836527b5261a27027b1d8548",
+    "semantic_hash": "7d09d06b836527b5261a27027b1d8548"
+  },
+  ".claude/settings.json": {
+    "mtime": 1789624574.8718355,
+    "seen": 1789637346.6495726,
+    "ast_hash": "0b06d7de13e4ee9dbe717cd53d09b99d",
+    "semantic_hash": "0b06d7de13e4ee9dbe717cd53d09b99d"
+  },
+  ".claude/skills/idea-refine/scripts/idea-refine.sh": {
+    "mtime": 1789623890.4838436,
+    "seen": 1789637346.649575,
+    "ast_hash": "7d09d06b836527b5261a27027b1d8548",
+    "semantic_hash": "7d09d06b836527b5261a27027b1d8548"
+  },
+  "skills-lock.json": {
+    "mtime": 1789624045.9550834,
+    "seen": 1789637346.6495762,
+    "ast_hash": "36b6ba844d9534eabdc85ea7177c2399",
+    "semantic_hash": "36b6ba844d9534eabdc85ea7177c2399"
+  },
+  "AGENTS.md": {
+    "mtime": 1789622556.879475,
+    "seen": 1789637346.6495771,
+    "ast_hash": "175cc1dc8543a7c1fba00fb2dd7b3c80",
+    "semantic_hash": "175cc1dc8543a7c1fba00fb2dd7b3c80"
+  },
+  "BUILD_PLAN.md": {
+    "mtime": 1789633238.3482008,
+    "seen": 1789637346.6495786,
+    "ast_hash": "96ec76738681d85260573e5fd0046dd0",
+    "semantic_hash": "96ec76738681d85260573e5fd0046dd0"
+  },
+  "README.md": {
+    "mtime": 1789616781.5886452,
+    "seen": 1789637346.6495798,
+    "ast_hash": "341adc901790b455e7c4528de7828cf6",
+    "semantic_hash": "341adc901790b455e7c4528de7828cf6"
+  },
+  "hackathon (1).md": {
+    "mtime": 1789634789.819245,
+    "seen": 1789637346.6495807,
+    "ast_hash": "29ad004865abb7455acc556473484d2f",
+    "semantic_hash": "29ad004865abb7455acc556473484d2f"
+  },
+  "opportunity_engine_prd_v8.md": {
+    "mtime": 1789593162.6431096,
+    "seen": 1789637346.649582,
+    "ast_hash": "f19be4eee687ea640d9de40d3c608b98",
+    "semantic_hash": "f19be4eee687ea640d9de40d3c608b98"
+  },
+  "tasks/plan.md": {
+    "mtime": 1789635632.845049,
+    "seen": 1789637346.6495829,
+    "ast_hash": "1dee30a9c233ad28a09ba42759d4a7cf",
+    "semantic_hash": "1dee30a9c233ad28a09ba42759d4a7cf"
+  },
+  "tasks/todo.md": {
+    "mtime": 1789635648.7425954,
+    "seen": 1789637346.6495838,
+    "ast_hash": "6659ed8d0e42f2af2dac3725e7533724",
+    "semantic_hash": "6659ed8d0e42f2af2dac3725e7533724"
+  }
+}
