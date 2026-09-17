@@ -40,3 +40,17 @@ Entity + API contract lives in `backend/schemas/`, `frontend/src/types/`, and `d
 ## Definition of done
 
 Matches `tasks/plan.md`'s per-task verification steps. Project-wide, on top of that: no P1/P2 work starts while any P0 item is incomplete (hard rule, not a suggestion — see `BUILD_PLAN.md`), and nothing after Day 3, 8pm feature freeze except bug fixes.
+
+## Agent skills
+
+### Issue tracker
+
+Issues are pre-broken-down tasks tracked in `tasks/plan.md` (detail) and `tasks/todo.md` (checkboxes, by Lane A/B/C). See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Default five canonical role labels, unchanged. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context layout (no `CONTEXT.md`/ADRs yet; created lazily by `/domain-modeling`). See `docs/agents/domain.md`.
