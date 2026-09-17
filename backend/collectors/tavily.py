@@ -92,6 +92,14 @@ def probe(query: str, api_key: str, *, post: Post = _post_json) -> dict:
 if __name__ == "__main__":
     import os
     import sys
+    from pathlib import Path
+
+    env_file = Path(__file__).resolve().parents[2] / ".env"
+    if env_file.exists():
+        for line in env_file.read_text().splitlines():
+            if "=" in line and not line.strip().startswith("#"):
+                k, _, v = line.partition("=")
+                os.environ.setdefault(k.strip(), v.strip())
 
     key = os.environ.get("TAVILY_API_KEY")
     if not key:
