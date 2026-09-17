@@ -25,7 +25,7 @@ Full detail and rationale for each task: `tasks/plan.md`. Check items off here a
 - [ ] Task 9: Screen 1 & 3 shells on fixture data, using Task 8's theme
 
 ### Lane C — Floating
-- [ ] Task 10: PulseStack simulator (scenario + generator + seed), `Signal`/`Evidence`-shaped output
+- [x] Task 10: PulseStack simulator (scenario + generator + seed), `Signal`/`Evidence`-shaped output
 - [ ] Task 11: App Store RSS fetch (one competitor) + Product Hunt token registered
 - [ ] Task 12: LEARNING.md — first real entry
 

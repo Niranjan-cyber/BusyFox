@@ -1,0 +1,73 @@
+{
+  "scenario_id": "pulsestack_v1",
+  "seed": 20260917,
+  "business": {
+    "name": "PulseStack",
+    "industry": "developer_tools_observability",
+    "product": "Lightweight uptime and error monitoring for small engineering teams",
+    "pricing": { "starter_usd_month": 29, "team_usd_month": 99 },
+    "capabilities": {
+      "slack_integration": true,
+      "on_call_paging": true,
+      "custom_dashboards": false,
+      "sso": false
+    },
+    "icp": ["seed to Series A startups", "teams of 3-15 engineers"],
+    "current_mrr_usd": 8200,
+    "goal": { "metric": "mrr", "change_usd": 15000, "horizon_days": 90 },
+    "named_competitors": ["Sentry", "Datadog", "New Relic", "Better Stack"]
+  },
+  "planted_truths": [
+    {
+      "id": "PT1",
+      "opportunity": "Alert-noise competitive gap",
+      "generator_effects": [
+        "PulseStack's own reviews repeatedly praise \"few false alarms\"",
+        "(real) competitor reviews and HN threads complain about alert fatigue at larger tools"
+      ]
+    },
+    {
+      "id": "PT2",
+      "opportunity": "Underpriced-tier migration wave",
+      "generator_effects": [
+        "(real) public posts about a competitor's pricing change",
+        "PulseStack support tickets show inbound \"we're evaluating alternatives\" messages"
+      ]
+    },
+    {
+      "id": "PT3",
+      "opportunity": "Onboarding friction fix-first risk",
+      "generator_effects": [
+        "a cluster of support tickets about multi-service setup confusion",
+        "if unresolved, blocks the migration-wave opportunity from converting"
+      ]
+    }
+  ],
+  "planted_strengths": [
+    {
+      "id": "PS1",
+      "strength": "Fast, human support response time",
+      "generator_effects": ["positive survey comments naming quick support"]
+    }
+  ],
+  "red_herrings": [
+    {
+      "id": "RH1",
+      "idea": "Build a full APM suite to match Datadog feature-for-feature",
+      "generator_effects": [],
+      "expected_outcome": "reject — required capability far outside current scope, effort very high"
+    },
+    {
+      "id": "RH2",
+      "idea": "One-off praise for a conference talk",
+      "generator_effects": ["a single old mention, 9 months stale"],
+      "expected_outcome": "flagged stale, not surfaced"
+    }
+  ],
+  "noise": {
+    "ticket_count": 180,
+    "survey_response_count": 90,
+    "rating_distribution_survey": { "5": 0.38, "4": 0.26, "3": 0.14, "2": 0.10, "1": 0.12 },
+    "spam_or_low_signal": 8
+  }
+}
