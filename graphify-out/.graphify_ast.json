@@ -1,0 +1,83 @@
+{
+  "nodes": [
+    {
+      "id": "claude_skills_idea_refine_scripts_idea_refine",
+      "label": "idea-refine.sh",
+      "file_type": "code",
+      "source_file": ".agents/skills/idea-refine/scripts/idea-refine.sh",
+      "source_location": "L1",
+      "metadata": {
+        "language": "bash",
+        "kind": "file"
+      },
+      "_origin": "ast"
+    },
+    {
+      "id": "agents_skills_idea_refine_scripts_idea_refine_sh__entry",
+      "label": "idea-refine.sh script",
+      "file_type": "code",
+      "source_file": ".agents/skills/idea-refine/scripts/idea-refine.sh",
+      "source_location": "L1",
+      "metadata": {
+        "language": "bash",
+        "kind": "bash_entrypoint"
+      },
+      "_origin": "ast"
+    },
+    {
+      "id": "claude_skills_idea_refine_scripts_idea_refine",
+      "label": "idea-refine.sh",
+      "file_type": "code",
+      "source_file": ".claude/skills/idea-refine/scripts/idea-refine.sh",
+      "source_location": "L1",
+      "metadata": {
+        "language": "bash",
+        "kind": "file"
+      },
+      "_origin": "ast"
+    },
+    {
+      "id": "claude_skills_idea_refine_scripts_idea_refine_sh__entry",
+      "label": "idea-refine.sh script",
+      "file_type": "code",
+      "source_file": ".claude/skills/idea-refine/scripts/idea-refine.sh",
+      "source_location": "L1",
+      "metadata": {
+        "language": "bash",
+        "kind": "bash_entrypoint"
+      },
+      "_origin": "ast"
+    }
+  ],
+  "edges": [
+    {
+      "source": "claude_skills_idea_refine_scripts_idea_refine",
+      "target": "agents_skills_idea_refine_scripts_idea_refine_sh__entry",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".agents/skills/idea-refine/scripts/idea-refine.sh",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "claude_skills_idea_refine_scripts_idea_refine",
+      "target": "claude_skills_idea_refine_scripts_idea_refine_sh__entry",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".claude/skills/idea-refine/scripts/idea-refine.sh",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_origin": "ast"
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0,
+  "failed_sources": [],
+  "extracted_sources": [
+    "C:\\Career\\Hackathons\\First Commit\\BusyFox\\.agents\\skills\\idea-refine\\scripts\\idea-refine.sh",
+    "C:\\Career\\Hackathons\\First Commit\\BusyFox\\.claude\\settings.json",
+    "C:\\Career\\Hackathons\\First Commit\\BusyFox\\.claude\\skills\\idea-refine\\scripts\\idea-refine.sh",
+    "C:\\Career\\Hackathons\\First Commit\\BusyFox\\skills-lock.json"
+  ]
+}
