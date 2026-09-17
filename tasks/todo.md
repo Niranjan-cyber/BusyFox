@@ -16,7 +16,7 @@ Full detail and rationale for each task: `tasks/plan.md`. Check items off here a
 ### Lane A — Backend/Agents
 - [x] Task 3: GitHub REST collector → `Signal`-shaped output
 - [x] Task 4: HN Algolia collector → `Signal`-shaped output
-- [ ] Task 5: One live Tavily round-trip — characterize failure modes
+- [x] Task 5: One live Tavily round-trip — characterize failure modes
 - [ ] Task 6: Skeleton AWS deploy (Amplify + API Gateway + Step Functions + stub Lambda)
 
 ### Lane B — Frontend/UX

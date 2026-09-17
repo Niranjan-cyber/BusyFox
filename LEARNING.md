@@ -22,6 +22,12 @@ Kept from Day 1 per the event rules (learning is a scored judging criterion). On
 **Collectors (Tasks 3–4)**
 - The GitHub collector gets `Signal.polarity` for free from the API shape (release = positive, open issue = negative). HN Algolia's `/search` response has no equivalent structural split — a story surfacing is just a story, no sentiment field. Rather than inventing a title-keyword classifier to fake a pain/praise split, the HN collector marks every hit POSITIVE (attention on the query) and leaves sentiment splitting to a later pass, flagged with a `ponytail:` comment. Could've gone the other way; recording why it didn't.
 
+**Tavily live round-trip (Task 5)**
+- Clean search+extract on two different queries (a normal one, a gibberish one) both succeeded — Tavily's search doesn't return `empty_results` even for nonsense input (`"xqzplonkfribbet zzyx nonsense query 928471"` still returned 5 results); an empty-results failure mode may be rare enough that we can't assume the demo will ever hit it live.
+- A bad API key surfaces as `http_error:search:401`, confirming `probe()`'s HTTP-error branch is reachable and correctly labelled.
+- Extract on a URL Tavily can't fetch (tried a PDF) doesn't come back as an HTTP error — it's a 200 with `results: []` and a separate `failed_results: [...]` list carrying the reason. `probe()`'s existing `if not extracted` check already catches this correctly as `malformed_extract`, but it's worth flagging: a naive implementation checking only for an HTTP error would have missed this failure shape entirely.
+- Net: of the three named failure modes (empty results, timeout, malformed extract), two are confirmed reachable and correctly handled; timeout wasn't triggered live (not something we can force on demand) but the code path (`urllib.error.URLError`/`TimeoutError`) is exercised by existing unit tests with a fake `post`.
+
 ## Day 2 — Sept 18, 2026
 
 **Contract lock (Tasks 1–2)**
