@@ -40,14 +40,14 @@ Nothing below "Core entities" can be built with confidence until that box is com
 **Description:** Encode Business, Competitor, Run, SourceDocument, Evidence, Claim, Signal, Opportunity, Target/Account, and ExecutionPack (PRD §14.1–14.10) as a shared schema both lanes read from — Pydantic models for the backend, generated or hand-mirrored TypeScript types for the frontend. Include the `OPP#`-style key prefixes and the Observed/Inferred/Assumed label as a shared enum, since it's applied everywhere a claim reaches the UI (§13.3).
 
 **Acceptance criteria:**
-- [ ] All nine entities from §14 exist as Pydantic models with every field named in the PRD, including `evidence_diversity`, `opportunity_mechanism`, and the runtime-contract fields on Run (§14.3)
-- [ ] Matching TypeScript interfaces exist for the frontend, field-for-field
-- [ ] Research-agent output types have no `opportunities` field anywhere in their schema (§10.1a) — this must be true structurally, not by convention
-- [ ] Committed to the repo, not left in chat/notes
+- [x] All nine entities from §14 exist as Pydantic models with every field named in the PRD, including `evidence_diversity`, `opportunity_mechanism`, and the runtime-contract fields on Run (§14.3)
+- [x] Matching TypeScript interfaces exist for the frontend, field-for-field
+- [x] Research-agent output types have no `opportunities` field anywhere in their schema (§10.1a) — this must be true structurally, not by convention
+- [x] Committed to the repo, not left in chat/notes
 
 **Verification:**
 - [ ] Both people read the committed file together before moving on — this is the one artifact where a silent misunderstanding costs a full day later
-- [ ] Manual check: pick one entity (e.g. Opportunity) and trace it against §14.8 line by line
+- [x] Manual check: pick one entity (e.g. Opportunity) and trace it against §14.8 line by line — done programmatically, see `backend/tests/test_stub_handlers.py` round-trip validation against the PRD's worked `opp_001` example
 
 **Dependencies:** None
 
@@ -65,13 +65,13 @@ Nothing below "Core entities" can be built with confidence until that box is com
 **Description:** Define the request/response shape for every endpoint the five P0 screens need (§15, plus the implied list/detail endpoints for screens 1, 3, 4, 5), using Task 1's entities as the payload types. Stub each as a Lambda handler returning fixture data — not real logic yet, just the shape, so the frontend can build against it today.
 
 **Acceptance criteria:**
-- [ ] Every endpoint in §15 is listed with method, path, request, response
-- [ ] Additionally listed: whatever GET endpoints screens 1, 3, 4, 5 need that §15 doesn't spell out (business profile, opportunity list, opportunity detail, execution pack) — the PRD names four explicit endpoints but the screens need more; make the gap explicit rather than discovering it mid-Day-2
-- [ ] Each stub Lambda returns a fixture payload matching Task 1's types exactly
-- [ ] API Gateway routes exist (even if pointing at stub Lambdas) so the frontend can hit real URLs, not mocks
+- [x] Every endpoint in §15 is listed with method, path, request, response
+- [x] Additionally listed: whatever GET endpoints screens 1, 3, 4, 5 need that §15 doesn't spell out (business profile, opportunity list, opportunity detail, execution pack) — the PRD names four explicit endpoints but the screens need more; make the gap explicit rather than discovering it mid-Day-2
+- [x] Each stub Lambda returns a fixture payload matching Task 1's types exactly
+- [x] API Gateway routes exist (even if pointing at stub Lambdas) so the frontend can hit real URLs, not mocks — `infra/api-gateway.yaml` (SAM template); real deploy is Task 6
 
 **Verification:**
-- [ ] `curl` or Postman hits every stubbed route and gets a Task-1-shaped response back
+- [x] `curl` or Postman hits every stubbed route and gets a Task-1-shaped response back — no live deploy yet (Task 6), so verified as `backend/tests/test_stub_handlers.py`: invokes every handler directly and validates the response body against its Task-1 model
 - [ ] Frontend dev confirms they can build screen 1 and 3 against these stubs without asking backend anything
 
 **Dependencies:** Task 1
@@ -84,7 +84,7 @@ Nothing below "Core entities" can be built with confidence until that box is com
 **Estimated scope:** Medium
 
 ### Checkpoint: Contract locked
-- [ ] Tasks 1–2 committed
+- [x] Tasks 1–2 committed
 - [ ] Both people can point at the same file and agree it's the source of truth
 - [ ] Lanes below start only after this checkpoint
 

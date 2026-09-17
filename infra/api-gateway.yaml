@@ -1,0 +1,139 @@
+# API Gateway routes for the five P0 screens (PRD §15 + docs/contract.md).
+#
+# AWS SAM template. Defines the HTTP API surface and routes it to the Task 2
+# stub Lambda handlers (backend/handlers/*_stub.py) so the frontend can hit
+# real URLs today, not mocks. Task 6 wires this into the actual skeleton
+# deploy (Amplify + this API + Step Functions + one stub Lambda); this file
+# is the route/handler mapping that deploy consumes, not a deploy in itself.
+#
+# Every route below has a matching handler in backend/handlers/ and a
+# matching Pydantic response type in backend/schemas/entities.py — see
+# docs/contract.md for the full table (method, path, purpose, screen, type).
+
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: Opportunity Engine — P0 API surface (stub Lambdas, Task 2)
+
+Globals:
+  Function:
+    Runtime: python3.13
+    Timeout: 10
+    MemorySize: 256
+    CodeUri: ../backend/
+
+Resources:
+  OpportunityEngineApi:
+    Type: AWS::Serverless::HttpApi
+
+  GetBusiness:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handlers.businesses_stub.get_business
+      Events:
+        Api:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref OpportunityEngineApi
+            Path: /businesses/{id}
+            Method: GET
+
+  GetBusinessFeedbackSummary:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handlers.businesses_stub.get_feedback_summary
+      Events:
+        Api:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref OpportunityEngineApi
+            Path: /businesses/{id}/feedback-summary
+            Method: GET
+
+  ListOpportunities:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handlers.opportunities_stub.list_opportunities
+      Events:
+        Api:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref OpportunityEngineApi
+            Path: /businesses/{id}/opportunities
+            Method: GET
+
+  GetOpportunity:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handlers.opportunities_stub.get_opportunity
+      Events:
+        Api:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref OpportunityEngineApi
+            Path: /opportunities/{id}
+            Method: GET
+
+  GetExecutionPack:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handlers.opportunities_stub.get_execution_pack
+      Events:
+        Api:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref OpportunityEngineApi
+            Path: /opportunities/{id}/execution-pack
+            Method: GET
+
+  ListClaims:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handlers.claims_stub.list_claims
+      Events:
+        Api:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref OpportunityEngineApi
+            Path: /opportunities/{id}/claims
+            Method: GET
+
+  GetClaimEvidence:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handlers.claims_stub.get_claim_evidence
+      Events:
+        Api:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref OpportunityEngineApi
+            Path: /claims/{id}/evidence
+            Method: GET
+
+  ListCompetitors:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handlers.competitors_stub.list_competitors
+      Events:
+        Api:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref OpportunityEngineApi
+            Path: /competitors
+            Method: GET
+
+  GetCompetitorEvidenceLive:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handlers.competitors_stub.get_competitor_evidence_live
+      Events:
+        Api:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref OpportunityEngineApi
+            Path: /competitors/{id}/evidence/{evidenceId}/live
+            Method: GET
+
+Outputs:
+  ApiUrl:
+    Description: Base URL for the P0 API surface
+    Value: !Sub "https://${OpportunityEngineApi}.execute-api.${AWS::Region}.amazonaws.com/"

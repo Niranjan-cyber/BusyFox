@@ -4,11 +4,11 @@ Full detail and rationale for each task: `tasks/plan.md`. Check items off here a
 
 ## Phase 0 — Contract lock (blocking, both people together)
 
-- [ ] **Task 1:** Core entity schema — nine entities + provenance chain (Pydantic + TS types), committed
-- [ ] **Task 2:** API surface for the five P0 screens — endpoint table + stub Lambdas returning fixture data
+- [x] **Task 1:** Core entity schema — nine entities + provenance chain (Pydantic + TS types), committed
+- [x] **Task 2:** API surface for the five P0 screens — endpoint table + stub Lambdas returning fixture data
 
 ### Checkpoint: Contract locked
-- [ ] Tasks 1–2 committed
+- [x] Tasks 1–2 committed
 - [ ] Both people agree the committed file is the source of truth
 
 ## Phase 1 — Day 1 remainder
