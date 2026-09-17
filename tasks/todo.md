@@ -17,7 +17,7 @@ Full detail and rationale for each task: `tasks/plan.md`. Check items off here a
 - [x] Task 3: GitHub REST collector → `Signal`-shaped output
 - [x] Task 4: HN Algolia collector → `Signal`-shaped output
 - [x] Task 5: One live Tavily round-trip — characterize failure modes
-- [ ] Task 6: Skeleton AWS deploy (Amplify + API Gateway + Step Functions + stub Lambda)
+- [ ] Task 6: Skeleton AWS deploy (Amplify + API Gateway + Step Functions + stub Lambda) — IaC written, live deploy pending AWS credentials
 
 ### Lane B — Frontend/UX
 - [ ] Task 7: React app scaffold + Amplify Hosting pipeline

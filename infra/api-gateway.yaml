@@ -1,14 +1,23 @@
-# API Gateway routes for the five P0 screens (PRD §15 + docs/contract.md).
+# API Gateway routes for the five P0 screens (PRD §15 + docs/contract.md),
+# plus the Task 6 Day-1 skeleton: one Step Functions state machine with a
+# single Task state invoking one stub Lambda (backend/handlers/
+# orchestrator_stub.py), proving Step Functions -> Lambda deploys and runs
+# end to end. This is a smoke test, not the real orchestrator — the actual
+# parallel research -> Synthesis -> Evidence Check -> Quality Gate graph
+# (§10.1) is Day 2 work.
 #
 # AWS SAM template. Defines the HTTP API surface and routes it to the Task 2
 # stub Lambda handlers (backend/handlers/*_stub.py) so the frontend can hit
-# real URLs today, not mocks. Task 6 wires this into the actual skeleton
-# deploy (Amplify + this API + Step Functions + one stub Lambda); this file
-# is the route/handler mapping that deploy consumes, not a deploy in itself.
+# real URLs today, not mocks.
 #
-# Every route below has a matching handler in backend/handlers/ and a
-# matching Pydantic response type in backend/schemas/entities.py — see
-# docs/contract.md for the full table (method, path, purpose, screen, type).
+# Amplify Hosting isn't in this template: it needs a GitHub App console
+# connection (a human-in-the-loop step, not something a CloudFormation
+# resource can complete unattended) and has nothing to host until Task 7's
+# React scaffold exists. Task 7 owns wiring that pipeline.
+#
+# Every API Gateway route below has a matching handler in backend/handlers/
+# and a matching Pydantic response type in backend/schemas/entities.py —
+# see docs/contract.md for the full table (method, path, purpose, screen, type).
 
 AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
@@ -133,7 +142,30 @@ Resources:
             Path: /competitors/{id}/evidence/{evidenceId}/live
             Method: GET
 
+  RunOrchestratorStub:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handlers.orchestrator_stub.run_stub
+
+  SkeletonOrchestrator:
+    Type: AWS::Serverless::StateMachine
+    Properties:
+      Definition:
+        StartAt: RunOrchestrator
+        States:
+          RunOrchestrator:
+            Type: Task
+            Resource: !GetAtt RunOrchestratorStub.Arn
+            End: true
+      Policies:
+        - LambdaInvokePolicy:
+            FunctionName: !Ref RunOrchestratorStub
+
 Outputs:
   ApiUrl:
     Description: Base URL for the P0 API surface
     Value: !Sub "https://${OpportunityEngineApi}.execute-api.${AWS::Region}.amazonaws.com/"
+
+  SkeletonOrchestratorArn:
+    Description: Step Functions state machine ARN for the Task 6 Day-1 skeleton
+    Value: !Ref SkeletonOrchestrator
