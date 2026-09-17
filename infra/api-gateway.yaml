@@ -28,7 +28,12 @@ Globals:
     Runtime: python3.13
     Timeout: 10
     MemorySize: 256
-    CodeUri: ../backend/
+    # Repo root, not ../backend/: every handler imports as `from backend.X
+    # import Y` (same as the pytest suite, run from repo root), so `backend`
+    # has to exist as a real package at the Lambda's runtime root too.
+    # requirements.txt at repo root (-r backend/requirements.txt) makes
+    # `sam build`'s pip step pick up the same deps.
+    CodeUri: ../
 
 Resources:
   OpportunityEngineApi:
@@ -37,7 +42,7 @@ Resources:
   GetBusiness:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: handlers.businesses_stub.get_business
+      Handler: backend.handlers.businesses_stub.get_business
       Events:
         Api:
           Type: HttpApi
@@ -49,7 +54,7 @@ Resources:
   GetBusinessFeedbackSummary:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: handlers.businesses_stub.get_feedback_summary
+      Handler: backend.handlers.businesses_stub.get_feedback_summary
       Events:
         Api:
           Type: HttpApi
@@ -61,7 +66,7 @@ Resources:
   ListOpportunities:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: handlers.opportunities_stub.list_opportunities
+      Handler: backend.handlers.opportunities_stub.list_opportunities
       Events:
         Api:
           Type: HttpApi
@@ -73,7 +78,7 @@ Resources:
   GetOpportunity:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: handlers.opportunities_stub.get_opportunity
+      Handler: backend.handlers.opportunities_stub.get_opportunity
       Events:
         Api:
           Type: HttpApi
@@ -85,7 +90,7 @@ Resources:
   GetExecutionPack:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: handlers.opportunities_stub.get_execution_pack
+      Handler: backend.handlers.opportunities_stub.get_execution_pack
       Events:
         Api:
           Type: HttpApi
@@ -97,7 +102,7 @@ Resources:
   ListClaims:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: handlers.claims_stub.list_claims
+      Handler: backend.handlers.claims_stub.list_claims
       Events:
         Api:
           Type: HttpApi
@@ -109,7 +114,7 @@ Resources:
   GetClaimEvidence:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: handlers.claims_stub.get_claim_evidence
+      Handler: backend.handlers.claims_stub.get_claim_evidence
       Events:
         Api:
           Type: HttpApi
@@ -121,7 +126,7 @@ Resources:
   ListCompetitors:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: handlers.competitors_stub.list_competitors
+      Handler: backend.handlers.competitors_stub.list_competitors
       Events:
         Api:
           Type: HttpApi
@@ -133,7 +138,7 @@ Resources:
   GetCompetitorEvidenceLive:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: handlers.competitors_stub.get_competitor_evidence_live
+      Handler: backend.handlers.competitors_stub.get_competitor_evidence_live
       Events:
         Api:
           Type: HttpApi
@@ -145,7 +150,7 @@ Resources:
   RunOrchestratorStub:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: handlers.orchestrator_stub.run_stub
+      Handler: backend.handlers.orchestrator_stub.run_stub
 
   SkeletonOrchestrator:
     Type: AWS::Serverless::StateMachine

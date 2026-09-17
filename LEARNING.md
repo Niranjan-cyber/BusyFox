@@ -10,8 +10,7 @@ Kept from Day 1 per the event rules (learning is a scored judging criterion). On
 - *(Fill in: any friction hit during verification — e.g. delay between account creation and verification clearing, which step took longest. Whoever did this step knows the specifics; worth a line here since "learning demonstrated" is explicitly judged.)*
 
 **AWS/Bedrock access**
-- Confirmed Bedrock model access for both Claude Haiku 4.5 and Sonnet 4.6.
-- *(Fill in: which region/inference profile ended up working, and whether the default one was blocked — this is exactly the kind of concrete technical learning judges want to see, and it's only known to whoever ran the check.)*
+- Confirmed Bedrock model access for both Claude Haiku 4.5 and Sonnet 4.6, in `eu-north-1` — that's the region the account's IAM Identity Center (SSO) permission set defaults to, so it's also the region the Task 6 skeleton deployed into. Both models showed "Access granted" on the first check, no request/approval wait.
 
 **Planning & tooling**
 - Locked the two-person workflow before writing any product code: split by architectural layer (backend/agents vs. frontend/screens) rather than by day, with a third floating lane for the extra AI subscription — the PRD's own Part B already argues for a contracts-first split, so this wasn't a novel idea, just a deliberate decision to follow it rather than default to a day-based split.
@@ -27,6 +26,12 @@ Kept from Day 1 per the event rules (learning is a scored judging criterion). On
 - A bad API key surfaces as `http_error:search:401`, confirming `probe()`'s HTTP-error branch is reachable and correctly labelled.
 - Extract on a URL Tavily can't fetch (tried a PDF) doesn't come back as an HTTP error — it's a 200 with `results: []` and a separate `failed_results: [...]` list carrying the reason. `probe()`'s existing `if not extracted` check already catches this correctly as `malformed_extract`, but it's worth flagging: a naive implementation checking only for an HTTP error would have missed this failure shape entirely.
 - Net: of the three named failure modes (empty results, timeout, malformed extract), two are confirmed reachable and correctly handled; timeout wasn't triggered live (not something we can force on demand) but the code path (`urllib.error.URLError`/`TimeoutError`) is exercised by existing unit tests with a fake `post`.
+
+**Skeleton AWS deploy (Task 6)**
+- The first live deploy returned `500 Internal Server Error` on every route. Root cause: every handler imports as `from backend.X import Y` (matching how the pytest suite runs, from repo root), but the SAM template had `CodeUri: ../backend/`, which deploys `backend/`'s *contents* as the Lambda's own root — so `backend` wasn't an importable package at runtime for any of the 9 functions. Fixed by pointing `CodeUri` at the repo root and prefixing every `Handler:` with `backend.` instead, which also needed a root-level `requirements.txt` (`-r backend/requirements.txt`) so `sam build`'s pip step still finds the dependency list, and a `.samignore` so the wider `CodeUri` doesn't try to bundle `.git`/`graphify-out`/etc. into every function's package. Same class of bug the GitHub Actions "works on my machine" trap is — local pytest and the deployed Lambda need the *same* package root, and nothing catches that mismatch until a real deploy.
+- SAM's `sam build` and `sam deploy` are on PATH for the account that ran `pip install aws-sam-cli`, but `aws` (installed via winget) needed a fresh terminal before PowerShell/bash picked it up on PATH — the wizard's own note about this ("reopen this terminal") was necessary, not boilerplate caution.
+- Used AWS SSO (`aws configure sso`), not long-lived access keys — `~/.aws/config` ends up with a named profile (e.g. `AdministratorAccess-<account-id>`), and the plain `aws` command with no `--profile` flag fails with `NoCredentials` even after a successful SSO login, since `[default]` in that file has no credential source. Every AWS CLI/SAM call after setup needs `--profile <name>` or `$env:AWS_PROFILE` set.
+- A first `sam deploy` run under a mistyped/truncated stack name (`busfox-ske`) left a stray, broken CloudFormation stack once the real one (`opportunity-engine-skeleton`) deployed correctly — cleaned up with `aws cloudformation delete-stack`. Worth double-checking the stack name at the `sam deploy --guided` prompt rather than typing fast.
 
 ## Day 2 — Sept 18, 2026
 
