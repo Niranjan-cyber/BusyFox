@@ -34,6 +34,10 @@ from backend.schemas.entities import (
     SourceKind,
 )
 
+# See market_agent.py's identical import for why these can't stay local to
+# `_build_live_agent`.
+from strands.hooks import BeforeModelCallEvent, BeforeToolCallEvent
+
 _COMPONENT = "competitor_agent"
 _MODEL_ID = "anthropic.claude-haiku-4-5-20251001-v1:0"
 
@@ -167,7 +171,6 @@ def _build_live_agent(contract: AgentRuntimeContract, budget: RuntimeBudget, nam
     importable/testable."""
 
     from strands import Agent, tool
-    from strands.hooks import BeforeModelCallEvent, BeforeToolCallEvent
     from strands.models import BedrockModel
 
     from backend.collectors.app_store import fetch_app_store_signals

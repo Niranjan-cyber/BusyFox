@@ -25,6 +25,14 @@ from backend.schemas.entities import (
     SourceKind,
 )
 
+# Hoisted out of `_build_live_agent`: `from __future__ import annotations`
+# makes every hook callback's `event:` annotation a string, and
+# `strands`' hook registry resolves it via `typing.get_type_hints`, which
+# looks the name up in the callback's *module* globals — a name imported
+# inside the function's own local scope is invisible there and fails with
+# "cannot infer event type" the first time a real strands.Agent is built.
+from strands.hooks import BeforeModelCallEvent, BeforeToolCallEvent
+
 _COMPONENT = "market_agent"
 _MODEL_ID = "anthropic.claude-haiku-4-5-20251001-v1:0"
 
@@ -194,7 +202,6 @@ def _build_live_agent(contract: AgentRuntimeContract, budget: RuntimeBudget):
     requires the SDK or AWS credentials to be importable/testable."""
 
     from strands import Agent, tool
-    from strands.hooks import BeforeModelCallEvent, BeforeToolCallEvent
     from strands.models import BedrockModel
 
     from backend.collectors.github import fetch_github_signals

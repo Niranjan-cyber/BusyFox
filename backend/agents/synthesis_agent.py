@@ -51,9 +51,17 @@ from backend.schemas.entities import (
     ValueModel,
 )
 
+# See market_agent.py's identical import for why these can't stay local to
+# `_build_live_agent`.
+from strands.hooks import BeforeModelCallEvent, BeforeToolCallEvent
+
 _COMPONENT = "synthesis_agent"
-# PRD names "Claude Sonnet 4.6" (§10.1); mirrors Task 15/16's Haiku ID format.
-_MODEL_ID = "anthropic.claude-sonnet-4-6-20260115-v1:0"
+# PRD names "Claude Sonnet 4.6" (§10.1). The dated `-20260115-v1:0` suffix,
+# guessed to mirror Task 15/16's Haiku ID format, doesn't exist in Bedrock's
+# catalog and was never caught since this path is only smoke-tested —
+# `aws bedrock list-foundation-models` confirms the real id has no date/
+# version suffix.
+_MODEL_ID = "anthropic.claude-sonnet-4-6"
 
 _KNOWN_TYPES = frozenset(t.value for t in OpportunityType)
 
@@ -288,7 +296,6 @@ def _build_live_agent(contract: AgentRuntimeContract, budget: RuntimeBudget):
     over the signals it's handed, it never goes back out to research."""
 
     from strands import Agent, tool
-    from strands.hooks import BeforeModelCallEvent, BeforeToolCallEvent
     from strands.models import BedrockModel
 
     collected: list[RawCandidate] = []
