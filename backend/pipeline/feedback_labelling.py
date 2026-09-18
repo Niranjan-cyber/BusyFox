@@ -86,10 +86,11 @@ class FeedbackSignals(NamedTuple):
     signals: list[Signal]
 
 
-def _fuzzy_ratio(span: str, text: str) -> float:
+def fuzzy_ratio(span: str, text: str) -> float:
     """Best match ratio for `span` against same-length windows of `text` —
     comparing `span` to the whole `text` instead tanks the ratio purely
-    from the length mismatch."""
+    from the length mismatch. Public: also reused by Task 18's Evidence
+    Check for its own quote-exists check (§12.1) against source text."""
 
     n = len(span)
     if n == 0 or n > len(text):
@@ -97,12 +98,12 @@ def _fuzzy_ratio(span: str, text: str) -> float:
     return max(SequenceMatcher(None, span, text[i : i + n]).ratio() for i in range(len(text) - n + 1))
 
 
-def _span_found(span: str, text: str) -> bool:
+def span_found(span: str, text: str) -> bool:
     """Verbatim substring, or fuzzy >=0.92 (§9.1)."""
 
     if not span:
         return False
-    return span in text or _fuzzy_ratio(span, text) >= _FUZZY_MATCH_THRESHOLD
+    return span in text or fuzzy_ratio(span, text) >= _FUZZY_MATCH_THRESHOLD
 
 
 def is_valid_label(label: RawLabel, source_text: str) -> bool:
@@ -112,7 +113,7 @@ def is_valid_label(label: RawLabel, source_text: str) -> bool:
         and bool(label.intents)
         and all(intent in INTENTS for intent in label.intents)
         and label.segment_hint in SEGMENT_HINTS
-        and _span_found(label.evidence_span, source_text)
+        and span_found(label.evidence_span, source_text)
     )
 
 
@@ -139,7 +140,7 @@ def _quote_hash(quote: str) -> str:
 
 def _evidence_for(item: RawFeedbackItem, label: RawLabel, now: datetime) -> Evidence:
     exact = label.evidence_span in item.text
-    ratio = 1.0 if exact else _fuzzy_ratio(label.evidence_span, item.text)
+    ratio = 1.0 if exact else fuzzy_ratio(label.evidence_span, item.text)
     age_days = max((now - item.published_at).days, 0)
     return Evidence(
         id=f"evd_fb_{item.id}",
