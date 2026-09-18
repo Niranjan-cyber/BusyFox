@@ -61,7 +61,10 @@ Full detail and rationale for each task: `tasks/plan.md`. Check items off here a
   rejected-candidate route, Task 19) and 3. See `frontend/README.md`, "Known blockers"
 
 ### Lane C — Floating
-- [ ] Task 24: Gold-set labelling (80 sim + 20 real, independent)
+- [~] Task 24: Gold-set labelling (80 sim + 20 real, independent) — corpus built
+  and blank sheets ready (`tasks/gold_set/labels_{niranjan,swarali}.csv`,
+  `scripts/build_gold_set.py`). Still needs: both of you actually labelling
+  independently, then reconciling into one agreed gold set.
 - [ ] Task 25: Re-run `/graphify` before evening stand-up
 
 ### Checkpoint: End of Day 2
