@@ -82,6 +82,23 @@ Kept from Day 1 per the event rules (learning is a scored judging criterion). On
   parses `theme.css` and fails the build. The page that checks it in a browser only helps when
   somebody opens it.
 
+**Merging Lane B onto the locked contract**
+- Lane B's frontend branch was cut before Task 1 landed, so it carried its own hand-written
+  `entities.ts` — and left an explicit comment flagging that it needed reconciling. The merge
+  conflict on that one file was trivial (`git checkout --ours`); the real work was everything
+  downstream that had been built against the invented shape (~60 type errors). Two of those
+  turned out to be real contract gaps rather than UI inventions — `RetrievalMode` was missing
+  `demo_fixture` even though it's a named guardrail, and `OpportunityType` was missing four
+  playbook values its own comment already invited extending — so the canonical schema grew by
+  two enums, not zero. Everything else (a `title`, a `fit` checklist, a `what_to_do` string, a
+  numeric value-assumption breakdown, a `RejectedIdea` concept) had no source in the canonical
+  entities at all; rather than inventing fields to make Lane B's screens compile, those became
+  either derived view-model adapters (`frontend/src/lib/viewModels.ts`) built only from data
+  the contract actually has, or were dropped/stubbed with the gap named in code. The lesson:
+  when two branches diverge across a contract lock, "make it type-check" and "make it correct"
+  are different tasks, and the second one needs a human call on which UI assumptions were real
+  requirements versus scaffolding that outran the schema.
+
 ## Day 3 — Sept 19, 2026
 
 *(Not yet written.)*

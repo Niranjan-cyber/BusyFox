@@ -3,6 +3,7 @@ import { Card, CardBody, CardFooter, CardHeader } from '../common/Card'
 import { ClaimLabel } from '../common/Labels'
 import { ConfidenceMeter, PriorityChip, ValueRange } from '../common/Metrics'
 import { count } from '../../lib/format'
+import { claimLabel, opportunityTitle } from '../../lib/viewModels'
 import './OpportunityCard.css'
 
 /** The card from §1.4. Every line on it is either evidence-backed or labelled as not. */
@@ -21,7 +22,7 @@ function ClaimRow({ claim }: { claim: Claim }) {
     <div className="claim">
       <div className="claim-head">
         <span className="claim-type">{CLAIM_HEADING[claim.type]}</span>
-        <ClaimLabel value={claim.label} />
+        <ClaimLabel value={claimLabel(claim)} />
         {claim.status === 'hypothesis' ? (
           <span className="claim-status" title="Passed with capped confidence (§11.2)">
             hypothesis
@@ -50,7 +51,7 @@ export function OpportunityCard({
   return (
     <Card tone={blocked ? 'blocked' : 'default'}>
       <CardHeader>
-        <h3>{opportunity.title}</h3>
+        <h3>{opportunityTitle(opportunity)}</h3>
         <PriorityChip value={opportunity.priority} />
       </CardHeader>
 
@@ -66,19 +67,9 @@ export function OpportunityCard({
 
         <div className="claims">{ordered.map((claim) => <ClaimRow key={claim.id} claim={claim} />)}</div>
 
-        {opportunity.fit.length > 0 ? (
-          <div className="fit">
-            <h4>Your fit</h4>
-            <ul>
-              {opportunity.fit.map((item) => (
-                <li key={item.key}>
-                  <span aria-hidden="true">✓</span> {item.label}
-                </li>
-              ))}
-            </ul>
-          </div>
-        ) : null}
-
+        {/* "Your fit" and "What to do" sections dropped: no canonical field backs either
+            (Opportunity has no capability link and no free-text action recommendation) and
+            inventing one isn't this layer's call — see LEARNING.md. */}
         {opportunity.pains_to_fix_first.length > 0 ? (
           <div className="fix-first">
             <h4>Fix first</h4>
@@ -89,11 +80,6 @@ export function OpportunityCard({
             </ul>
           </div>
         ) : null}
-
-        <div className="what-to-do">
-          <h4>What to do</h4>
-          <p>{opportunity.what_to_do}</p>
-        </div>
 
         <p className="diversity">
           Source diversity: <span className="tabular">{count(diversity.source_kind_count)}</span>{' '}

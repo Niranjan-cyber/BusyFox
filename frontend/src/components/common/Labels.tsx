@@ -1,4 +1,4 @@
-import type { ClaimLabel as ClaimLabelValue, RetrievalMode } from '../../types/entities'
+import type { ObservedInferredAssumed as ClaimLabelValue, RetrievalMode } from '../../types/entities'
 import './Labels.css'
 
 /**

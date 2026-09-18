@@ -1,4 +1,5 @@
-import type { Business, FeedbackSummary } from '../types/entities'
+import type { Business, Signal } from '../types/entities'
+import { summariseFeedback } from '../lib/viewModels'
 
 /**
  * PulseStack — the simulated business from PRD §8.1 / §14.1.
@@ -29,90 +30,88 @@ export const business: Business = {
   created_at: '2026-09-17T10:00:00+05:30',
 }
 
-/** Theme aggregation over PulseStack's own tickets and survey responses (§9.2). */
-export const feedbackSummary: FeedbackSummary = {
-  business_id: 'biz_pulsestack',
-  run_id: 'run_fixture_01',
-  total_items: 184,
-  positive_count: 112,
-  negative_count: 72,
-  themes: [
-    {
-      id: 'thm_alert_precision',
-      aspect: 'alert_noise',
-      summary: 'Alerts fire on real incidents, not on noise',
-      polarity: 'positive',
-      mention_count: 41,
-      representative_quote:
-        'Three weeks in and every page we got was a real incident. Our previous tool trained us to ignore it.',
-      representative_evidence_id: 'evd_101',
-      retrieval_mode: 'demo_fixture',
-    },
-    {
-      id: 'thm_setup_speed',
-      aspect: 'onboarding',
-      summary: 'First service is monitored within an afternoon',
-      polarity: 'positive',
-      mention_count: 33,
-      representative_quote:
-        'Had our API under monitoring before lunch. No agent install, no YAML archaeology.',
-      representative_evidence_id: 'evd_102',
-      retrieval_mode: 'demo_fixture',
-    },
-    {
-      id: 'thm_slack_flow',
-      aspect: 'slack_integration',
-      summary: 'Slack thread per incident keeps the whole team in context',
-      polarity: 'positive',
-      mention_count: 24,
-      representative_quote:
-        'The per-incident Slack thread is the feature. Everyone sees the same timeline without anyone narrating it.',
-      representative_evidence_id: 'evd_103',
-      retrieval_mode: 'demo_fixture',
-    },
-    {
-      id: 'thm_multi_service',
-      aspect: 'multi_service_onboarding',
-      summary: 'Adding services beyond the first is slow and manual',
-      polarity: 'negative',
-      mention_count: 29,
-      representative_quote:
-        'Service four took as long as service one. There is no way to clone a config or bulk-import.',
-      representative_evidence_id: 'evd_104',
-      retrieval_mode: 'demo_fixture',
-    },
-    {
-      id: 'thm_dashboards',
-      aspect: 'custom_dashboards',
-      summary: 'No custom dashboards, so reporting happens in a spreadsheet',
-      polarity: 'negative',
-      mention_count: 22,
-      representative_quote:
-        'I export to CSV every Monday to build the view my CTO actually wants to see.',
-      representative_evidence_id: 'evd_105',
-      retrieval_mode: 'demo_fixture',
-    },
-    {
-      id: 'thm_sso',
-      aspect: 'sso',
-      summary: 'No SSO blocks rollout past a certain team size',
-      polarity: 'negative',
-      mention_count: 14,
-      representative_quote:
-        'Security review stopped at SSO. We are stuck on two seats until that ships.',
-      representative_evidence_id: 'evd_106',
-      retrieval_mode: 'demo_fixture',
-    },
-    {
-      id: 'thm_mobile',
-      aspect: 'mobile_app',
-      summary: 'On-call handoff is awkward away from a laptop',
-      polarity: 'negative',
-      mention_count: 7,
-      representative_quote:
-        'Acknowledging a page from my phone means loading the full web app on a 4G connection.',
-      representative_evidence_id: 'evd_107',
-      retrieval_mode: 'demo_fixture',
-    },
-  ],
+/**
+ * Feedback signals over PulseStack's own tickets and survey responses (§9.2).
+ *
+ * `/businesses/{id}/feedback-summary` returns `Signal[]` (docs/contract.md:61) — there is no
+ * separate "theme" entity, so each theme below is expanded into one Signal per mention and
+ * grouped back into themes client-side by `summariseFeedback` (lib/viewModels.ts). Total/
+ * positive/negative counts are therefore always exactly what the signals below sum to, not a
+ * separately-asserted number.
+ */
+interface FeedbackThemeSeed {
+  aspect: string
+  polarity: Signal['polarity']
+  claim_text: string
+  evidence_id: string
+  mention_count: number
 }
+
+const FEEDBACK_THEME_SEEDS: FeedbackThemeSeed[] = [
+  {
+    aspect: 'alert_noise',
+    polarity: 'positive',
+    claim_text:
+      'Three weeks in and every page we got was a real incident. Our previous tool trained us to ignore it.',
+    evidence_id: 'evd_101',
+    mention_count: 41,
+  },
+  {
+    aspect: 'onboarding',
+    polarity: 'positive',
+    claim_text: 'Had our API under monitoring before lunch. No agent install, no YAML archaeology.',
+    evidence_id: 'evd_102',
+    mention_count: 33,
+  },
+  {
+    aspect: 'slack_integration',
+    polarity: 'positive',
+    claim_text:
+      'The per-incident Slack thread is the feature. Everyone sees the same timeline without anyone narrating it.',
+    evidence_id: 'evd_103',
+    mention_count: 24,
+  },
+  {
+    aspect: 'multi_service_onboarding',
+    polarity: 'negative',
+    claim_text: 'Service four took as long as service one. There is no way to clone a config or bulk-import.',
+    evidence_id: 'evd_104',
+    mention_count: 29,
+  },
+  {
+    aspect: 'custom_dashboards',
+    polarity: 'negative',
+    claim_text: 'I export to CSV every Monday to build the view my CTO actually wants to see.',
+    evidence_id: 'evd_105',
+    mention_count: 22,
+  },
+  {
+    aspect: 'sso',
+    polarity: 'negative',
+    claim_text: 'Security review stopped at SSO. We are stuck on two seats until that ships.',
+    evidence_id: 'evd_106',
+    mention_count: 14,
+  },
+  {
+    aspect: 'mobile_app',
+    polarity: 'negative',
+    claim_text: 'Acknowledging a page from my phone means loading the full web app on a 4G connection.',
+    evidence_id: 'evd_107',
+    mention_count: 7,
+  },
+]
+
+export const feedbackSignals: Signal[] = FEEDBACK_THEME_SEEDS.flatMap((seed, seedIndex) =>
+  Array.from({ length: seed.mention_count }, (_, i) => ({
+    id: `sig_feedback_${seedIndex}_${i}`,
+    run_id: 'run_fixture_01',
+    source_kind: 'owner_upload',
+    aspect: seed.aspect,
+    polarity: seed.polarity,
+    claim_text: seed.claim_text,
+    evidence_ids: [seed.evidence_id],
+    produced_by: 'feedback_pipeline_agent',
+  })),
+)
+
+export const feedbackSummary = summariseFeedback(feedbackSignals)

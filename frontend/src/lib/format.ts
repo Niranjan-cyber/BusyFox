@@ -17,10 +17,6 @@ export function usdRange(low: number, high: number): string {
   return `${compactUsd(low)}–${compactUsd(high)}`
 }
 
-export function percent(fraction: number): string {
-  return `${Math.round(fraction * 1000) / 10}%`
-}
-
 export function count(value: number): string {
   return value.toLocaleString('en-US')
 }

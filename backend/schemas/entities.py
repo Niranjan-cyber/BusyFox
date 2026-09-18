@@ -43,8 +43,11 @@ class SourceKind(str, Enum):
 
 
 class RetrievalMode(str, Enum):
+    """§7.2/§12.2 — the three-tier resilience ladder. Never substituted silently."""
+
     CACHED = "cached"
     LIVE = "live"
+    DEMO_FIXTURE = "demo_fixture"
 
 
 class ClaimType(str, Enum):
@@ -105,11 +108,18 @@ class Polarity(str, Enum):
 
 class OpportunityType(str, Enum):
     """PRD names competitive_gap explicitly (§14.8); other playbook-specific
-    types are expected but not yet enumerated — extend as they appear."""
+    types are expected but not yet enumerated — extend as they appear.
+
+    segment_expansion/retention_fix/packaging_pricing/positioning_shift added
+    2026-09-18 once Lane B's PulseStack fixtures needed them for real."""
 
     COMPETITIVE_GAP = "competitive_gap"
     UNMET_NEED = "unmet_need"
     EXPANSION = "expansion"
+    SEGMENT_EXPANSION = "segment_expansion"
+    RETENTION_FIX = "retention_fix"
+    PACKAGING_PRICING = "packaging_pricing"
+    POSITIONING_SHIFT = "positioning_shift"
 
 
 class ExecutionPackStatus(str, Enum):

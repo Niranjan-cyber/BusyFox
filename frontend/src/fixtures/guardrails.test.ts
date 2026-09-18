@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest'
-import { feedbackSummary } from './business'
+import { fetchBusiness, fetchFeedbackSignals } from '../api/client'
 import { claims, opportunities } from './opportunities'
 import { derivePriority } from '../screens/Inbox/grouping'
+import { claimLabel, fixFirstFlag } from '../lib/viewModels'
 import type { ResearchAgentOutput } from '../types/entities'
 
 /**
@@ -33,27 +34,23 @@ describe('no composite opportunity score (§13.1)', () => {
   it('derives every fixture priority from the rule table, not from a computation', () => {
     for (const opportunity of opportunities) {
       expect(opportunity.priority).toBe(
-        derivePriority(opportunity.evidence_confidence, opportunity.fix_first_flag),
+        derivePriority(opportunity.evidence_confidence, fixFirstFlag(opportunity)),
       )
     }
   })
 })
 
-describe('value estimates survive being checked by hand (§13.2)', () => {
-  it.each(opportunities)('$id monthly range matches its own assumptions', (opportunity) => {
-    const { assumptions, monthly_usd } = opportunity.value
-    const low =
-      assumptions.estimated_qualified_accounts.low *
-      assumptions.expected_conversion *
-      assumptions.arpa_usd
-    const high =
-      assumptions.estimated_qualified_accounts.high *
-      assumptions.expected_conversion *
-      assumptions.arpa_usd
-    // The card prints these inputs beside the range, so a reader can redo the arithmetic.
-    // It has to come out to the number shown.
-    expect(monthly_usd.low).toBe(Math.round(low))
-    expect(monthly_usd.high).toBe(Math.round(high))
+describe('value estimates carry their own labels (§13.2)', () => {
+  // Canonical `ValueAssumption` (§13.2) is `{key, label, description}` — a qualitative line
+  // item, not a numeric calculator input. There is no structured accounts/conversion/ARPA
+  // data to recompute monthly_usd from, so the guardrail here is that every assumption still
+  // states its own provenance label, not that the range can be rederived by hand.
+  it.each(opportunities)('$id has a non-empty, labelled assumption for every value line', (opportunity) => {
+    expect(opportunity.value.assumptions.length).toBeGreaterThan(0)
+    for (const assumption of opportunity.value.assumptions) {
+      expect(assumption.description.length).toBeGreaterThan(0)
+      expect(['OBSERVED', 'INFERRED', 'ASSUMED']).toContain(assumption.label)
+    }
   })
 
   it('never shows a bare point value', () => {
@@ -65,7 +62,7 @@ describe('value estimates survive being checked by hand (§13.2)', () => {
 
 describe('every claim reaching the UI is labelled (§13.3)', () => {
   it.each(claims)('$id is Observed, Inferred or Assumed', (claim) => {
-    expect(['OBSERVED', 'INFERRED', 'ASSUMED']).toContain(claim.label)
+    expect(['OBSERVED', 'INFERRED', 'ASSUMED']).toContain(claimLabel(claim))
   })
 
   it('gives every opportunity all four claim types (§14.8)', () => {
@@ -89,19 +86,25 @@ describe('every claim reaching the UI is labelled (§13.3)', () => {
 })
 
 describe('every source is labelled with its retrieval level (§7.2)', () => {
-  it.each(feedbackSummary.themes)('$id states how it was retrieved', (theme) => {
-    expect(['live', 'cached', 'demo_fixture']).toContain(theme.retrieval_mode)
+  // Retrieval mode is a property of how a payload was served (Served<T>, api/client.ts), not
+  // a per-theme field — asserting it there instead of on a fixture is the enforcement point
+  // that actually matters (no VITE_API_BASE_URL in the test env, so both resolve to fixtures).
+  it('every fetch declares a retrieval mode', async () => {
+    const business = await fetchBusiness('biz_pulsestack')
+    const feedback = await fetchFeedbackSignals('biz_pulsestack')
+    expect(['live', 'cached', 'demo_fixture']).toContain(business.retrieval_mode)
+    expect(['live', 'cached', 'demo_fixture']).toContain(feedback.retrieval_mode)
   })
 })
 
 describe('research agents emit signals only (§10.1a)', () => {
   it('rejects an opportunities field structurally, not by convention', () => {
-    const output: ResearchAgentOutput = { signals: [], truncated: false }
+    const output: ResearchAgentOutput = { run_id: 'run_test', produced_by: 'market_agent', signals: [], truncated: false }
     expect(output.signals).toEqual([])
 
     // @ts-expect-error — research-agent output must be structurally incapable of carrying
     // opportunities. If this line ever stops erroring, the guarantee has been lost.
-    const violation: ResearchAgentOutput = { signals: [], truncated: false, opportunities: [] }
+    const violation: ResearchAgentOutput = { run_id: 'run_test', produced_by: 'market_agent', signals: [], truncated: false, opportunities: [] }
     expect(violation).toBeDefined()
   })
 })

@@ -38,12 +38,12 @@ describe('OpportunityCard', () => {
     expect(html).toContain('Potential value')
   })
 
-  it('tags the value estimate ASSUMED and shows the arithmetic behind it', () => {
+  it('tags the value estimate ASSUMED and shows the assumptions behind it', () => {
     const html = renderCard('opp_07')
     expect(html).toContain('ASSUMED')
     // The §13.2 worked example, so the numbers on screen can be checked against the PRD.
-    expect(html).toContain('$5,940')
-    expect(html).toContain('$17,820')
+    expect(html).toContain('$5.9k')
+    expect(html).toContain('$18k')
     expect(html).toContain('5%')
     expect(html).toContain('$99')
   })
@@ -73,7 +73,7 @@ describe('PolaritySplitBar', () => {
         negative={feedbackSummary.negative_count}
       />,
     )
-    expect(html).toContain('112')
+    expect(html).toContain('98')
     expect(html).toContain('72')
     expect(html).toContain('aria-label')
   })

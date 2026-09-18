@@ -1,13 +1,7 @@
-import { business, feedbackSummary } from '../fixtures/business'
-import { claims, opportunities, rejectedIdeas } from '../fixtures/opportunities'
-import type {
-  Business,
-  Claim,
-  FeedbackSummary,
-  Opportunity,
-  RejectedIdea,
-  RetrievalMode,
-} from '../types/entities'
+import { business, feedbackSignals } from '../fixtures/business'
+import { claims, opportunities } from '../fixtures/opportunities'
+import type { Business, Claim, Opportunity, RetrievalMode, Signal } from '../types/entities'
+import type { RejectedIdea } from '../lib/viewModels'
 
 /**
  * API client for the screens Lane B owns.
@@ -106,8 +100,10 @@ export function fetchBusiness(businessId: string): Promise<Served<Business>> {
   return servedOrFixture(`/businesses/${businessId}`, business)
 }
 
-export function fetchFeedbackSummary(businessId: string): Promise<Served<FeedbackSummary>> {
-  return servedOrFixture(`/businesses/${businessId}/feedback-summary`, feedbackSummary)
+/** docs/contract.md:61 — this endpoint's response type is `Signal[]`, not a bespoke summary
+    shape; grouping into themes happens client-side (see lib/viewModels.ts). */
+export function fetchFeedbackSignals(businessId: string): Promise<Served<Signal[]>> {
+  return servedOrFixture(`/businesses/${businessId}/feedback-summary`, feedbackSignals)
 }
 
 export function fetchOpportunities(businessId: string): Promise<Served<Opportunity[]>> {
@@ -118,6 +114,8 @@ export function fetchClaims(businessId: string): Promise<Served<Claim[]>> {
   return servedOrFixture(`/businesses/${businessId}/claims`, claims)
 }
 
-export function fetchRejectedIdeas(businessId: string): Promise<Served<RejectedIdea[]>> {
-  return servedOrFixture(`/businesses/${businessId}/rejected`, rejectedIdeas)
+/** No canonical entity or endpoint exists for gate-rejected candidates yet (Quality Gate,
+    Day 2, Lane A) — see lib/viewModels.ts. Stubbed empty rather than calling a made-up path. */
+export function fetchRejectedIdeas(_businessId: string): Promise<Served<RejectedIdea[]>> {
+  return Promise.resolve({ data: [], retrieval_mode: 'demo_fixture' })
 }

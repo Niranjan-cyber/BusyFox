@@ -1,4 +1,4 @@
-import type { RejectedIdea } from '../../types/entities'
+import type { RejectedIdea } from '../../lib/viewModels'
 import './RejectedIdeas.css'
 
 /**

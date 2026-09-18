@@ -1,11 +1,11 @@
 import {
   fetchBusiness,
-  fetchFeedbackSummary,
+  fetchFeedbackSignals,
   firstFallbackReason,
   weakestMode,
 } from '../../api/client'
 import { Card, CardBody, CardHeader, Section } from '../../components/common/Card'
-import { ClaimLabel, SourceLabel } from '../../components/common/Labels'
+import { ClaimLabel } from '../../components/common/Labels'
 import {
   ErrorState,
   LoadingState,
@@ -14,7 +14,7 @@ import {
 import { PolaritySplitBar } from '../../components/polarity/PolaritySplitBar'
 import { count, exactUsd } from '../../lib/format'
 import { useServed } from '../../lib/useServed'
-import type { FeedbackTheme } from '../../types/entities'
+import { summariseFeedback, type FeedbackTheme } from '../../lib/viewModels'
 import './BusinessScreen.css'
 
 /** Turns a snake_case key from the scenario file into something a person reads. */
@@ -36,7 +36,6 @@ function ThemeList({ themes, emptyText }: { themes: FeedbackTheme[]; emptyText: 
           </div>
           <blockquote className="theme-quote">{theme.representative_quote}</blockquote>
           <div className="theme-meta">
-            <SourceLabel mode={theme.retrieval_mode} />
             <ClaimLabel value="OBSERVED" />
           </div>
         </li>
@@ -48,7 +47,7 @@ function ThemeList({ themes, emptyText }: { themes: FeedbackTheme[]; emptyText: 
 /** Screen 1 — Business & feedback (PRD §16.1). */
 export function BusinessScreen({ businessId }: { businessId: string }) {
   const profile = useServed(fetchBusiness, businessId)
-  const feedback = useServed(fetchFeedbackSummary, businessId)
+  const feedback = useServed(fetchFeedbackSignals, businessId)
 
   if (profile.status === 'loading' || feedback.status === 'loading') {
     return <LoadingState what="the business profile" />
@@ -59,7 +58,7 @@ export function BusinessScreen({ businessId }: { businessId: string }) {
   // Both endpoints fall back independently; the banner reports the weaker of the two.
   const payloads = [profile.served, feedback.served]
   const business = profile.served.data
-  const summary = feedback.served.data
+  const summary = summariseFeedback(feedback.served.data)
   const loves = summary.themes.filter((theme) => theme.polarity === 'positive')
   const complains = summary.themes.filter((theme) => theme.polarity === 'negative')
   const goalTarget = business.current_mrr_usd + business.goal.change_usd

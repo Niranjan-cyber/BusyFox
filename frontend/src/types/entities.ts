@@ -28,7 +28,8 @@ export type SourceKind =
   | "hn"
   | "model_inference";
 
-export type RetrievalMode = "cached" | "live";
+/** §7.2/§12.2 — the three-tier resilience ladder. Never substituted silently. */
+export type RetrievalMode = "cached" | "live" | "demo_fixture";
 
 /** §14.6 — an opportunity's four required claim types. */
 export type ClaimType = "why_this" | "why_you" | "why_now" | "mechanism";
@@ -53,8 +54,18 @@ export type Polarity = "positive" | "negative";
 /**
  * PRD names competitive_gap explicitly (§14.8); other playbook-specific
  * types are expected but not yet enumerated — extend as they appear.
+ *
+ * segment_expansion/retention_fix/packaging_pricing/positioning_shift added
+ * 2026-09-18 once Lane B's PulseStack fixtures needed them for real.
  */
-export type OpportunityType = "competitive_gap" | "unmet_need" | "expansion";
+export type OpportunityType =
+  | "competitive_gap"
+  | "unmet_need"
+  | "expansion"
+  | "segment_expansion"
+  | "retention_fix"
+  | "packaging_pricing"
+  | "positioning_shift";
 
 export type ExecutionPackStatus = "draft" | "sent";
 
