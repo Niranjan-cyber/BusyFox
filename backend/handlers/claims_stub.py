@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from backend.fixtures.fixtures import CLAIMS, EVIDENCE_BY_ID, OPPORTUNITY
 from backend.handlers._common import dynamo_children, dynamo_get, not_found, ok, path_param
-from backend.schemas.entities import Claim, DynamoKeyPrefix, Evidence, Opportunity
+from backend.schemas.entities import Claim, DynamoKeyPrefix, Evidence, Opportunity, RetrievalMode
 
 _CLAIMS_BY_ID = {c.id: c for c in CLAIMS}
 
@@ -22,10 +22,10 @@ def list_claims(event: dict, context: object) -> dict:
 
     claims = dynamo_children(f"{DynamoKeyPrefix.OPPORTUNITY.value}{opportunity_id}", DynamoKeyPrefix.CLAIM, Claim)
     if claims:
-        return ok(claims)
+        return ok(claims, retrieval_mode=RetrievalMode.LIVE)
     if opportunity_id != OPPORTUNITY.id:
-        return ok([])
-    return ok(CLAIMS)
+        return ok([], retrieval_mode=RetrievalMode.LIVE)
+    return ok(CLAIMS, retrieval_mode=RetrievalMode.DEMO_FIXTURE)
 
 
 def get_claim_evidence(event: dict, context: object) -> dict:

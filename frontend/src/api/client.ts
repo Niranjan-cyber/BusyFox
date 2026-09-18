@@ -41,8 +41,9 @@ const REQUEST_TIMEOUT_MS = 8000
  * a bare array (`Signal[]`, `Opportunity[]`, `Claim[]`, `Evidence[]`), which has nowhere to put
  * an envelope field without changing its declared response type in `docs/contract.md`.
  *
- * NOT SENT BY THE DEPLOYED API YET — see `frontend/README.md`, "Provenance is not wired end to
- * end". Until a handler sets it, every successful live response is reported `undeclared`.
+ * Sent by every stub Lambda as of Task 21's follow-up (`backend/handlers/_common.py::ok`).
+ * `get_execution_pack` and `list_competitors` always send `demo_fixture` — neither is wired to
+ * DynamoDB yet, so that is the honest label rather than a guess.
  */
 const RETRIEVAL_MODE_HEADER = 'X-Retrieval-Mode'
 

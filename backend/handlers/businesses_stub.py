@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from backend.fixtures.fixtures import BUSINESS, SIGNALS
 from backend.handlers._common import dynamo_children, dynamo_get, not_found, ok, path_param
-from backend.schemas.entities import Business, DynamoKeyPrefix, Signal
+from backend.schemas.entities import Business, DynamoKeyPrefix, RetrievalMode, Signal
 
 _FEEDBACK_PRODUCERS = {"feedback_pipeline_labeller", "pulsestack_simulator"}
 
@@ -20,10 +20,10 @@ def get_business(event: dict, context: object) -> dict:
     business_id = path_param(event, "id")
     business = dynamo_get(DynamoKeyPrefix.BUSINESS, business_id, Business)
     if business is not None:
-        return ok(business)
+        return ok(business, retrieval_mode=RetrievalMode.LIVE)
     if business_id != BUSINESS.id:
         return not_found(f"no business with id {business_id!r}")
-    return ok(BUSINESS)
+    return ok(BUSINESS, retrieval_mode=RetrievalMode.DEMO_FIXTURE)
 
 
 def get_feedback_summary(event: dict, context: object) -> dict:
@@ -36,7 +36,7 @@ def get_feedback_summary(event: dict, context: object) -> dict:
     signals = dynamo_children(f"{DynamoKeyPrefix.BUSINESS.value}{business_id}", DynamoKeyPrefix.SIGNAL, Signal)
     own_feedback = [s for s in signals if s.produced_by in _FEEDBACK_PRODUCERS] if signals else []
     if own_feedback:
-        return ok(own_feedback)
+        return ok(own_feedback, retrieval_mode=RetrievalMode.LIVE)
     if business_id != BUSINESS.id:
-        return ok([])
-    return ok([s for s in SIGNALS if s.produced_by == "feedback_pipeline"])
+        return ok([], retrieval_mode=RetrievalMode.LIVE)
+    return ok([s for s in SIGNALS if s.produced_by == "feedback_pipeline"], retrieval_mode=RetrievalMode.DEMO_FIXTURE)

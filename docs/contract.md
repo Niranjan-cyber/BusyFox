@@ -77,26 +77,25 @@ Day 2 pipeline work, not part of Task 2's stub contract.
 Recorded here rather than worked around in the UI. Both need a Lane A decision;
 neither is something the frontend can invent a field for.
 
-**1. No response states its retrieval mode.** §7.2 requires every source to be
-labelled `LIVE RESEARCH` / `CACHED VERIFIED SOURCE` / `DEMO FIXTURE` in the UI,
-but `retrieval_mode` lives only on `SourceDocument` (§14.4) and `Evidence`
-(§14.5). `Business`, `Signal`, `Opportunity` and `Claim` have no such field, so
-nothing in a screen-1 or screen-3 response says how it was obtained. The client
-therefore reports an unlabelled response as *provenance not stated* rather than
-guessing a rung — a wrong guess of `cached` is as much a false claim as a wrong
-guess of `live`.
-
-Proposal: every handler sends a response header
+**1. No response states its retrieval mode. — Resolved.** §7.2 requires every
+source to be labelled `LIVE RESEARCH` / `CACHED VERIFIED SOURCE` /
+`DEMO FIXTURE` in the UI, but `retrieval_mode` lives only on `SourceDocument`
+(§14.4) and `Evidence` (§14.5) — `Business`, `Signal`, `Opportunity` and
+`Claim` have no such field. Rather than adding one (which would break the four
+endpoints above that return a bare array with no envelope to put it in), every
+handler now sends a response header instead:
 
 ```
 X-Retrieval-Mode: live | cached | demo_fixture
 ```
 
-A header rather than an envelope because four endpoints in the table above
-return a bare array (`Signal[]`, `Opportunity[]`, `Claim[]`, `Evidence[]`), which
-cannot carry an envelope field without changing its declared response type.
-`frontend/src/api/client.ts` already reads this header; nothing else changes on
-the frontend when it starts arriving.
+`backend/handlers/_common.py::ok()` takes an optional `retrieval_mode` and
+sets the header; each handler passes `LIVE` when it served a real DynamoDB
+row and `DEMO_FIXTURE` when it fell back to the Task 2 fixture.
+`get_execution_pack` and `list_competitors` always send `DEMO_FIXTURE` — the
+Action Agent and Competitor Agent don't persist rows yet, so that's the honest
+label rather than a guess. `frontend/src/api/client.ts` already read this
+header; nothing changed on the frontend.
 
 **2. No route for gate-rejected candidates.** Screen 3's "Ideas we rejected"
 (§1.3, §16.1) has no row in the table and no handler. It is Task 19's output —

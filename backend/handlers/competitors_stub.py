@@ -4,11 +4,16 @@ from __future__ import annotations
 
 from backend.fixtures.fixtures import COMPETITOR_SENTRY, EVIDENCE_BY_ID
 from backend.handlers._common import not_found, ok, path_param
+from backend.schemas.entities import RetrievalMode
 
 
 def list_competitors(event: dict, context: object) -> dict:
-    """GET /competitors"""
-    return ok([COMPETITOR_SENTRY])
+    """GET /competitors
+
+    Not wired to DynamoDB (the orchestrator never writes a Competitor row) —
+    always the Task 2 fixture.
+    """
+    return ok([COMPETITOR_SENTRY], retrieval_mode=RetrievalMode.DEMO_FIXTURE)
 
 
 def get_competitor_evidence_live(event: dict, context: object) -> dict:

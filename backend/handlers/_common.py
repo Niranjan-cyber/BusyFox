@@ -14,7 +14,7 @@ from typing import Any, Optional, TypeVar
 from pydantic import BaseModel
 
 from backend.db.dynamo import get_entity, query_children
-from backend.schemas.entities import DynamoKeyPrefix
+from backend.schemas.entities import DynamoKeyPrefix, RetrievalMode
 
 _HEADERS = {"Content-Type": "application/json"}
 ModelT = TypeVar("ModelT", bound=BaseModel)
@@ -40,8 +40,17 @@ def _to_jsonable(payload: Any) -> Any:
     return payload
 
 
-def ok(payload: Any) -> dict:
-    return {"statusCode": 200, "headers": _HEADERS, "body": json.dumps(_to_jsonable(payload))}
+def ok(payload: Any, retrieval_mode: Optional[RetrievalMode] = None) -> dict:
+    """Business/Signal/Opportunity/Claim/Competitor have no `retrieval_mode`
+    field of their own (only SourceDocument/Evidence do, per the locked
+    schema) — `X-Retrieval-Mode` carries the §7.2 ladder for a whole response
+    envelope instead, since four contract endpoints return a bare array with
+    nowhere to put a field."""
+
+    headers = dict(_HEADERS)
+    if retrieval_mode is not None:
+        headers["X-Retrieval-Mode"] = retrieval_mode.value
+    return {"statusCode": 200, "headers": headers, "body": json.dumps(_to_jsonable(payload))}
 
 
 def not_found(message: str) -> dict:

@@ -53,12 +53,12 @@ Full detail and rationale for each task: `tasks/plan.md`. Check items off here a
 
 ### Lane B — Frontend/UX
 - [~] Task 22: Screen 1 on real data — client wired to the contract routes and verified in a
-  browser against the deployed stage; **blocked** on no endpoint declaring its retrieval mode,
-  so the §7.2 banner cannot say LIVE or CACHED for a real request. See `frontend/README.md`,
-  "Known blockers" (1, 3, 4)
+  browser against the deployed stage; blocker 1 (retrieval-mode header) resolved. Still
+  **blocked** on 3 (real pipeline data behind the stage) and 4 (CORS). See `frontend/README.md`,
+  "Known blockers"
 - [~] Task 23: Screen 3 on real data — inbox groups and ranks the live opportunity with its
-  claims off `/opportunities/{id}/claims`; **blocked** on the same provenance gap plus no
-  rejected-candidate route (Task 19). See `frontend/README.md`, "Known blockers" (1, 2, 3, 5)
+  claims off `/opportunities/{id}/claims`; blocker 1 resolved. Still **blocked** on 2 (no
+  rejected-candidate route, Task 19), 3, 5. See `frontend/README.md`, "Known blockers"
 
 ### Lane C — Floating
 - [ ] Task 24: Gold-set labelling (80 sim + 20 real, independent)

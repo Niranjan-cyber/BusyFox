@@ -157,3 +157,27 @@ def test_unknown_id_still_404s_when_running_in_lambda_with_empty_table(monkeypat
 
     response = businesses_stub.get_business(_event(id="biz_nonexistent"), None)
     assert response["statusCode"] == 404
+
+
+# ---------------------------------------------------------------------------
+# X-Retrieval-Mode header — frontend/README.md blocker 1. Business/Signal/
+# Opportunity/Claim have no retrieval_mode field of their own, so the §7.2
+# ladder for the whole response travels as a header instead.
+# ---------------------------------------------------------------------------
+
+
+def test_fixture_served_responses_are_labelled_demo_fixture():
+    assert businesses_stub.get_business(_event(id="biz_pulsestack"), None)["headers"]["X-Retrieval-Mode"] == "demo_fixture"
+    assert opportunities_stub.get_opportunity(_event(id="opp_001"), None)["headers"]["X-Retrieval-Mode"] == "demo_fixture"
+    assert claims_stub.list_claims(_event(id="opp_001"), None)["headers"]["X-Retrieval-Mode"] == "demo_fixture"
+    assert competitors_stub.list_competitors(_event(), None)["headers"]["X-Retrieval-Mode"] == "demo_fixture"
+
+
+def test_dynamo_served_responses_are_labelled_live(monkeypatch):
+    real_business = BUSINESS.model_copy(update={"name": "Real PulseStack"})
+    table = _fake_table_with((real_business, None))
+    monkeypatch.setenv("AWS_LAMBDA_FUNCTION_NAME", "test")
+    monkeypatch.setattr("backend.db.dynamo.get_table", lambda: table)
+
+    response = businesses_stub.get_business(_event(id="biz_pulsestack"), None)
+    assert response["headers"]["X-Retrieval-Mode"] == "live"
