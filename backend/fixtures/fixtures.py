@@ -213,7 +213,7 @@ OPPORTUNITY = Opportunity(
     competitive_context=[CompetitiveContextItem(signal_id="sig_001", competitor="Sentry", pattern="competitor_pain_business_strength")],
     evidence_diversity=EvidenceDiversity(source_kind_count=1, domain_count=1, author_count=2, underlying_event_risk="unknown"),
     evidence_confidence="HIGH",
-    priority="High",
+    priority="Blocked",
     value=ValueModel(
         model="saas_arr",
         assumptions=[

@@ -57,8 +57,8 @@ Full detail and rationale for each task: `tasks/plan.md`. Check items off here a
   **blocked** on 3 (real pipeline data behind the stage) and 4 (CORS). See `frontend/README.md`,
   "Known blockers"
 - [~] Task 23: Screen 3 on real data — inbox groups and ranks the live opportunity with its
-  claims off `/opportunities/{id}/claims`; blocker 1 resolved. Still **blocked** on 2 (no
-  rejected-candidate route, Task 19), 3, 5. See `frontend/README.md`, "Known blockers"
+  claims off `/opportunities/{id}/claims`; blockers 1 and 5 resolved. Still **blocked** on 2 (no
+  rejected-candidate route, Task 19) and 3. See `frontend/README.md`, "Known blockers"
 
 ### Lane C — Floating
 - [ ] Task 24: Gold-set labelling (80 sim + 20 real, independent)

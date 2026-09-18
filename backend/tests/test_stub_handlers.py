@@ -57,6 +57,18 @@ def test_get_opportunity_returns_task1_shaped_payload():
     assert not hasattr(opp, "score") and not hasattr(opp, "opportunity_score")
 
 
+def test_get_opportunity_fixture_priority_matches_the_rule_table():
+    """frontend/README.md blocker 5 — a fix-first pain makes an opportunity
+    Blocked regardless of evidence confidence (§13.1); the fixture had drifted
+    to "High" without ever going through `run_quality_gate`."""
+    from backend.pipeline.quality_gate import _priority_from_rule_table
+
+    assert OPPORTUNITY.pains_to_fix_first
+    assert OPPORTUNITY.priority == _priority_from_rule_table(
+        OPPORTUNITY.evidence_confidence, fix_first=bool(OPPORTUNITY.pains_to_fix_first)
+    )
+
+
 def test_get_execution_pack_returns_task1_shaped_payload():
     response = opportunities_stub.get_execution_pack(_event(id="opp_001"), None)
     ExecutionPack.model_validate(_body(response))
