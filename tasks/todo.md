@@ -65,7 +65,11 @@ Full detail and rationale for each task: `tasks/plan.md`. Check items off here a
   and blank sheets ready (`tasks/gold_set/labels_{niranjan,swarali}.csv`,
   `scripts/build_gold_set.py`). Still needs: both of you actually labelling
   independently, then reconciling into one agreed gold set.
-- [ ] Task 25: Re-run `/graphify` before evening stand-up
+- [x] Task 25: Re-run `/graphify` before evening stand-up — scoped via
+  `.graphifyignore` (`.agents/`, `.claude/`) this time, per Day 1's own
+  lesson. 112 files, 1237 nodes, 87 communities. Health check flagged 96
+  dangling-endpoint edges and ~326 collapsed multi-relation edges (mostly
+  benign AST multi-edge collapse) — see `graphify-out/GRAPH_REPORT.md`.
 
 ### Checkpoint: End of Day 2
 - [ ] ≥1 gate-passed opportunity visible in real inbox, claims traceable to evidence
