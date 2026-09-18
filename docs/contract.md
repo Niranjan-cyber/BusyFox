@@ -91,14 +91,28 @@ One table (`infra/api-gateway.yaml`'s `OpportunityEngineTable`), all nine
 core entities, keyed on the prefixes in the table above:
 
 - `PK = "<PREFIX><id>"`, `SK = "METADATA"` — get-by-id for any entity.
-- `GSI1PK`/`GSI1SK` — provenance-chain list access patterns (e.g.
-  "opportunities for this run"): the parent's own key goes in `GSI1PK`, the
-  child's own key goes in `GSI1SK`, written by the caller via
-  `put_entity(table, model, parent_key=...)`.
+- `GSI1PK`/`GSI1SK` — provenance-chain list access patterns: the parent's
+  own key goes in `GSI1PK`, the child's own key goes in `GSI1SK`, written by
+  the caller via `put_entity(table, model, parent_key=...)`. Task 21's
+  `orchestrator.persist` parents Signal and Opportunity to their Business
+  (matching `/businesses/{id}/opportunities` and `/businesses/{id}/
+  feedback-summary`, which list by business, not by run), Claim to its
+  Opportunity, and Evidence to its Claim.
 - `ttl` (native DynamoDB TTL) is set on `SourceDocument` items from
   `expires_at`, enforcing PRD §18's 30-day raw-text expiry with no cleanup
   job.
 
 DAO: `backend/db/dynamo.py` (`get_table`, `put_entity`, `get_entity`,
 `query_children`). Writing to the table from a real pipeline run is Task
-21's job — Task 20 only designs the table and the write/read primitives.
+21's job (`backend/orchestrator.py`) — Task 20 only designs the table and
+the write/read primitives.
+
+Task 21 also points the Task 2 GET handlers (`backend/handlers/*_stub.py`)
+at real rows: each tries DynamoDB first (`backend/handlers/_common.py`'s
+`dynamo_get`/`dynamo_children`, gated on actually running inside a Lambda —
+`AWS_LAMBDA_FUNCTION_NAME` — so local dev/test never pays boto3's several-
+second no-credentials timeout) and falls back to the Task 2 fixture only
+for the demo business/opportunity/claim ids when Dynamo has nothing yet.
+Once Action Agent (Day 3) exists, `get_execution_pack` gets the same
+treatment; today it stays fixture-only since nothing writes an
+`ExecutionPack` yet.

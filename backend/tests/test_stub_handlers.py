@@ -14,9 +14,11 @@ import json
 
 import pytest
 
-from backend.fixtures.fixtures import COMPETITOR_SENTRY, EVIDENCE_ALERT_NOISE
+from backend.db.dynamo import put_entity
+from backend.fixtures.fixtures import BUSINESS, CLAIMS, COMPETITOR_SENTRY, EVIDENCE_ALERT_NOISE, OPPORTUNITY
 from backend.handlers import businesses_stub, claims_stub, competitors_stub, opportunities_stub
-from backend.schemas.entities import Business, Claim, Competitor, Evidence, ExecutionPack, Opportunity, Signal
+from backend.schemas.entities import Business, Claim, Competitor, DynamoKeyPrefix, Evidence, ExecutionPack, Opportunity, Signal
+from backend.tests.test_dynamo import _FakeTable
 
 
 def _event(**path_params: str) -> dict:
@@ -102,4 +104,56 @@ def test_get_competitor_evidence_live_returns_task1_shaped_payload():
 )
 def test_unknown_ids_return_404_not_a_500(handler, event):
     response = handler(event, None)
+    assert response["statusCode"] == 404
+
+
+# ---------------------------------------------------------------------------
+# Task 21 — real DynamoDB rows win over the Task 2 fixture once a pipeline
+# run has persisted them; outside a real Lambda (no AWS_LAMBDA_FUNCTION_NAME)
+# the fixture keeps serving local dev/test exactly as before.
+# ---------------------------------------------------------------------------
+
+
+def _fake_table_with(*entities_and_parents) -> _FakeTable:
+    table = _FakeTable()
+    for entity, parent_key in entities_and_parents:
+        put_entity(table, entity, parent_key=parent_key)
+    return table
+
+
+def test_get_business_prefers_real_dynamo_row_when_running_in_lambda(monkeypatch):
+    real_business = BUSINESS.model_copy(update={"name": "Real PulseStack"})
+    table = _fake_table_with((real_business, None))
+    monkeypatch.setenv("AWS_LAMBDA_FUNCTION_NAME", "test")
+    monkeypatch.setattr("backend.db.dynamo.get_table", lambda: table)
+
+    body = _body(businesses_stub.get_business(_event(id="biz_pulsestack"), None))
+    assert body["name"] == "Real PulseStack"
+
+
+def test_list_opportunities_prefers_real_dynamo_rows_when_running_in_lambda(monkeypatch):
+    biz_key = f"{DynamoKeyPrefix.BUSINESS.value}{BUSINESS.id}"
+    table = _fake_table_with((BUSINESS, None), (OPPORTUNITY, biz_key))
+    monkeypatch.setenv("AWS_LAMBDA_FUNCTION_NAME", "test")
+    monkeypatch.setattr("backend.db.dynamo.get_table", lambda: table)
+
+    body = _body(opportunities_stub.list_opportunities(_event(id="biz_pulsestack"), None))
+    assert [Opportunity.model_validate(item).id for item in body] == [OPPORTUNITY.id]
+
+
+def test_list_claims_prefers_real_dynamo_rows_when_running_in_lambda(monkeypatch):
+    opp_key = f"{DynamoKeyPrefix.OPPORTUNITY.value}{OPPORTUNITY.id}"
+    table = _fake_table_with((OPPORTUNITY, None), *((c, opp_key) for c in CLAIMS))
+    monkeypatch.setenv("AWS_LAMBDA_FUNCTION_NAME", "test")
+    monkeypatch.setattr("backend.db.dynamo.get_table", lambda: table)
+
+    body = _body(claims_stub.list_claims(_event(id="opp_001"), None))
+    assert len(body) == len(CLAIMS)
+
+
+def test_unknown_id_still_404s_when_running_in_lambda_with_empty_table(monkeypatch):
+    monkeypatch.setenv("AWS_LAMBDA_FUNCTION_NAME", "test")
+    monkeypatch.setattr("backend.db.dynamo.get_table", lambda: _FakeTable())
+
+    response = businesses_stub.get_business(_event(id="biz_nonexistent"), None)
     assert response["statusCode"] == 404

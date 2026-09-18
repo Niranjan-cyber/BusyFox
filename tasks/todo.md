@@ -49,7 +49,7 @@ Full detail and rationale for each task: `tasks/plan.md`. Check items off here a
 - [x] Task 18: Evidence Check (quote-exists + quote-supports-claim + freshness)
 - [x] Task 19: Quality Gate + Ranker (14 checks, rule-table priority, no composite score)
 - [x] Task 20: DynamoDB table design + writes for all core entities
-- [ ] Task 21: Orchestrator wiring — full pipeline end to end
+- [x] Task 21: Orchestrator wiring — full pipeline end to end
 
 ### Lane B — Frontend/UX
 - [ ] Task 22: Screen 1 on real data
