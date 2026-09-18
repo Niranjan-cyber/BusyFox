@@ -31,8 +31,17 @@ Globals:
     # Repo root, not ../backend/: every handler imports as `from backend.X
     # import Y` (same as the pytest suite, run from repo root), so `backend`
     # has to exist as a real package at the Lambda's runtime root too.
-    # requirements.txt at repo root (-r backend/requirements.txt) makes
-    # `sam build`'s pip step pick up the same deps.
+    # requirements.txt at repo root points at backend/requirements-lambda.txt
+    # (pydantic + boto3 only) rather than backend/requirements.txt: none of
+    # these 10 functions import strands-agents/mcp, and pulling it in anyway
+    # dragged mcp's Windows-only pywin32 dependency into `sam build`'s local
+    # pip resolution — a symlinked-CodeUri fix to also drop the ~90MB of
+    # unrelated frontend/node_modules that rides along was tried and reverted
+    # (this repo's git-for-windows has core.symlinks=false, so the "symlink"
+    # became a second, real, driftable copy of backend/ once committed — a
+    # worse problem than the packaging bloat it was solving). 128MB is well
+    # under Lambda's 250MB unzipped limit, so the bloat stays, uncorrected.
+    # See frontend/README.md blocker 6.
     CodeUri: ../
 
 Resources:
