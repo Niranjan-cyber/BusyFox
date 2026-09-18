@@ -47,7 +47,7 @@ Full detail and rationale for each task: `tasks/plan.md`. Check items off here a
 - [x] Task 16: Competitor Agent (Strands, Haiku) → `signals[]`
 - [x] Task 17: Synthesis Agent (Strands, Sonnet) → `candidate_opportunities[]` w/ mechanism
 - [x] Task 18: Evidence Check (quote-exists + quote-supports-claim + freshness)
-- [ ] Task 19: Quality Gate + Ranker (14 checks, rule-table priority, no composite score)
+- [x] Task 19: Quality Gate + Ranker (14 checks, rule-table priority, no composite score)
 - [ ] Task 20: DynamoDB table design + writes for all core entities
 - [ ] Task 21: Orchestrator wiring — full pipeline end to end
 

@@ -405,6 +405,10 @@ class Opportunity(BaseModel):
     evidence_confidence: EvidenceConfidence
     priority: Priority
     value: ValueModel
+    # Quality Gate (Task 19) non-rejecting flags — §11.1 check 3 (stale evidence),
+    # check 4/§11.4 check 12 (contradiction / one-sided evidence), §11.4 check 13
+    # (fix-first risk). Shown, never gates pass/fail.
+    flags: list[str] = []
 
 
 # ---------------------------------------------------------------------------

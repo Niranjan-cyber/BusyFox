@@ -339,6 +339,9 @@ export interface Opportunity {
   evidence_confidence: EvidenceConfidence;
   priority: Priority;
   value: ValueModel;
+  /** Quality Gate (Task 19) non-rejecting flags, e.g. "stale_evidence",
+   * "contradiction_present", "fix_first_risk". Shown, never gates pass/fail. */
+  flags?: string[];
 }
 
 // ---------------------------------------------------------------------------
