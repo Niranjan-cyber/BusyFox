@@ -126,6 +126,9 @@ Kept from Day 1 per the event rules (learning is a scored judging criterion). On
 - The real Strands Agents SDK (1.56, confirmed by reading its installed source, not assumed from training data) genuinely supports §10.1a's "enforced by code around the agent loop, not a prompt instruction" requirement: `BeforeModelCallEvent.cancel` and `BeforeToolCallEvent.cancel_tool` let a hook stop the loop mid-invocation and hand back whatever was already produced. A bare function with a type-hinted `event:` parameter registers itself via inference (`Agent(hooks=[fn])`) — no `HookProvider` subclass needed for a simple budget check. Confirmed by reading `Agent.__init__`'s actual hook-registration branch, not the docs.
 - Split the module the same way Task 14 split the feedback labeller: §9.4 claim validation and §10.1a budget tracking are pure Python, unit-tested with a fake clock and a fake tool-call collector; the real `Agent`/`BedrockModel`/`@tool` wiring is network/AWS-credential-dependent and only smoke-tested, never exercised in the test suite. Kept the live path importable-but-untested rather than mocking `strands` itself, which would test the mock, not the integration.
 
+**Competitor Agent (Task 16)**
+- Reused Task 15's `RuntimeBudget` by importing it rather than re-implementing §10.1a budget tracking a second time — it was already generic over the component name via `to_invocation(component=...)`, so the only genuinely new logic was §18.4's named-competitor scope check (`competitor_name in named_competitors`), which structurally stops the agent from inventing or disparaging a company the business never named, on top of §9.4's existing count/date/source rule.
+
 ## Day 3 — Sept 19, 2026
 
 *(Not yet written.)*
