@@ -186,6 +186,31 @@ Kept from Day 1 per the event rules (learning is a scored judging criterion). On
   does not reload, so a "full outage" check silently re-reported the previous run's live data
   until a cache-busting query string was added.
 
+**Merging Lane B, and clearing its blockers (frontend/README.md)**
+- Two of the frontend's five named blockers (retrieval-mode header, `opp_001`'s fixture priority)
+  turned out to be one-line backend fixes once traced to source — the header just needed
+  `ok()` to accept an optional param, and the priority bug was a hand-authored Task 2 fixture
+  that had simply never been run through `run_quality_gate`'s real rule table. Worth noting
+  that "known blocker documented by the other lane" and "hard to fix" are not the same thing;
+  the value was in the other lane's precise write-up, not in the fix itself.
+- The CORS blocker exposed a second, unrelated failure: `sam build` for `infra/api-gateway.yaml`
+  is broken, and has been since Task 15 added `strands-agents` to `backend/requirements.txt` —
+  nobody had rebuilt this template since. `strands-agents` pulls in `mcp`, which lists
+  `pywin32>=311; sys_platform == 'win32'` as a dependency; SAM's local (non-container) pip
+  resolver runs on the host platform and tries to satisfy that marker even though the Lambda
+  target is Linux, and fails resolving the wheel. `sam build --use-container` targets the
+  correct platform and gets past that, but then fails `CopySource` on `.claude/skills/...`:
+  those are symlinks to an absolute host path, and even though `.samignore` lists `.claude/`,
+  the container-build copy step doesn't honor it before trying to follow the symlink — which
+  then doesn't resolve inside the container's mount. Neither failure has anything to do with
+  the CORS change that surfaced them.
+- Given a broken build, the actual fix was applied straight to the live resource
+  (`aws apigatewayv2 update-api --cors-configuration ...`) rather than through `sam deploy`,
+  with the same config also committed to the template so a future successful deploy confirms
+  rather than drifts it. Verified with a real `OPTIONS` preflight against the deployed API
+  from the Amplify origin, not just a template review — the same "prove it live" standard as
+  Tasks 5/11's collector probes.
+
 ## Day 3 — Sept 19, 2026
 
 *(Not yet written.)*
