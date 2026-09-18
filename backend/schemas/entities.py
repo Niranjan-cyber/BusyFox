@@ -490,7 +490,13 @@ class ResearchAgentOutput(BaseModel):
 
 class SynthesisAgentOutput(BaseModel):
     """Synthesis Agent output — the only component allowed to emit candidate
-    opportunities, and only from already-collected signals (§10.1a, §10.3)."""
+    opportunities, and only from already-collected signals (§10.1a, §10.3).
+
+    `claims` accompanies `candidate_opportunities` because each opportunity's
+    `claim_ids` (§14.8) must resolve to real Claim rows (§14.6), and nothing
+    upstream of Synthesis creates them — Evidence Check (Task 18) fills in
+    each claim's real `status`/`evidence_ids` afterward."""
 
     run_id: str
     candidate_opportunities: list[Opportunity]
+    claims: list[Claim]

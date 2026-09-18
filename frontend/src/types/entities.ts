@@ -421,8 +421,13 @@ export interface ResearchAgentOutput {
 /**
  * Synthesis Agent output — the only component allowed to emit candidate
  * opportunities, and only from already-collected signals (§10.1a, §10.3).
+ *
+ * `claims` accompanies `candidate_opportunities` because each opportunity's
+ * `claim_ids` (§14.8) must resolve to real Claim rows (§14.6); Evidence
+ * Check (Task 18) fills in each claim's real `status`/`evidence_ids` after.
  */
 export interface SynthesisAgentOutput {
   run_id: string;
   candidate_opportunities: Opportunity[];
+  claims: Claim[];
 }

@@ -45,7 +45,7 @@ OBSERVED, `mechanism` is INFERRED — see §13.3 for the worked example).
 ## Research agents vs. Synthesis agent (§10.1a) — structurally enforced
 
 - `ResearchAgentOutput` (Market / Feedback Pipeline / Competitor agents): `{ run_id, produced_by, signals: Signal[], truncated }` — **no `opportunities` field exists on this type**, not just unused by convention.
-- `SynthesisAgentOutput` (Synthesis agent only): `{ run_id, candidate_opportunities: Opportunity[] }`.
+- `SynthesisAgentOutput` (Synthesis agent only): `{ run_id, candidate_opportunities: Opportunity[], claims: Claim[] }` — `claims` carries the Claim rows `claim_ids` resolve to; Evidence Check fills in real `status`/`evidence_ids` afterward.
 
 ## API surface (§15 + implied screen endpoints)
 
