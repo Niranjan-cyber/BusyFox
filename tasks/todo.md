@@ -30,13 +30,13 @@ Full detail and rationale for each task: `tasks/plan.md`. Check items off here a
 - [x] Task 12: LEARNING.md — first real entry
 
 ### Checkpoint: End of Day 1
-- [ ] Real, visible commits across the day
-- [ ] GitHub + HN collectors return real signals
-- [ ] Tavily failure modes known
-- [ ] Simulator committed with its seed
-- [ ] Skeleton deployed, live Amplify URL reachable
-- [ ] Screens 1 & 3 render fixture data through committed theme
-- [ ] LEARNING.md has a real entry
+- [~] Real, visible commits across the day — true for Lane A/C (19 commits, 09:15-23:59 Sept 17); Lane B's Tasks 7-9 landed as one commit dated Sept 18 12:52, flagged to teammate
+- [x] GitHub + HN collectors return real signals — live-verified 2026-09-18 against getsentry/sentry and an HN "Datadog" search (not exercised live before; their unit tests mock the HTTP call)
+- [x] Tavily failure modes known
+- [x] Simulator committed with its seed
+- [x] Skeleton deployed, live Amplify URL reachable — https://main.dw3gwg5t169l9.amplifyapp.com/ (created 2026-09-18; `amplify.yml` alone wasn't a live app until now, see README.md)
+- [x] Screens 1 & 3 render fixture data through committed theme
+- [x] LEARNING.md has a real entry
 
 ## Phase 2 — Day 2
 

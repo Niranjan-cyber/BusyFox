@@ -99,6 +99,20 @@ Kept from Day 1 per the event rules (learning is a scored judging criterion). On
   are different tasks, and the second one needs a human call on which UI assumptions were real
   requirements versus scaffolding that outran the schema.
 
+**Auditing the Day 1 checkpoint before starting Day 2**
+- Checking `tasks/todo.md`'s Day 1 checkmarks against actual evidence (not just trusting them)
+  found two real gaps a re-read alone wouldn't have caught. First: the GitHub and HN collectors
+  had never been exercised live — their own unit tests mock the HTTP call, and unlike Tasks 5
+  and 11, nothing in Day 1's own log recorded a real round-trip. Fixed by actually running both
+  against real data (`getsentry/sentry`, an HN "Datadog" search) before checking the box.
+  Second, and less obvious: `amplify.yml` being committed and Task 7 being checked off was not
+  the same thing as a live Amplify Hosting app existing — a buildspec file doesn't create an
+  app, and nothing in the repo recorded an App ID or URL. Closed by actually creating the app
+  (`aws amplify create-app` with a `gh auth token` for git-connected hosting) and confirming the
+  build succeeded and the URL is reachable, not just that the command exited 0. The pattern in
+  both: "the task is checked off" and "the thing the task promised is real" can quietly drift
+  apart, and the only way to catch it is to go re-verify the artifact, not re-read the checklist.
+
 ## Day 3 — Sept 19, 2026
 
 *(Not yet written.)*
