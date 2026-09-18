@@ -260,7 +260,7 @@ def _build_live_agent(contract: AgentRuntimeContract, budget: RuntimeBudget):
             event.cancel_tool = "runtime contract exhausted (§10.1a)"
 
     agent = Agent(
-        model=BedrockModel(model_id=_MODEL_ID, max_tokens=contract.max_tokens),
+        model=BedrockModel(model_id=_MODEL_ID, max_tokens=contract.max_tokens, boto_session=bedrock_session()),
         tools=[search_web, search_hn, search_github, emit_market_signal],
         system_prompt=(
             "You are the Market Agent. Find claim-level, count/date/source-anchored "
@@ -270,6 +270,21 @@ def _build_live_agent(contract: AgentRuntimeContract, budget: RuntimeBudget):
         hooks=[_before_model_call, _before_tool_call],
     )
     return agent, collected
+
+
+def bedrock_session():
+    """BEDROCK_AWS_PROFILE routes every Bedrock call (this agent, Competitor,
+    Synthesis, Evidence Check) through a different AWS profile/account than
+    everything else (DynamoDB, collectors) — for when this account's own
+    Bedrock model access is blocked but a teammate's account isn't. Unset
+    (the normal case) falls back to the default credential chain."""
+
+    profile = os.environ.get("BEDROCK_AWS_PROFILE")
+    if not profile:
+        return None
+    import boto3
+
+    return boto3.Session(profile_name=profile)
 
 
 def _tavily_api_key() -> str:

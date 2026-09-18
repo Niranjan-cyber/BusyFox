@@ -212,7 +212,10 @@ _TOOL_SCHEMA = {
 
 
 def bedrock_semantic_support_checker(client=None, model_id: str = _MODEL_ID) -> SemanticSupportChecker:
-    bedrock = client or boto3.client("bedrock-runtime")
+    from backend.agents.market_agent import bedrock_session
+
+    session = bedrock_session()
+    bedrock = client or (session.client("bedrock-runtime") if session else boto3.client("bedrock-runtime"))
 
     def check(claim_text: str, quote: str) -> ClaimSupport:
         prompt = f'Claim: "{claim_text}"\nQuote: "{quote}"\nDoes the quote support the claim: yes/partial/no, one-sentence reason.'

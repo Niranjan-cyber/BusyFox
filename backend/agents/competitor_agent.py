@@ -25,7 +25,7 @@ import os
 from dataclasses import dataclass
 from typing import Callable, NamedTuple
 
-from backend.agents.market_agent import RuntimeBudget
+from backend.agents.market_agent import RuntimeBudget, bedrock_session
 from backend.schemas.entities import (
     AgentInvocation,
     AgentRuntimeContract,
@@ -263,7 +263,7 @@ def _build_live_agent(contract: AgentRuntimeContract, budget: RuntimeBudget, nam
             event.cancel_tool = "runtime contract exhausted (§10.1a)"
 
     agent = Agent(
-        model=BedrockModel(model_id=_MODEL_ID, max_tokens=contract.max_tokens),
+        model=BedrockModel(model_id=_MODEL_ID, max_tokens=contract.max_tokens, boto_session=bedrock_session()),
         tools=[search_web, search_hn, search_github, search_app_store, search_producthunt, emit_competitor_signal],
         system_prompt=(
             "You are the Competitor Agent. Named competitors in scope: "

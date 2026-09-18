@@ -27,7 +27,7 @@ import os
 from dataclasses import dataclass
 from typing import Callable, NamedTuple
 
-from backend.agents.market_agent import RuntimeBudget
+from backend.agents.market_agent import RuntimeBudget, bedrock_session
 from backend.schemas.entities import (
     AgentInvocation,
     AgentRuntimeContract,
@@ -348,7 +348,7 @@ def _build_live_agent(contract: AgentRuntimeContract, budget: RuntimeBudget):
             event.cancel_tool = "runtime contract exhausted (§10.1a)"
 
     agent = Agent(
-        model=BedrockModel(model_id=_MODEL_ID, max_tokens=contract.max_tokens),
+        model=BedrockModel(model_id=_MODEL_ID, max_tokens=contract.max_tokens, boto_session=bedrock_session()),
         tools=[emit_candidate_opportunity],
         system_prompt=(
             "You are the Synthesis Agent. Combine the signals below using the "
