@@ -43,7 +43,7 @@ Full detail and rationale for each task: `tasks/plan.md`. Check items off here a
 ### Lane A — Backend/Agents
 - [x] Task 13: Feedback pipeline — normalise/dedupe/redact/spam filter (code only)
 - [x] Task 14: Feedback pipeline — label/validate/aggregate/balance (Haiku labeller)
-- [ ] Task 15: Market Agent (Strands, Haiku) → `signals[]`
+- [x] Task 15: Market Agent (Strands, Haiku) → `signals[]`
 - [ ] Task 16: Competitor Agent (Strands, Haiku) → `signals[]`
 - [ ] Task 17: Synthesis Agent (Strands, Sonnet) → `candidate_opportunities[]` w/ mechanism
 - [ ] Task 18: Evidence Check (quote-exists + quote-supports-claim + freshness)
