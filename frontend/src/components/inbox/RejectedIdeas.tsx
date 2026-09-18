@@ -8,9 +8,19 @@ import './RejectedIdeas.css'
  * "the AI checked nine things and can tell you why three did not survive", so the reason is
  * always shown in full rather than summarised behind a count.
  */
-export function RejectedIdeas({ ideas }: { ideas: RejectedIdea[] }) {
+export function RejectedIdeas({
+  ideas,
+  emptyReason,
+}: {
+  ideas: RejectedIdea[]
+  /** Why there is nothing to show, when the reason is not "the run rejected nothing". */
+  emptyReason?: string
+}) {
   if (ideas.length === 0) {
-    return <p className="rejected-empty">Nothing was rejected in this run.</p>
+    // "Nothing was rejected in this run" is a claim about the run. It must not stand in for
+    // "nothing could be asked", which is a claim about the API — the two look identical on
+    // screen and mean opposite things about how hard the gate worked.
+    return <p className="rejected-empty">{emptyReason ?? 'Nothing was rejected in this run.'}</p>
   }
 
   return (

@@ -1,11 +1,4 @@
-import {
-  fetchBusiness,
-  fetchClaims,
-  fetchOpportunities,
-  fetchRejectedIdeas,
-  firstFallbackReason,
-  weakestMode,
-} from '../../api/client'
+import { fetchBusiness, fetchInbox, fetchRejectedIdeas } from '../../api/client'
 import { Section } from '../../components/common/Card'
 import {
   EmptyState,
@@ -23,29 +16,28 @@ import './InboxScreen.css'
 /** Screen 3 — Opportunity Inbox (PRD §1.3, §16.1). */
 export function InboxScreen({ businessId }: { businessId: string }) {
   const profile = useServed(fetchBusiness, businessId)
-  const inbox = useServed(fetchOpportunities, businessId)
-  const claimSet = useServed(fetchClaims, businessId)
+  const inbox = useServed(fetchInbox, businessId)
   const rejected = useServed(fetchRejectedIdeas, businessId)
 
   if (
     profile.status === 'loading' ||
     inbox.status === 'loading' ||
-    claimSet.status === 'loading' ||
     rejected.status === 'loading'
   ) {
     return <LoadingState what="the opportunity inbox" />
   }
   if (profile.status === 'error') return <ErrorState message={profile.message} />
   if (inbox.status === 'error') return <ErrorState message={inbox.message} />
-  if (claimSet.status === 'error') return <ErrorState message={claimSet.message} />
   if (rejected.status === 'error') return <ErrorState message={rejected.message} />
 
-  // Four endpoints fall back independently, so the banner reports the weakest provenance
-  // on the screen rather than the first one it happens to read.
-  const payloads = [profile.served, inbox.served, claimSet.served, rejected.served]
+  // Each payload falls back independently, so the banner gets all of them and names each.
+  const sources = [
+    { label: 'Business profile', served: profile.served },
+    { label: 'Opportunities and claims', served: inbox.served },
+    { label: 'Ideas we rejected', served: rejected.served },
+  ]
   const business = profile.served.data
-  const opportunities = inbox.served.data
-  const claims = claimSet.served.data
+  const { opportunities, claims } = inbox.served.data
   const sections = groupOpportunities(opportunities)
   const coverage = goalCoverage(opportunities, business.goal.change_usd)
 
@@ -56,10 +48,7 @@ export function InboxScreen({ businessId }: { businessId: string }) {
         <p className="screen-lede">
           What {business.name} could do to reach its goal, ranked, with what is blocking the rest.
         </p>
-        <ServedBanner
-          mode={weakestMode(payloads)}
-          fallbackReason={firstFallbackReason(payloads)}
-        />
+        <ServedBanner sources={sources} />
       </header>
 
       <GoalBar
@@ -100,7 +89,10 @@ export function InboxScreen({ businessId }: { businessId: string }) {
         title="Ideas we rejected"
         description="Checked, and did not survive the check. The reason is the point."
       >
-        <RejectedIdeas ideas={rejected.served.data} />
+        <RejectedIdeas
+          ideas={rejected.served.data}
+          emptyReason={rejected.served.fallback_reason}
+        />
       </Section>
     </>
   )

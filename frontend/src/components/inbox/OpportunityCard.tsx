@@ -65,7 +65,20 @@ export function OpportunityCard({
           </div>
         </div>
 
-        <div className="claims">{ordered.map((claim) => <ClaimRow key={claim.id} claim={claim} />)}</div>
+        {/* An opportunity whose claims did not load is not an opportunity without claims, and
+            the two look identical if the block just renders empty. §14.8 requires all four. */}
+        {ordered.length === 0 ? (
+          <p className="claims-missing">
+            This opportunity&apos;s claims could not be loaded, so its why this / why you / why
+            now / mechanism lines are missing rather than absent.
+          </p>
+        ) : (
+          <div className="claims">
+            {ordered.map((claim) => (
+              <ClaimRow key={claim.id} claim={claim} />
+            ))}
+          </div>
+        )}
 
         {/* "Your fit" and "What to do" sections dropped: no canonical field backs either
             (Opportunity has no capability link and no free-text action recommendation) and

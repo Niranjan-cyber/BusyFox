@@ -153,6 +153,38 @@ Kept from Day 1 per the event rules (learning is a scored judging criterion). On
 - `Signal` (§14.7) is deliberately the "trimmed public shape" — no raw quote or URL — but Evidence Check needs both to verify a claim. The Market/Competitor agents' raw tool-call output (`RawMarketSignal`/`RawCompetitorSignal`) does carry a `source_url` and a `date_window` string; `run_market_agent`/`run_competitor_agent` throw both away on the way to building a `Signal`. Rather than changing those already-tested Task 15/16 files, the orchestrator calls their lower-level `validate_claims`/`build_signal` directly and keeps its own signal_id → (url, parsed date) map alongside. Net: Evidence Check gets a real URL and a best-effort real date for Market/Competitor evidence, with zero changes to committed agent code.
 - A second, smaller gap: `Synthesis` only treats a negative signal as `pains_to_fix_first` when `produced_by == "feedback_pipeline_labeller"` (Task 17), but the PulseStack simulator (Task 10) stamps its signals `produced_by="pulsestack_simulator"` — a negative simulated signal silently can't become a fix-first pain today. Not fixed here (it's a cross-task naming mismatch, not an orchestrator wiring bug), but the demo pipeline was built to route around it — competitor-agent pain + simulator strength → `competitive_gap`, the same pattern Task 17's own self-check already uses — rather than quietly special-casing produced_by strings in new code. Worth a one-line fix (either name) before Task 24's gold-set run depends on fix-first opportunities showing up from simulated data.
 - Wiring the P0 GET handlers to read real DynamoDB rows (asked for explicitly, beyond the minimum "orchestrator wiring" scope) almost shipped a real regression: swallowing `Exception` from `boto3.resource("dynamodb")` calls to fall back to the fixture is correct, but with zero AWS credentials configured (normal local dev/test state), boto3's credential-resolution chain takes ~3.4 real seconds to fail before that except-block ever runs — turning every handler call, and the whole test suite, into a multi-second hang. Fixed by gating the DynamoDB attempt on `AWS_LAMBDA_FUNCTION_NAME` (set automatically inside a real Lambda) instead of just try/except, so local/test calls skip straight to the fixture in effectively zero time. The lesson: "catch the error and fall back" and "detect you don't need to try" are different fixes, and only one of them is fast.
+**Screens 1 and 3 against the real API (Tasks 22–23)**
+- The frontend had been calling `/businesses/{id}/claims`, which exists in neither
+  `docs/contract.md` nor the deployed stage — it 404s. Nothing caught it, because with
+  `VITE_API_BASE_URL` unset the client never makes the request and the fixture fallback renders
+  a perfectly good screen. A fallback ladder hides integration bugs by design: the same code
+  path that keeps the demo alive when Tavily has a bad five minutes also keeps a wrong URL
+  looking fine forever. The fix was a test that asserts the *requested URL* against the
+  contract table, not just that the screen renders.
+- The bigger find: no endpoint says how it was retrieved. `retrieval_mode` is on
+  `SourceDocument` and `Evidence` only (§14.4/§14.5), so a `Business` or `Opportunity` response
+  carries no provenance at all — and the client's old behaviour was to assume `cached` when a
+  payload didn't declare one. That is a §7.2 violation in the direction nobody looks for:
+  the guardrail is written as "never show a fixture as live", so a conservative-sounding
+  default reads as safe, when it is still the product asserting a provenance it cannot support
+  over what is currently stub-Lambda fixture data served on HTTP 200. Replaced with an explicit
+  "provenance not stated" state and an `X-Retrieval-Mode` header proposed to Lane A — a header
+  rather than an envelope field because four contract endpoints return a bare array with
+  nowhere to put one.
+- Fetching the inbox's claims exposed a rule the screen would otherwise get wrong silently: if
+  the opportunity list is live and a claims call fails, falling back to the committed fixture
+  claims attaches evidence to opportunities nobody ever wrote it about. Consistency between two
+  endpoints' fallbacks is part of the ladder, not a detail — so the pairing lives in the client
+  (`fetchInbox`) where it can be tested, and fixture claims are only ever served beside fixture
+  opportunities.
+- With no chrome-devtools MCP configured, the browser pass ran on headless Chrome directly:
+  `--dump-dom` for content, and a ~40-line CDP script over Node 24's global `WebSocket` for
+  device-metrics emulation, real `Input.dispatchKeyEvent` Tab presses and overflow measurement.
+  Two things that would have produced false results: `--window-size` does not set the layout
+  viewport, so a screenshot looked clipped at 390px when the page was actually fine (device
+  metrics must be emulated via CDP); and `Page.navigate` to a URL differing only in its hash
+  does not reload, so a "full outage" check silently re-reported the previous run's live data
+  until a cache-busting query string was added.
 
 ## Day 3 — Sept 19, 2026
 

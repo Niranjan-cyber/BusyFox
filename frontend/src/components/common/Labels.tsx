@@ -1,4 +1,5 @@
-import type { ObservedInferredAssumed as ClaimLabelValue, RetrievalMode } from '../../types/entities'
+import type { ObservedInferredAssumed as ClaimLabelValue } from '../../types/entities'
+import type { ServedMode } from '../../lib/viewModels'
 import './Labels.css'
 
 /**
@@ -26,7 +27,7 @@ export function ClaimLabel({ value }: { value: ClaimLabelValue }) {
   )
 }
 
-const SOURCE_TEXT: Record<RetrievalMode, { short: string; full: string }> = {
+const SOURCE_TEXT: Record<ServedMode, { short: string; full: string }> = {
   live: {
     short: 'LIVE RESEARCH',
     full: 'Fetched fresh during this run',
@@ -39,10 +40,16 @@ const SOURCE_TEXT: Record<RetrievalMode, { short: string; full: string }> = {
     short: 'DEMO FIXTURE',
     full: 'Pre-collected and verified, not this run live search',
   },
+  // Not a fourth rung on the §7.2 ladder — the state of a response that did not name its rung.
+  // Saying so is the only honest option: the other three are all claims we cannot back.
+  undeclared: {
+    short: 'PROVENANCE NOT STATED',
+    full: 'The API answered but did not say whether this was fetched live, re-served from cache, or a fixture',
+  },
 }
 
 /** §7.2 — the retrieval level is always stated, never silently substituted. */
-export function SourceLabel({ mode }: { mode: RetrievalMode }) {
+export function SourceLabel({ mode }: { mode: ServedMode }) {
   const text = SOURCE_TEXT[mode]
   return (
     <span className={`label label-${mode}`} title={text.full}>

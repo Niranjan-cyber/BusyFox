@@ -49,3 +49,12 @@
     color: var(--text-secondary-on-bg);
     border: 1px dashed var(--border-strong);
 }
+
+/* Off the ladder entirely, so it borrows the warning treatment the card already uses for
+   fix-first rather than a fourth position in the live -> cached -> fixture escalation.
+   --warning is 3.9:1 on --bg: enough for a border, not for text, hence the slate label. */
+.label-undeclared {
+    background: transparent;
+    color: var(--text-secondary-on-bg);
+    border: 1px dotted var(--warning);
+}

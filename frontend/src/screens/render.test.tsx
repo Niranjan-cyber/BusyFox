@@ -5,8 +5,10 @@ import { OpportunityCard } from '../components/inbox/OpportunityCard'
 import { GoalBar } from '../components/inbox/GoalBar'
 import { RejectedIdeas } from '../components/inbox/RejectedIdeas'
 import { PolaritySplitBar } from '../components/polarity/PolaritySplitBar'
+import { EmptyState, ErrorState, LoadingState, ServedBanner } from '../components/common/ScreenState'
 import { claims, opportunities, rejectedIdeas } from '../fixtures/opportunities'
 import { feedbackSummary } from '../fixtures/business'
+import type { Served } from '../api/client'
 
 /**
  * Render smoke tests.
@@ -53,6 +55,13 @@ describe('OpportunityCard', () => {
     expect(html).toContain('card-blocked')
     expect(html).toContain('Blocked')
     expect(html).toContain('Fix first')
+  })
+
+  it('says an opportunity lost its claims rather than rendering as if it had none', () => {
+    const opportunity = opportunities.find((o) => o.id === 'opp_07')!
+    const html = renderToStaticMarkup(<OpportunityCard opportunity={opportunity} claims={[]} />)
+    expect(html).toContain('could not be loaded')
+    expect(html).not.toContain('Why this')
   })
 
   it('never renders a combined score', () => {
@@ -113,6 +122,80 @@ describe('RejectedIdeas', () => {
   it('has an empty state', () => {
     const html = renderToStaticMarkup(<RejectedIdeas ideas={[]} />)
     expect(html).toContain('Nothing was rejected')
+  })
+
+  it('says why it is empty when the reason is that nothing could be asked', () => {
+    const html = renderToStaticMarkup(
+      <RejectedIdeas ideas={[]} emptyReason="No rejected-candidate endpoint exists yet." />,
+    )
+    expect(html).toContain('No rejected-candidate endpoint exists yet.')
+    expect(html).not.toContain('Nothing was rejected')
+  })
+})
+
+describe('ServedBanner', () => {
+  const at = (retrieval_mode: Served<unknown>['retrieval_mode'], fallback_reason?: string) =>
+    ({ data: null, retrieval_mode, fallback_reason }) satisfies Served<unknown>
+
+  it('states the one level when every source agrees, without a breakdown', () => {
+    const html = renderToStaticMarkup(
+      <ServedBanner
+        sources={[
+          { label: 'Business profile', served: at('demo_fixture') },
+          { label: 'Customer feedback', served: at('demo_fixture') },
+        ]}
+      />,
+    )
+    expect(html).toContain('DEMO FIXTURE')
+    expect(html).not.toContain('LIVE RESEARCH')
+    expect(html).not.toContain('served-sources')
+  })
+
+  it('names every source when one falls back and the others do not', () => {
+    const html = renderToStaticMarkup(
+      <ServedBanner
+        sources={[
+          { label: 'Business profile', served: at('live') },
+          { label: 'Customer feedback', served: at('demo_fixture', '/feedback-summary returned HTTP 500') },
+        ]}
+      />,
+    )
+    // The weakest level leads, so no part of the screen is covered by a stronger claim...
+    expect(html).toContain('DEMO FIXTURE')
+    // ...but the source that really is live still says so, and the failure names itself.
+    expect(html).toContain('LIVE RESEARCH')
+    expect(html).toContain('Business profile')
+    expect(html).toContain('Customer feedback')
+    expect(html).toContain('returned HTTP 500')
+  })
+
+  it('never claims a level for a response that declared none', () => {
+    const html = renderToStaticMarkup(
+      <ServedBanner sources={[{ label: 'Business profile', served: at('undeclared') }]} />,
+    )
+    expect(html).toContain('PROVENANCE NOT STATED')
+    expect(html).not.toContain('LIVE RESEARCH')
+    expect(html).not.toContain('CACHED VERIFIED SOURCE')
+    expect(html).not.toContain('DEMO FIXTURE')
+  })
+})
+
+describe('screen states', () => {
+  it('announces loading to assistive technology rather than only showing a spinner', () => {
+    const html = renderToStaticMarkup(<LoadingState what="the opportunity inbox" />)
+    expect(html).toContain('role="status"')
+    expect(html).toContain('the opportunity inbox')
+  })
+
+  it('shows the error detail, not just a generic apology', () => {
+    const html = renderToStaticMarkup(<ErrorState message="boom" />)
+    expect(html).toContain('role="alert"')
+    expect(html).toContain('boom')
+  })
+
+  it('makes an empty screen an invitation rather than a shrug', () => {
+    const html = renderToStaticMarkup(<EmptyState>Run an investigation.</EmptyState>)
+    expect(html).toContain('Run an investigation.')
   })
 })
 
