@@ -18,6 +18,15 @@
     gap: var(--space-3);
 }
 
+/* Same warning treatment as fix-first: something is missing, and the card says so rather
+   than letting an empty claims block read as "this opportunity has no claims". */
+.claims-missing {
+    border-left: 2px solid var(--warning);
+    padding-left: var(--space-3);
+    font-size: var(--text-small);
+    color: var(--text-secondary);
+}
+
 .claim {
     display: flex;
     flex-direction: column;

@@ -48,6 +48,30 @@ Screens 2, 4 and 5 are listed in the nav as not built yet rather than linking no
 client serves committed fixtures instead — and the UI labels them `DEMO FIXTURE`, per the
 Live → Cached → Demo Fixture ladder in PRD §7.2. Fixture data is never shown as if it were live.
 
+`VITE_DEV_API_ORIGIN` turns on the dev-server proxy (`vite.config.ts`). It exists because the
+deployed stage sends no CORS headers, so a browser on `localhost` cannot call it directly. To
+run the screens against real data locally, copy `.env.example` to `.env.local` and set:
+
+```
+VITE_DEV_API_ORIGIN=https://vx59qs2osl.execute-api.eu-north-1.amazonaws.com
+VITE_API_BASE_URL=/api
+```
+
+`.env.local` is gitignored. The proxy is a local affordance, not the fix — see below.
+
+## Known blockers
+
+These are why `tasks/todo.md` Tasks 22 and 23 are not checked off. The client-side integration
+is done and tested; each item below is upstream of it.
+
+| # | Blocker | Owner | What it stops |
+|---|---|---|---|
+| 1 | No endpoint states its retrieval mode. `Business`, `Signal`, `Opportunity` and `Claim` have no `retrieval_mode` field (only `SourceDocument` and `Evidence` do, §14.4/§14.5), and no handler sets a response header. | Lane A | The §7.2 banner cannot say `LIVE RESEARCH` or `CACHED VERIFIED SOURCE` for a real request. The client reports `PROVENANCE NOT STATED` rather than guessing. **Ask:** have each handler send `X-Retrieval-Mode: live \| cached \| demo_fixture`. A header rather than an envelope field because four contract endpoints return a bare array, which has nowhere to put one without changing its declared response type. |
+| 2 | No rejected-candidate route. `docs/contract.md`'s API table has none and `backend/handlers/` has no handler. | Lane A, Task 19 (Quality Gate + Ranker) | "Ideas we rejected" — screen 3's signature moment (§16.1) — has nothing to call. With a live endpoint configured it shows the reason instead of fixture rejections, which would present ideas this run never considered as ideas this run rejected. |
+| 3 | The API is still Task 2's stub Lambdas over `backend/fixtures/fixtures.py`, not real run output. Tasks 19–21 (Quality Gate, DynamoDB, orchestrator) are unchecked. | Lane A | A "live" response today is a fixture served over HTTP. Blocker 1 is what makes that visible rather than mislabelled. |
+| 4 | The deployed `AWS::Serverless::HttpApi` has no `CorsConfiguration`: `OPTIONS` answers 404 and a `GET` carries no `Access-Control-Allow-Origin`. | Lane A / infra | The Amplify-hosted build cannot call the API from a browser at all. Local dev works around it with the proxy above; hosting needs `CorsConfiguration` in `infra/api-gateway.yaml` plus a redeploy. |
+| 5 | `opp_001` comes back with `evidence_confidence: HIGH`, a non-empty `pains_to_fix_first` and `priority: "High"`. §13.1's rule table makes that combination `Blocked`. | Lane A | The inbox renders the priority the gate assigned and does not recompute it, so the card lands under "High-confidence opportunities" while showing a "Fix first" block. The fix belongs in the gate, not the UI. |
+
 ## Rendering rules that are not optional
 
 These come from `AGENTS.md` and the PRD; a change that breaks one of them is a bug, not a preference.

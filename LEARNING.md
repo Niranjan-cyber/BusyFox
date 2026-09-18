@@ -129,6 +129,39 @@ Kept from Day 1 per the event rules (learning is a scored judging criterion). On
 **Competitor Agent (Task 16)**
 - Reused Task 15's `RuntimeBudget` by importing it rather than re-implementing §10.1a budget tracking a second time — it was already generic over the component name via `to_invocation(component=...)`, so the only genuinely new logic was §18.4's named-competitor scope check (`competitor_name in named_competitors`), which structurally stops the agent from inventing or disparaging a company the business never named, on top of §9.4's existing count/date/source rule.
 
+**Screens 1 and 3 against the real API (Tasks 22–23)**
+- The frontend had been calling `/businesses/{id}/claims`, which exists in neither
+  `docs/contract.md` nor the deployed stage — it 404s. Nothing caught it, because with
+  `VITE_API_BASE_URL` unset the client never makes the request and the fixture fallback renders
+  a perfectly good screen. A fallback ladder hides integration bugs by design: the same code
+  path that keeps the demo alive when Tavily has a bad five minutes also keeps a wrong URL
+  looking fine forever. The fix was a test that asserts the *requested URL* against the
+  contract table, not just that the screen renders.
+- The bigger find: no endpoint says how it was retrieved. `retrieval_mode` is on
+  `SourceDocument` and `Evidence` only (§14.4/§14.5), so a `Business` or `Opportunity` response
+  carries no provenance at all — and the client's old behaviour was to assume `cached` when a
+  payload didn't declare one. That is a §7.2 violation in the direction nobody looks for:
+  the guardrail is written as "never show a fixture as live", so a conservative-sounding
+  default reads as safe, when it is still the product asserting a provenance it cannot support
+  over what is currently stub-Lambda fixture data served on HTTP 200. Replaced with an explicit
+  "provenance not stated" state and an `X-Retrieval-Mode` header proposed to Lane A — a header
+  rather than an envelope field because four contract endpoints return a bare array with
+  nowhere to put one.
+- Fetching the inbox's claims exposed a rule the screen would otherwise get wrong silently: if
+  the opportunity list is live and a claims call fails, falling back to the committed fixture
+  claims attaches evidence to opportunities nobody ever wrote it about. Consistency between two
+  endpoints' fallbacks is part of the ladder, not a detail — so the pairing lives in the client
+  (`fetchInbox`) where it can be tested, and fixture claims are only ever served beside fixture
+  opportunities.
+- With no chrome-devtools MCP configured, the browser pass ran on headless Chrome directly:
+  `--dump-dom` for content, and a ~40-line CDP script over Node 24's global `WebSocket` for
+  device-metrics emulation, real `Input.dispatchKeyEvent` Tab presses and overflow measurement.
+  Two things that would have produced false results: `--window-size` does not set the layout
+  viewport, so a screenshot looked clipped at 390px when the page was actually fine (device
+  metrics must be emulated via CDP); and `Page.navigate` to a URL differing only in its hash
+  does not reload, so a "full outage" check silently re-reported the previous run's live data
+  until a cache-busting query string was added.
+
 ## Day 3 — Sept 19, 2026
 
 *(Not yet written.)*

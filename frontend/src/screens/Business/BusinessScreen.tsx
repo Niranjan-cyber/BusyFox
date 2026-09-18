@@ -1,12 +1,8 @@
-import {
-  fetchBusiness,
-  fetchFeedbackSignals,
-  firstFallbackReason,
-  weakestMode,
-} from '../../api/client'
+import { fetchBusiness, fetchFeedbackSignals } from '../../api/client'
 import { Card, CardBody, CardHeader, Section } from '../../components/common/Card'
 import { ClaimLabel } from '../../components/common/Labels'
 import {
+  EmptyState,
   ErrorState,
   LoadingState,
   ServedBanner,
@@ -55,8 +51,11 @@ export function BusinessScreen({ businessId }: { businessId: string }) {
   if (profile.status === 'error') return <ErrorState message={profile.message} />
   if (feedback.status === 'error') return <ErrorState message={feedback.message} />
 
-  // Both endpoints fall back independently; the banner reports the weaker of the two.
-  const payloads = [profile.served, feedback.served]
+  // Both endpoints fall back independently, so the banner gets both and names each one.
+  const sources = [
+    { label: 'Business profile', served: profile.served },
+    { label: 'Customer feedback', served: feedback.served },
+  ]
   const business = profile.served.data
   const summary = summariseFeedback(feedback.served.data)
   const loves = summary.themes.filter((theme) => theme.polarity === 'positive')
@@ -70,10 +69,7 @@ export function BusinessScreen({ businessId }: { businessId: string }) {
         <p className="screen-lede">
           {humanise(business.industry)} · {humanise(business.playbook_id)} playbook
         </p>
-        <ServedBanner
-          mode={weakestMode(payloads)}
-          fallbackReason={firstFallbackReason(payloads)}
-        />
+        <ServedBanner sources={sources} />
         {business.is_simulated ? (
           <p className="simulated-note">
             {business.name} is a simulated business (scenario <code>{business.scenario_id}</code>),
@@ -184,20 +180,32 @@ export function BusinessScreen({ businessId }: { businessId: string }) {
           </>
         }
       >
-        <PolaritySplitBar positive={summary.positive_count} negative={summary.negative_count} />
-        <div className="theme-columns">
-          <div>
-            <h3>What customers love</h3>
-            <ThemeList themes={loves} emptyText="No praise themes cleared the mention threshold." />
-          </div>
-          <div>
-            <h3>What customers complain about</h3>
-            <ThemeList
-              themes={complains}
-              emptyText="No complaint themes cleared the mention threshold."
-            />
-          </div>
-        </div>
+        {summary.total_items === 0 ? (
+          <EmptyState>
+            This business has no labelled feedback yet. The feedback pipeline (§10.1) fills this
+            from its own tickets and survey responses — nothing here is scraped.
+          </EmptyState>
+        ) : (
+          <>
+            <PolaritySplitBar positive={summary.positive_count} negative={summary.negative_count} />
+            <div className="theme-columns">
+              <div>
+                <h3>What customers love</h3>
+                <ThemeList
+                  themes={loves}
+                  emptyText="No praise themes cleared the mention threshold."
+                />
+              </div>
+              <div>
+                <h3>What customers complain about</h3>
+                <ThemeList
+                  themes={complains}
+                  emptyText="No complaint themes cleared the mention threshold."
+                />
+              </div>
+            </div>
+          </>
+        )}
       </Section>
     </>
   )

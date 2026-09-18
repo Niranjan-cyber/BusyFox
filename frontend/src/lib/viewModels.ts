@@ -4,6 +4,7 @@ import type {
   ObservedInferredAssumed,
   Opportunity,
   Polarity,
+  RetrievalMode,
   Signal,
 } from '../types/entities'
 
@@ -15,6 +16,16 @@ import type {
  * file only derives display shapes from data those files already define. Where a UI need has
  * no legitimate source in the canonical contract, it does not appear here (see LEARNING.md).
  */
+
+/**
+ * What the client can honestly say about where a payload came from.
+ *
+ * `RetrievalMode` is the canonical §7.2 ladder and stays exactly three rungs. `undeclared` is
+ * not a fourth rung — it is the state of a response that did not say which rung it is on, and
+ * it exists so the UI can report that instead of picking a rung on the response's behalf. It
+ * is a rendering concern, so it lives here rather than in the canonical entity contract.
+ */
+export type ServedMode = RetrievalMode | 'undeclared'
 
 /** §13.3 rendering convention (docs/contract.md): why_this/why_you/why_now claims are
     OBSERVED, mechanism claims are INFERRED. Not a stored field on Claim. */

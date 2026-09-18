@@ -52,8 +52,13 @@ Full detail and rationale for each task: `tasks/plan.md`. Check items off here a
 - [ ] Task 21: Orchestrator wiring — full pipeline end to end
 
 ### Lane B — Frontend/UX
-- [ ] Task 22: Screen 1 on real data
-- [ ] Task 23: Screen 3 on real data
+- [~] Task 22: Screen 1 on real data — client wired to the contract routes and verified in a
+  browser against the deployed stage; **blocked** on no endpoint declaring its retrieval mode,
+  so the §7.2 banner cannot say LIVE or CACHED for a real request. See `frontend/README.md`,
+  "Known blockers" (1, 3, 4)
+- [~] Task 23: Screen 3 on real data — inbox groups and ranks the live opportunity with its
+  claims off `/opportunities/{id}/claims`; **blocked** on the same provenance gap plus no
+  rejected-candidate route (Task 19). See `frontend/README.md`, "Known blockers" (1, 2, 3, 5)
 
 ### Lane C — Floating
 - [ ] Task 24: Gold-set labelling (80 sim + 20 real, independent)
