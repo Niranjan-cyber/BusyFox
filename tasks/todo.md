@@ -20,9 +20,9 @@ Full detail and rationale for each task: `tasks/plan.md`. Check items off here a
 - [ ] Task 6: Skeleton AWS deploy (Amplify + API Gateway + Step Functions + stub Lambda)
 
 ### Lane B — Frontend/UX
-- [ ] Task 7: React app scaffold + Amplify Hosting pipeline
-- [ ] Task 8: Design tokens via `frontend-design` skill, committed as a theme file
-- [ ] Task 9: Screen 1 & 3 shells on fixture data, using Task 8's theme
+- [x] Task 7: React app scaffold + Amplify Hosting pipeline
+- [x] Task 8: Design tokens via `frontend-design` skill, committed as a theme file
+- [x] Task 9: Screen 1 & 3 shells on fixture data, using Task 8's theme
 
 ### Lane C — Floating
 - [ ] Task 10: PulseStack simulator (scenario + generator + seed), `Signal`/`Evidence`-shaped output

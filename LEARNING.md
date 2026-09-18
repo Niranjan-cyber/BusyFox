@@ -21,7 +21,38 @@ Kept from Day 1 per the event rules (learning is a scored judging criterion). On
 
 ## Day 2 — Sept 18, 2026
 
-*(Not yet written — add as the day happens.)*
+**Lane B — design tokens and screens 1 & 3**
+- The brief's palette and WCAG AA disagree in one specific place, and it only showed up once
+  the ratios were computed rather than eyeballed: `#456C6F` secondary text on the `#CBD5D4`
+  page background is 3.9:1, under the 4.5:1 body-text bar. Fixed by adding one lighter tint of
+  the same colour (`#E4EAE9`) as the card surface, which puts the same text at 4.75:1 without
+  introducing a hue the brief didn't ask for. `#7EAEA6` as text on the light background is
+  1.65:1 — unusable — so the accent is a fill colour on light and a text colour only on dark.
+  The token names encode that (`--on-accent`, `--accent-on-dark`) so the failing pairing is
+  hard to reach by accident, and the `#/tokens` page recomputes every pairing at load instead
+  of trusting the numbers in the design doc.
+- The PRD contradicts itself on goal coverage. §13.2 defines it as monthly value × 3 for the
+  90-day horizon ÷ goal gap, but §1.3's inbox mock-up compares the monthly sums to the $15k
+  MRR goal directly ($6.5k + $4.1k against $15k, no ×3). ×3 is also dimensionally odd, since
+  the goal is itself a monthly rate. Built §1.3's version because that's the screen being
+  rendered, and left the conflict named in `grouping.ts` rather than quietly picking a side —
+  needs a ruling at stand-up.
+- §13.1's priority rule table covers HIGH and LOW explicitly but never says which §1.3 section
+  MEDIUM belongs to. Grouped it with LOW under "additional hypotheses (lower confidence)",
+  since the alternative puts medium-confidence items under a heading that says
+  "high-confidence". Also flagged in code rather than settled silently.
+- Writing the "no composite score" guardrail as an actual test — asserting no rendered card
+  carries a score-shaped field, and that every fixture priority matches the rule table — was
+  cheap and caught nothing today, which is the point: it will catch it on Day 3 when someone
+  is adding the detail screen at speed. The `signals[]`-only guarantee is enforced the same
+  way, as a `@ts-expect-error` that fails the typecheck if the field ever becomes assignable.
+- Checking the palette's contrast once, for the light background, was not enough. A review pass
+  caught `#456C6F` used as text on the dark nav rail at 2.6:1 — the same colour that is fine on a
+  card. The lesson was less "check contrast" than "check it per surface": a token that passes
+  somewhere gets reused everywhere. The fix was a second derived step (`--on-slate-muted`) and,
+  more usefully, moving the whole contrast table out of a doc and into `npm test`, where it
+  parses `theme.css` and fails the build. The page that checks it in a browser only helps when
+  somebody opens it.
 
 ## Day 3 — Sept 19, 2026
 

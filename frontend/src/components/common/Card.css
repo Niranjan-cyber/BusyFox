@@ -1,0 +1,60 @@
+.card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-card);
+    padding: var(--space-4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+/* Blocked opportunities are marked structurally, by a left rule, not by tinting the whole
+   card — they are still real opportunities, just not sellable yet (§13.1). */
+.card-blocked {
+    border-left: 3px solid var(--warning);
+}
+
+.card-header {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-3);
+    align-items: baseline;
+    justify-content: space-between;
+}
+
+.card-body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+.card-footer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--border);
+}
+
+.section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+}
+
+.section-head {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+}
+
+.section-description {
+    color: var(--text-secondary-on-bg);
+    font-size: var(--text-small);
+}
+
+@media (min-width: 48rem) {
+    .card {
+        padding: var(--space-6);
+    }
+}
