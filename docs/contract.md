@@ -84,3 +84,21 @@ so a fixture can never drift from the schema without failing to import).
   (deployment is Task 6).
 - API Gateway route definitions: `infra/api-gateway.yaml` (SAM template —
   routes exist in code now; Task 6 deploys them for real).
+
+## DynamoDB (Task 20)
+
+One table (`infra/api-gateway.yaml`'s `OpportunityEngineTable`), all nine
+core entities, keyed on the prefixes in the table above:
+
+- `PK = "<PREFIX><id>"`, `SK = "METADATA"` — get-by-id for any entity.
+- `GSI1PK`/`GSI1SK` — provenance-chain list access patterns (e.g.
+  "opportunities for this run"): the parent's own key goes in `GSI1PK`, the
+  child's own key goes in `GSI1SK`, written by the caller via
+  `put_entity(table, model, parent_key=...)`.
+- `ttl` (native DynamoDB TTL) is set on `SourceDocument` items from
+  `expires_at`, enforcing PRD §18's 30-day raw-text expiry with no cleanup
+  job.
+
+DAO: `backend/db/dynamo.py` (`get_table`, `put_entity`, `get_entity`,
+`query_children`). Writing to the table from a real pipeline run is Task
+21's job — Task 20 only designs the table and the write/read primitives.

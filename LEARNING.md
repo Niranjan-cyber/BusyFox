@@ -145,6 +145,10 @@ Kept from Day 1 per the event rules (learning is a scored judging criterion). On
 - `Opportunity` needed a place for the three non-rejecting flags §11 describes (stale evidence, contradiction/one-sided evidence, fix-first risk) — none of the 14 checks' outcomes fit into `evidence_confidence`/`priority` alone. Added `flags: list[str]` to the entity (Python default `[]`, TS `flags?: string[]` to avoid breaking existing fixture literals) rather than inventing an out-of-band side channel, same reasoning as Task 17's `claims` field addition.
 - Confirmed from `tasks/plan.md`'s own Task 19 line (no mention of `value`) and `todo.md`'s Day 3 list ("value model" appears there, not Day 2) that §13.2's value model is out of scope here — Quality Gate passes `Opportunity.value` through untouched from Synthesis's placeholder rather than half-implementing it.
 
+**DynamoDB table + writes (Task 20)**
+- No entity in the locked Task 1 schema carries its own parent id (`Opportunity` has no `run_id`/`business_id`, `ExecutionPack`/`Claim` have no back-pointer beyond `opportunity_id` one level up) — but the API's list endpoints (`/businesses/{id}/opportunities`, `/opportunities/{id}/claims`) need exactly that to query. Rather than adding parent-id fields the Pydantic/TS contract doesn't need, `to_item()` writes the caller-supplied `parent_key` only into `GSI1PK`/`GSI1SK` (not into the entity's own fields), and pydantic v2's default `extra="ignore"` means reading a `GSI1PK`-carrying item back through `Model.model_validate(item)` drops it silently — the contract stays untouched and the query key still works.
+- Testing the GSI1 query path without moto (not a project dependency) meant faking `table.query(KeyConditionExpression=...)`, but that argument is a real `boto3.dynamodb.conditions` object (`Key(...).eq(...) & Key(...).begins_with(...)`), not a callable — its `_values`/`.name` fields are undocumented/private but stable enough to walk recursively for a same-process fake. Cheaper than adding moto for one test file; revisit if more Dynamo tests show up and the private-attribute walk gets fragile.
+
 ## Day 3 — Sept 19, 2026
 
 *(Not yet written.)*

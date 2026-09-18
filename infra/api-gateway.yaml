@@ -36,6 +36,42 @@ Globals:
     CodeUri: ../
 
 Resources:
+  # Task 20: single-table design for all nine core entities, keyed on the
+  # Task 1 prefixes (backend/schemas/entities.py DynamoKeyPrefix) — PK/SK
+  # gives get-by-id, GSI1 gives the provenance-chain list access patterns
+  # (docs/contract.md). `ttl` enforces PRD §18.8's 30-day raw-text expiry
+  # natively, no cleanup job. See backend/db/dynamo.py.
+  OpportunityEngineTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: PK
+          AttributeType: S
+        - AttributeName: SK
+          AttributeType: S
+        - AttributeName: GSI1PK
+          AttributeType: S
+        - AttributeName: GSI1SK
+          AttributeType: S
+      KeySchema:
+        - AttributeName: PK
+          KeyType: HASH
+        - AttributeName: SK
+          KeyType: RANGE
+      GlobalSecondaryIndexes:
+        - IndexName: GSI1
+          KeySchema:
+            - AttributeName: GSI1PK
+              KeyType: HASH
+            - AttributeName: GSI1SK
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+      TimeToLiveSpecification:
+        AttributeName: ttl
+        Enabled: true
+
   OpportunityEngineApi:
     Type: AWS::Serverless::HttpApi
 
@@ -174,3 +210,7 @@ Outputs:
   SkeletonOrchestratorArn:
     Description: Step Functions state machine ARN for the Task 6 Day-1 skeleton
     Value: !Ref SkeletonOrchestrator
+
+  DynamoTableName:
+    Description: Single table holding all nine core entities (Task 20)
+    Value: !Ref OpportunityEngineTable
