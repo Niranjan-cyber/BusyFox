@@ -211,6 +211,31 @@ Kept from Day 1 per the event rules (learning is a scored judging criterion). On
   from the Amplify origin, not just a template review — the same "prove it live" standard as
   Tasks 5/11's collector probes.
 
+**Actually fixing `sam build` (blocker 6)**
+- `.samignore` never did anything. `.git`/`.pytest_cache`/`.venv`/etc. being excluded from the
+  build artifact was `aws_lambda_builders`' own hardcoded `EXCLUDED_FILES` tuple, not our file —
+  it isn't referenced anywhere in the installed `samcli`/`aws_lambda_builders` packages. It
+  looked like it was working because the things it claimed to exclude (`.git`, `graphify-out`,
+  `.claude`) either matched the hardcoded list by coincidence (`.git`) or simply never broke
+  anything by being included (small text files) — until `.claude/skills/*`'s symlinks did, under
+  `--use-container`, and there was nothing left to blame but a config file that was always inert.
+- The real fix for the `pywin32` failure was smaller than it looked: none of the 10 deployed
+  functions import `strands-agents`/`mcp` at all (checked by grepping every handler's imports) —
+  it's only needed by `backend/agents/*.py`, none of which are wired into this template. Pointing
+  `sam build` at a `pydantic`+`boto3`-only requirements file sidesteps the whole platform-marker
+  problem, no container needed, and confirmed correct by checking the built `pydantic_core`
+  wheel's tag was `manylinux_2_17_x86_64`, not a Windows one — cross-platform pip resolution for
+  the Lambda target does work locally on Windows; it just can't tolerate a Windows-only marker in
+  the dependency graph, container or not.
+- Tried to also stop `frontend/node_modules` (~90MB) from riding into every package, by pointing
+  `CodeUri` at a small directory containing a symlink to the real `backend/`. Reverted: this
+  repo's `git config core.symlinks` is `false` (git-for-windows default), so `git add` silently
+  dereferenced the symlink and staged a full second copy of `backend/` as real files — the exact
+  drift risk this whole exercise was trying to avoid, just relocated. Checking `git ls-files -s`
+  on an existing symlinked path (`.claude/skills/*`) before committing anything symlink-shaped
+  would have caught this in seconds; the packaging bloat itself (128MB, under Lambda's 250MB
+  unzipped limit) turned out not to be a real problem worth solving today.
+
 ## Day 3 — Sept 19, 2026
 
 *(Not yet written.)*
