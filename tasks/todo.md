@@ -53,8 +53,8 @@ Full detail and rationale for each task: `tasks/plan.md`. Check items off here a
 
 ### Lane B — Frontend/UX
 - [~] Task 22: Screen 1 on real data — client wired to the contract routes and verified in a
-  browser against the deployed stage; blocker 1 (retrieval-mode header) resolved. Still
-  **blocked** on 3 (real pipeline data behind the stage) and 4 (CORS). See `frontend/README.md`,
+  browser against the deployed stage; blockers 1 (retrieval-mode header) and 4 (CORS) resolved.
+  Still **blocked** on 3 (real pipeline data behind the stage). See `frontend/README.md`,
   "Known blockers"
 - [~] Task 23: Screen 3 on real data — inbox groups and ranks the live opportunity with its
   claims off `/opportunities/{id}/claims`; blockers 1 and 5 resolved. Still **blocked** on 2 (no

@@ -74,6 +74,22 @@ Resources:
 
   OpportunityEngineApi:
     Type: AWS::Serverless::HttpApi
+    Properties:
+      # frontend/README.md blocker 4: the Amplify-hosted build (and local dev
+      # via the Vite proxy) needs to call this API from a browser. GET-only,
+      # no auth, no cookies — a wildcard origin is the honest scope, not a
+      # workaround. ExposeHeaders is what actually matters here: without it
+      # the browser drops X-Retrieval-Mode (blocker 1) before JS ever sees it.
+      CorsConfiguration:
+        AllowOrigins:
+          - "*"
+        AllowMethods:
+          - GET
+        AllowHeaders:
+          - Content-Type
+        ExposeHeaders:
+          - X-Retrieval-Mode
+        MaxAge: 600
 
   GetBusiness:
     Type: AWS::Serverless::Function
