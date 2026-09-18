@@ -1,0 +1,502 @@
+[
+  {
+    "item_id": "sim_051",
+    "text": "Performance is fine most days, but backend_engineer noticed it slows down noticeably around the 20th concurrent dashboard viewer.",
+    "source": "simulated"
+  },
+  {
+    "item_id": "sim_054",
+    "text": "Core monitoring is complete, but sre_devops counted 6 smaller features (custom SLOs, saved filters) that are still on the roadmap.",
+    "source": "simulated"
+  },
+  {
+    "item_id": "sim_028",
+    "text": "on_call_lead says the API docs are the best-written of any observability vendor we've evaluated \u2014 found what we needed in 14 minutes.",
+    "source": "simulated"
+  },
+  {
+    "item_id": "sim_061",
+    "text": "sre_devops says the API docs are the best-written of any observability vendor we've evaluated \u2014 found what we needed in 22 minutes.",
+    "source": "simulated"
+  },
+  {
+    "item_id": "sim_065",
+    "text": "We're still missing 16 features we relied on with our previous vendor, and backend_engineer has had to keep a second tool running just for those.",
+    "source": "simulated"
+  },
+  {
+    "item_id": "sim_004",
+    "text": "backend_engineer wired up Slack, PagerDuty and our CI in under 44 minutes \u2014 the integration list covers everything we use.",
+    "source": "simulated"
+  },
+  {
+    "item_id": "sim_043",
+    "text": "founder says PulseStack covers everything our old 5-tool stack did, in one place.",
+    "source": "simulated"
+  },
+  {
+    "item_id": "sim_071",
+    "text": "Opened a ticket 3 days ago and backend_engineer still hasn't heard back from PulseStack support.",
+    "source": "simulated"
+  },
+  {
+    "item_id": "sim_002",
+    "text": "Our bill jumped by $15 last month with no warning \u2014 backend_engineer is now shopping around for something with predictable pricing.",
+    "source": "simulated"
+  },
+  {
+    "item_id": "sim_006",
+    "text": "The getting-started docs are great, but sre_devops couldn't find anything on the 2 advanced config options in the dashboard.",
+    "source": "simulated"
+  },
+  {
+    "item_id": "sim_007",
+    "text": "Query latency on our 31-node cluster's dashboard is consistently under a second \u2014 on_call_lead never has to wait.",
+    "source": "simulated"
+  },
+  {
+    "item_id": "sim_034",
+    "text": "Got the whole team set up on PulseStack in under an hour \u2014 sre_devops said the 43-step onboarding flow was the smoothest of any monitoring tool we've tried.",
+    "source": "simulated"
+  },
+  {
+    "item_id": "sim_080",
+    "text": "PulseStack's own dashboard went down for 31 minutes last week, right when on_call_lead needed it most during an incident.",
+    "source": "simulated"
+  },
+  {
+    "item_id": "sim_052",
+    "text": "sre_devops says alert volume dropped by 25% after switching, with zero false positives so far this month.",
+    "source": "simulated"
+  },
+  {
+    "item_id": "sim_050",
+    "text": "The docs page for the alerting API hasn't been updated in 27 months and still references a deprecated endpoint, which cost on_call_lead an afternoon.",
+    "source": "simulated"
+  },
+  {
+    "item_id": "sim_027",
+    "text": "Support resolved backend_engineer's issue but it took 22 back-and-forth emails to get there.",
+    "source": "simulated"
+  },
+  {
+    "item_id": "sim_023",
+    "text": "sre_devops gave up halfway through PulseStack's onboarding wizard after it asked for 19 separate API keys with no explanation of what each one does.",
+    "source": "simulated"
+  },
+  {
+    "item_id": "sim_072",
+    "text": "The getting-started docs are great, but on_call_lead couldn't find anything on the 5 advanced config options in the dashboard.",
+    "source": "simulated"
+  },
+  {
+    "item_id": "sim_026",
+    "text": "on_call_lead needed a integration with our internal ticketing system and PulseStack has 11 pre-built connectors, none of which fit.",
+    "source": "simulated"
+  },
+  {
+    "item_id": "sim_019",
+    "text": "sre_devops says alert volume dropped by 23% after switching, with zero false positives so far this month.",
+    "source": "simulated"
+  },
+  {
+    "item_id": "sim_035",
+    "text": "Our bill jumped by $27 last month with no warning \u2014 backend_engineer is now shopping around for something with predictable pricing.",
+    "source": "simulated"
+  },
+  {
+    "item_id": "sim_021",
+    "text": "Core monitoring is complete, but founder counted 17 smaller features (custom SLOs, saved filters) that are still on the roadmap.",
+    "source": "simulated"
+  },
+  {
+    "item_id": "sim_042",
+    "text": "The dashboard is intuitive for the basics, but backend_engineer needed 25 tries to find where custom views are saved.",
+    "source": "simulated"
+  },
+  {
+    "item_id": "sim_045",
+    "text": "PulseStack's onboarding got us to a working dashboard fast, but on_call_lead still had to read the docs for 30 minutes to figure out the alerting setup.",
+    "source": "simulated"
+  },
+  {
+    "item_id": "sim_047",
+    "text": "PulseStack's own dashboard went down for 22 minutes last week, right when founder needed it most during an incident.",
+    "source": "simulated"
+  },
+  {
+    "item_id": "sim_029",
+    "text": "backend_engineer says the dashboard takes 32 seconds to load once we crossed our current node count, which is unacceptable during an incident.",
+    "source": "simulated"
+  },
+  {
+    "item_id": "sim_036",
+    "text": "Reliability has been solid for 21 weeks straight, though backend_engineer noticed one brief blip during a deploy that wasn't explained.",
+    "source": "simulated"
+  },
+  {
+    "item_id": "sim_033",
+    "text": "Most of the migration was painless, but backend_engineer had to hand-rewrite 18 legacy alert rules that the importer choked on.",
+    "source": "simulated"
+  },
+  {
+    "item_id": "sim_069",
+    "text": "Reliability has been solid for 9 weeks straight, though founder noticed one brief blip during a deploy that wasn't explained.",
+    "source": "simulated"
+  },
+  {
+    "item_id": "sim_008",
+    "text": "founder is drowning in 3 duplicate alerts a night from the same underlying issue and is close to muting the channel entirely.",
+    "source": "simulated"
+  },
+  {
+    "item_id": "sim_009",
+    "text": "The dashboard is intuitive for the basics, but backend_engineer needed 33 tries to find where custom views are saved.",
+    "source": "simulated"
+  },
+  {
+    "item_id": "sim_046",
+    "text": "founder says PulseStack's flat $4/month team plan is a no-brainer compared to what we were paying per-seat elsewhere.",
+    "source": "simulated"
+  },
+  {
+    "item_id": "sim_070",
+    "text": "founder wired up Slack, PagerDuty and our CI in under 5 minutes \u2014 the integration list covers everything we use.",
+    "source": "simulated"
+  },
+  {
+    "item_id": "sim_062",
+    "text": "founder says the dashboard takes 27 seconds to load once we crossed our current node count, which is unacceptable during an incident.",
+    "source": "simulated"
+  },
+  {
+    "item_id": "sim_063",
+    "text": "The low-noise alerting is a real improvement, but founder still gets 32 redundant pages for planned maintenance windows.",
+    "source": "simulated"
+  },
+  {
+    "item_id": "sim_056",
+    "text": "founder gave up halfway through PulseStack's onboarding wizard after it asked for 43 separate API keys with no explanation of what each one does.",
+    "source": "simulated"
+  },
+  {
+    "item_id": "sim_059",
+    "text": "sre_devops needed a integration with our internal ticketing system and PulseStack has 30 pre-built connectors, none of which fit.",
+    "source": "simulated"
+  },
+  {
+    "item_id": "sim_001",
+    "text": "Got the whole team set up on PulseStack in under an hour \u2014 on_call_lead said the 39-step onboarding flow was the smoothest of any monitoring tool we've tried.",
+    "source": "simulated"
+  },
+  {
+    "item_id": "sim_015",
+    "text": "Most integrations just worked, but sre_devops had to write a small script to bridge the 21th tool we use that isn't supported.",
+    "source": "simulated"
+  },
+  {
+    "item_id": "sim_079",
+    "text": "sre_devops says PulseStack's flat $18/month team plan is a no-brainer compared to what we were paying per-seat elsewhere.",
+    "source": "simulated"
+  },
+  {
+    "item_id": "sim_076",
+    "text": "backend_engineer says PulseStack covers everything our old 34-tool stack did, in one place.",
+    "source": "simulated"
+  },
+  {
+    "item_id": "sim_012",
+    "text": "PulseStack's onboarding got us to a working dashboard fast, but founder still had to read the docs for 45 minutes to figure out the alerting setup.",
+    "source": "simulated"
+  },
+  {
+    "item_id": "sim_003",
+    "text": "Reliability has been solid for 14 weeks straight, though backend_engineer noticed one brief blip during a deploy that wasn't explained.",
+    "source": "simulated"
+  },
+  {
+    "item_id": "sim_010",
+    "text": "on_call_lead says PulseStack covers everything our old 45-tool stack did, in one place.",
+    "source": "simulated"
+  },
+  {
+    "item_id": "sim_055",
+    "text": "founder migrated 18 services over a weekend with the provided import tool \u2014 barely any manual work.",
+    "source": "simulated"
+  },
+  {
+    "item_id": "sim_022",
+    "text": "backend_engineer migrated 33 services over a weekend with the provided import tool \u2014 barely any manual work.",
+    "source": "simulated"
+  },
+  {
+    "item_id": "sim_038",
+    "text": "Opened a ticket 25 days ago and on_call_lead still hasn't heard back from PulseStack support.",
+    "source": "simulated"
+  },
+  {
+    "item_id": "sim_031",
+    "text": "backend_engineer taught a new hire the whole dashboard in 36 minutes \u2014 nothing needed explaining twice.",
+    "source": "simulated"
+  },
+  {
+    "item_id": "sim_074",
+    "text": "sre_devops is drowning in 8 duplicate alerts a night from the same underlying issue and is close to muting the channel entirely.",
+    "source": "simulated"
+  },
+  {
+    "item_id": "sim_040",
+    "text": "Query latency on our 38-node cluster's dashboard is consistently under a second \u2014 backend_engineer never has to wait.",
+    "source": "simulated"
+  },
+  {
+    "item_id": "sim_075",
+    "text": "The dashboard is intuitive for the basics, but backend_engineer needed 9 tries to find where custom views are saved.",
+    "source": "simulated"
+  },
+  {
+    "item_id": "sim_014",
+    "text": "PulseStack's own dashboard went down for 45 minutes last week, right when backend_engineer needed it most during an incident.",
+    "source": "simulated"
+  },
+  {
+    "item_id": "sim_064",
+    "text": "on_call_lead taught a new hire the whole dashboard in 6 minutes \u2014 nothing needed explaining twice.",
+    "source": "simulated"
+  },
+  {
+    "item_id": "sim_005",
+    "text": "Opened a ticket 11 days ago and founder still hasn't heard back from PulseStack support.",
+    "source": "simulated"
+  },
+  {
+    "item_id": "sim_067",
+    "text": "Got the whole team set up on PulseStack in under an hour \u2014 backend_engineer said the 30-step onboarding flow was the smoothest of any monitoring tool we've tried.",
+    "source": "simulated"
+  },
+  {
+    "item_id": "sim_066",
+    "text": "Most of the migration was painless, but backend_engineer had to hand-rewrite 35 legacy alert rules that the importer choked on.",
+    "source": "simulated"
+  },
+  {
+    "item_id": "sim_016",
+    "text": "founder got a real answer from support in under 36 minutes on a Sunday \u2014 that responsiveness alone would keep us as customers.",
+    "source": "simulated"
+  },
+  {
+    "item_id": "sim_058",
+    "text": "20 days of uptime and zero missed incidents \u2014 on_call_lead trusts PulseStack more than the tool we migrated from.",
+    "source": "simulated"
+  },
+  {
+    "item_id": "sim_060",
+    "text": "Support resolved on_call_lead's issue but it took 45 back-and-forth emails to get there.",
+    "source": "simulated"
+  },
+  {
+    "item_id": "sim_039",
+    "text": "The getting-started docs are great, but sre_devops couldn't find anything on the 18 advanced config options in the dashboard.",
+    "source": "simulated"
+  },
+  {
+    "item_id": "sim_041",
+    "text": "on_call_lead is drowning in 23 duplicate alerts a night from the same underlying issue and is close to muting the channel entirely.",
+    "source": "simulated"
+  },
+  {
+    "item_id": "sim_048",
+    "text": "Most integrations just worked, but on_call_lead had to write a small script to bridge the 26th tool we use that isn't supported.",
+    "source": "simulated"
+  },
+  {
+    "item_id": "sim_073",
+    "text": "Query latency on our 23-node cluster's dashboard is consistently under a second \u2014 backend_engineer never has to wait.",
+    "source": "simulated"
+  },
+  {
+    "item_id": "sim_013",
+    "text": "sre_devops says PulseStack's flat $41/month team plan is a no-brainer compared to what we were paying per-seat elsewhere.",
+    "source": "simulated"
+  },
+  {
+    "item_id": "sim_032",
+    "text": "We're still missing 7 features we relied on with our previous vendor, and backend_engineer has had to keep a second tool running just for those.",
+    "source": "simulated"
+  },
+  {
+    "item_id": "sim_018",
+    "text": "Performance is fine most days, but founder noticed it slows down noticeably around the 15th concurrent dashboard viewer.",
+    "source": "simulated"
+  },
+  {
+    "item_id": "sim_030",
+    "text": "The low-noise alerting is a real improvement, but sre_devops still gets 34 redundant pages for planned maintenance windows.",
+    "source": "simulated"
+  },
+  {
+    "item_id": "sim_037",
+    "text": "on_call_lead wired up Slack, PagerDuty and our CI in under 6 minutes \u2014 the integration list covers everything we use.",
+    "source": "simulated"
+  },
+  {
+    "item_id": "sim_077",
+    "text": "founder is 40 weeks into migrating off our old vendor and PulseStack's import tool still can't handle our alert-rule format.",
+    "source": "simulated"
+  },
+  {
+    "item_id": "sim_057",
+    "text": "The base plan is fair, but on_call_lead was surprised the extra $27/month add-on for longer retention wasn't mentioned upfront.",
+    "source": "simulated"
+  },
+  {
+    "item_id": "sim_017",
+    "text": "The docs page for the alerting API hasn't been updated in 44 months and still references a deprecated endpoint, which cost sre_devops an afternoon.",
+    "source": "simulated"
+  },
+  {
+    "item_id": "sim_024",
+    "text": "The base plan is fair, but sre_devops was surprised the extra $14/month add-on for longer retention wasn't mentioned upfront.",
+    "source": "simulated"
+  },
+  {
+    "item_id": "sim_078",
+    "text": "PulseStack's onboarding got us to a working dashboard fast, but on_call_lead still had to read the docs for 35 minutes to figure out the alerting setup.",
+    "source": "simulated"
+  },
+  {
+    "item_id": "sim_068",
+    "text": "Our bill jumped by $13 last month with no warning \u2014 backend_engineer is now shopping around for something with predictable pricing.",
+    "source": "simulated"
+  },
+  {
+    "item_id": "sim_025",
+    "text": "38 days of uptime and zero missed incidents \u2014 founder trusts PulseStack more than the tool we migrated from.",
+    "source": "simulated"
+  },
+  {
+    "item_id": "sim_011",
+    "text": "sre_devops is 33 weeks into migrating off our old vendor and PulseStack's import tool still can't handle our alert-rule format.",
+    "source": "simulated"
+  },
+  {
+    "item_id": "sim_044",
+    "text": "on_call_lead is 22 weeks into migrating off our old vendor and PulseStack's import tool still can't handle our alert-rule format.",
+    "source": "simulated"
+  },
+  {
+    "item_id": "sim_020",
+    "text": "It took founder 21 clicks just to filter the dashboard by service, which feels like it should be one step.",
+    "source": "simulated"
+  },
+  {
+    "item_id": "sim_053",
+    "text": "It took sre_devops 11 clicks just to filter the dashboard by service, which feels like it should be one step.",
+    "source": "simulated"
+  },
+  {
+    "item_id": "sim_049",
+    "text": "on_call_lead got a real answer from support in under 38 minutes on a Sunday \u2014 that responsiveness alone would keep us as customers.",
+    "source": "simulated"
+  },
+  {
+    "item_id": "real_appstore_sig_appstore_1391380318_14552720228",
+    "text": "Datadog App Store review (1\u2605): 'Blocks vpn connections'.",
+    "source": "real:app_store"
+  },
+  {
+    "item_id": "real_appstore_sig_appstore_1391380318_14420622538",
+    "text": "Datadog App Store review (1\u2605): 'Terrible native app'.",
+    "source": "real:app_store"
+  },
+  {
+    "item_id": "real_appstore_sig_appstore_1391380318_14147442474",
+    "text": "Datadog App Store review (1\u2605): 'Showing \u201cBad Request\u201d on ever log click'.",
+    "source": "real:app_store"
+  },
+  {
+    "item_id": "real_appstore_sig_appstore_1391380318_14090707160",
+    "text": "Datadog App Store review (1\u2605): 'UI Issues'.",
+    "source": "real:app_store"
+  },
+  {
+    "item_id": "real_appstore_sig_appstore_1391380318_13874877795",
+    "text": "Datadog App Store review (1\u2605): 'App is helpful but links don\u2019t open to the right page so becomes worse than the web'.",
+    "source": "real:app_store"
+  },
+  {
+    "item_id": "real_appstore_sig_appstore_1391380318_12965430645",
+    "text": "Datadog App Store review (5\u2605): 'Useful app'.",
+    "source": "real:app_store"
+  },
+  {
+    "item_id": "real_appstore_sig_appstore_1391380318_12904447613",
+    "text": "Datadog App Store review (1\u2605): 'Poor experience on mobile'.",
+    "source": "real:app_store"
+  },
+  {
+    "item_id": "real_appstore_sig_appstore_1391380318_12808670045",
+    "text": "Datadog App Store review (1\u2605): 'The alarm is giving me a heart attack'.",
+    "source": "real:app_store"
+  },
+  {
+    "item_id": "real_appstore_sig_appstore_1391380318_12797129928",
+    "text": "Datadog App Store review (1\u2605): 'Garbage app'.",
+    "source": "real:app_store"
+  },
+  {
+    "item_id": "real_appstore_sig_appstore_1391380318_12790374676",
+    "text": "Datadog App Store review (1\u2605): 'App and mobile site are basically unusable'.",
+    "source": "real:app_store"
+  },
+  {
+    "item_id": "real_appstore_sig_appstore_1391380318_12323857428",
+    "text": "Datadog App Store review (2\u2605): 'Overall terrible'.",
+    "source": "real:app_store"
+  },
+  {
+    "item_id": "real_appstore_sig_appstore_1391380318_12277792387",
+    "text": "Datadog App Store review (1\u2605): 'Sad'.",
+    "source": "real:app_store"
+  },
+  {
+    "item_id": "real_appstore_sig_appstore_1391380318_11841675087",
+    "text": "Datadog App Store review (1\u2605): 'Crashes after update /won\u2019t launch'.",
+    "source": "real:app_store"
+  },
+  {
+    "item_id": "real_appstore_sig_appstore_1391380318_11751386836",
+    "text": "Datadog App Store review (1\u2605): 'Buggy, impossible to triage an incident on mobile app'.",
+    "source": "real:app_store"
+  },
+  {
+    "item_id": "real_appstore_sig_appstore_1391380318_11495566424",
+    "text": "Datadog App Store review (1\u2605): 'Pointless out of the box'.",
+    "source": "real:app_store"
+  },
+  {
+    "item_id": "real_appstore_sig_appstore_1391380318_11011081461",
+    "text": "Datadog App Store review (1\u2605): 'Widgets don\u2019t work'.",
+    "source": "real:app_store"
+  },
+  {
+    "item_id": "real_appstore_sig_appstore_1391380318_10620911511",
+    "text": "Datadog App Store review (5\u2605): 'Tons of fun!'.",
+    "source": "real:app_store"
+  },
+  {
+    "item_id": "real_appstore_sig_appstore_1391380318_10576622369",
+    "text": "Datadog App Store review (2\u2605): 'Dashboards and monitors are broken'.",
+    "source": "real:app_store"
+  },
+  {
+    "item_id": "real_appstore_sig_appstore_1391380318_10558641206",
+    "text": "Datadog App Store review (1\u2605): 'Needs resources'.",
+    "source": "real:app_store"
+  },
+  {
+    "item_id": "real_appstore_sig_appstore_1391380318_9893971487",
+    "text": "Datadog App Store review (1\u2605): 'missing features from prev versions'.",
+    "source": "real:app_store"
+  }
+]
