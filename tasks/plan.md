@@ -129,15 +129,41 @@ Nothing below "Core entities" can be built with confidence until that box is com
 
 ---
 
-### Phase 2: Day 2 — milestone level (break down at Day 2 morning stand-up)
+### Phase 2: Day 2 (parallel by lane, broken down at Day 2 morning stand-up)
 
-Goal per BUILD_PLAN.md: a full run produces ≥1 gate-passed opportunity, visible in a real inbox, with claims traceable to evidence.
+Goal per BUILD_PLAN.md: a full run produces ≥1 gate-passed opportunity, visible in a real inbox, with claims traceable to evidence. Broken down below now that Day 1's actual contract, collector output and merged frontend state are known.
 
-- [ ] **Lane A:** Feedback/competitor pipeline (normalise → dedupe → redact → spam filter → label → validate → aggregate); Market/Feedback/Competitor agents under the runtime contract (§10.1a), verified `signals[]`-only; Synthesis Agent with mandatory mechanism statement (§9.5); Evidence Check (quote-exists + quote-supports-claim); Quality Gate + Ranker with the rule-based priority table (no composite score); DynamoDB writes for all core entities
-- [ ] **Lane B:** Screen 1 and Screen 3 on real (not fixture) data
-- [ ] **Lane C:** Gold-set labelling (80 simulated + 20 real), both people independently; re-run `/graphify` against the day's codebase before the evening stand-up
+#### Lane A — Backend/Agents
 
-**Re-plan this phase into S/M tasks the morning of Day 2**, once Day 1's actual contract and collector output are known — writing detailed acceptance criteria now, before that's real, would just be guessing.
+**Task 13 — Feedback pipeline: normalise → dedupe → redact → spam filter.** Pure code, no LLM call — takes PulseStack's simulated/uploaded feedback and runs it through the first four §9 pipeline stages. Testable without any Bedrock call, so it lands before Task 14 adds one. *(Medium, depends on Tasks 1, 10)*
+
+**Task 14 — Feedback pipeline: label → validate → aggregate → balance.** Adds the Haiku structured-output labeller against the §9.1 taxonomy (aspect/polarity/intents/segment_hints), span+schema validation with one retry, theme aggregation against the §9.2 thresholds, and the §9.3 sentiment-balance check. Completes the "Feedback Pipeline" component (§10.1 #3). *(Medium, depends on Task 13)*
+
+**Task 15 — Market Agent.** Strands agent (Haiku) over web/HN/GitHub producing claim-level, count/date/source-anchored signals (§9.4) — a generic market claim (e.g. "the market is growing") fails schema validation and is dropped as `rejected_generic_market_claim`, never reaching Synthesis. Bound by the §10.1a runtime contract; output is structurally `signals[]`-only. *(Medium, depends on Tasks 1, 3, 4, 5)*
+
+**Task 16 — Competitor Agent.** Strands agent (Haiku) identifying relevant named competitors and their public signals (web/HN/GitHub P0, App Store/Product Hunt enrichment where available), same runtime contract and `signals[]`-only shape as Task 15. *(Medium, depends on Tasks 1, 3, 4, 11)*
+
+**Task 17 — Synthesis Agent.** Strands agent (Sonnet) combining signals via the §9.3 pattern table into `candidate_opportunities[]`, with a mandatory `opportunity_mechanism` statement (§9.5) and rubric self-critique. The only component allowed to emit opportunities, and only from already-collected signals — never raw research (§10.3). *(Medium, depends on Tasks 14, 15, 16)*
+
+**Task 18 — Evidence Check.** Code, plus one lightweight model call for semantic claim support (§12.1): quote-exists, quote-supports-claim, freshness against the §11.4 per-type limits, contradiction detection. Populates `Evidence.claim_support` and `Evidence.freshness` exactly as shaped in §12. *(Medium, depends on Task 17)*
+
+**Task 19 — Quality Gate + Ranker.** Code implementing all 14 checks across the four §11 stages (truth, relevance — including the computed `evidence_diversity` object, not a single heuristic — commerciality, quality/safety). Derives confidence and priority from the rule table only, never a composite score. Rejected candidates are stored with their reason and failed-gate stage, for "Ideas we rejected" (frontend's `RejectedIdea` — see `frontend/src/lib/viewModels.ts` and today's `LEARNING.md` entry on why that's not a canonical entity yet). *(Medium, depends on Task 18)*
+
+**Task 20 — DynamoDB table design + writes.** Table(s) keyed on the Task 1 prefixes (`BIZ#`, `RUN#`, `OPP#`, etc., §17.2) for every core entity: Business, Run, SourceDocument, Evidence, Claim, Signal, Opportunity, Target, ExecutionPack. *(Medium, depends on Task 1; can start in parallel with Tasks 13–19)*
+
+**Task 21 — Orchestrator wiring.** Step Functions runs Market/Feedback/Competitor in parallel → S3 → Synthesis → Evidence Check → Quality Gate + Ranker → DynamoDB, replacing Task 6's single stub Lambda with the real graph (§17.1). A full run produces at least one gate-passed opportunity end to end — this is the Day 2 goal, made real. *(Large, depends on Tasks 15–20)*
+
+#### Lane B — Frontend/UX
+
+**Task 22 — Screen 1 on real data.** Point `fetchBusiness`/`fetchFeedbackSignals` (`frontend/src/api/client.ts`) at the real API Gateway routes once Task 20/21 exposes real rows; confirm the Live/Cached/Demo Fixture banner reflects what actually happened on that request rather than always reading `demo_fixture`. *(Medium, depends on Task 20 or 21, whichever exposes real business/signal data first)*
+
+**Task 23 — Screen 3 on real data.** Same treatment for `fetchOpportunities`/`fetchClaims`; confirm "Ideas we rejected" renders Task 19's real rejected-candidate output instead of the empty stub (`fetchRejectedIdeas` currently always resolves `[]`), and that the inbox groups/ranks real gate-passed opportunities correctly. *(Medium, depends on Tasks 19, 20/21)*
+
+#### Lane C — Floating
+
+**Task 24 — Gold-set labelling.** 80 simulated feedback items (balanced positive/negative/mixed) + 20 real competitor snippets, labelled independently by both teammates against the §9.1 taxonomy before either sees the other's labels — this is what the §19.2 label-F1 (≥ 0.75 macro) target gets measured against. *(Medium, depends on Task 10 for the simulated half)*
+
+**Task 25 — Re-run `/graphify`.** Against the day's actual codebase, scoped to the project-specific files rather than the whole tree — Day 1's `LEARNING.md` entry already flagged that an unscoped run pulls in the vendored skill library twice over. Run before the evening stand-up. *(XS)*
 
 ### Checkpoint: End of Day 2
 - [ ] A full run produces at least one gate-passed opportunity

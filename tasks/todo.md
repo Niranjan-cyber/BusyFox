@@ -38,11 +38,26 @@ Full detail and rationale for each task: `tasks/plan.md`. Check items off here a
 - [ ] Screens 1 & 3 render fixture data through committed theme
 - [ ] LEARNING.md has a real entry
 
-## Phase 2 — Day 2 (re-break-down at Day 2 morning stand-up)
+## Phase 2 — Day 2
 
-- [ ] Lane A: feedback/competitor pipeline; Market/Feedback/Competitor agents under runtime contract; Synthesis Agent w/ mechanism statement; Evidence Check; Quality Gate + Ranker; DynamoDB writes
-- [ ] Lane B: Screens 1 & 3 on real data
-- [ ] Lane C: gold-set labelling (80 sim + 20 real); re-run `/graphify` before evening stand-up
+### Lane A — Backend/Agents
+- [ ] Task 13: Feedback pipeline — normalise/dedupe/redact/spam filter (code only)
+- [ ] Task 14: Feedback pipeline — label/validate/aggregate/balance (Haiku labeller)
+- [ ] Task 15: Market Agent (Strands, Haiku) → `signals[]`
+- [ ] Task 16: Competitor Agent (Strands, Haiku) → `signals[]`
+- [ ] Task 17: Synthesis Agent (Strands, Sonnet) → `candidate_opportunities[]` w/ mechanism
+- [ ] Task 18: Evidence Check (quote-exists + quote-supports-claim + freshness)
+- [ ] Task 19: Quality Gate + Ranker (14 checks, rule-table priority, no composite score)
+- [ ] Task 20: DynamoDB table design + writes for all core entities
+- [ ] Task 21: Orchestrator wiring — full pipeline end to end
+
+### Lane B — Frontend/UX
+- [ ] Task 22: Screen 1 on real data
+- [ ] Task 23: Screen 3 on real data
+
+### Lane C — Floating
+- [ ] Task 24: Gold-set labelling (80 sim + 20 real, independent)
+- [ ] Task 25: Re-run `/graphify` before evening stand-up
 
 ### Checkpoint: End of Day 2
 - [ ] ≥1 gate-passed opportunity visible in real inbox, claims traceable to evidence
