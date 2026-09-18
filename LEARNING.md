@@ -113,6 +113,9 @@ Kept from Day 1 per the event rules (learning is a scored judging criterion). On
   both: "the task is checked off" and "the thing the task promised is real" can quietly drift
   apart, and the only way to catch it is to go re-verify the artifact, not re-read the checklist.
 
+**Feedback pipeline: normalise/dedupe/redact/spam filter (Task 13)**
+- The locked Task 1 schema has no entity for a raw ticket/survey row — `Evidence` already requires `claim_support`, which can't exist until something has been labelled against a claim. §9's diagram puts normalise/dedupe/redact/spam-filter *before* the labeller, so this stage necessarily operates on a pre-`Evidence` shape the contract never defined. Rather than stretching `Evidence` to cover an unlabelled row (or bending the pipeline to consume the simulator's already-labelled `Signal` output, which would skip the stages this task exists to build), added a small `RawFeedbackItem` local to `backend/pipeline/` — deliberately not promoted into `backend/schemas/entities.py`, since it's scaffolding between ingestion and Task 14, not one of the nine contract entities.
+
 ## Day 3 — Sept 19, 2026
 
 *(Not yet written.)*

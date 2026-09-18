@@ -41,7 +41,7 @@ Full detail and rationale for each task: `tasks/plan.md`. Check items off here a
 ## Phase 2 — Day 2
 
 ### Lane A — Backend/Agents
-- [ ] Task 13: Feedback pipeline — normalise/dedupe/redact/spam filter (code only)
+- [x] Task 13: Feedback pipeline — normalise/dedupe/redact/spam filter (code only)
 - [ ] Task 14: Feedback pipeline — label/validate/aggregate/balance (Haiku labeller)
 - [ ] Task 15: Market Agent (Strands, Haiku) → `signals[]`
 - [ ] Task 16: Competitor Agent (Strands, Haiku) → `signals[]`
