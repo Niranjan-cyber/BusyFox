@@ -21,6 +21,7 @@ a real competitor) can't be violated structurally.
 
 from __future__ import annotations
 
+import os
 from dataclasses import dataclass
 from typing import Callable, NamedTuple
 
@@ -39,7 +40,8 @@ from backend.schemas.entities import (
 from strands.hooks import BeforeModelCallEvent, BeforeToolCallEvent
 
 _COMPONENT = "competitor_agent"
-_MODEL_ID = "anthropic.claude-haiku-4-5-20251001-v1:0"
+# See market_agent.py's identical env override.
+_MODEL_ID = os.environ.get("COMPETITOR_AGENT_MODEL_ID", "anthropic.claude-haiku-4-5-20251001-v1:0")
 
 # §7 S1-S3 (P0) plus S4-S5 (P1 enrichment) — never SIMULATED (§18.1/gate check 10).
 _ALLOWED_SOURCE_KINDS = frozenset(

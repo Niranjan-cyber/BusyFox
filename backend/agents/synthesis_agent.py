@@ -23,6 +23,7 @@ not an arbitrary placeholder, so Task 19 overwrites rather than invents.
 
 from __future__ import annotations
 
+import os
 from dataclasses import dataclass
 from typing import Callable, NamedTuple
 
@@ -61,7 +62,8 @@ _COMPONENT = "synthesis_agent"
 # catalog and was never caught since this path is only smoke-tested —
 # `aws bedrock list-foundation-models` confirms the real id has no date/
 # version suffix.
-_MODEL_ID = "anthropic.claude-sonnet-4-6"
+# See market_agent.py's identical env override.
+_MODEL_ID = os.environ.get("SYNTHESIS_AGENT_MODEL_ID", "anthropic.claude-sonnet-4-6")
 
 _KNOWN_TYPES = frozenset(t.value for t in OpportunityType)
 

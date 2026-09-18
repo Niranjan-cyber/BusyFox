@@ -12,6 +12,7 @@ network/credential-dependent and only smoke-tested here, same as
 
 from __future__ import annotations
 
+import os
 import time
 from dataclasses import dataclass, field
 from typing import Callable, NamedTuple
@@ -34,7 +35,9 @@ from backend.schemas.entities import (
 from strands.hooks import BeforeModelCallEvent, BeforeToolCallEvent
 
 _COMPONENT = "market_agent"
-_MODEL_ID = "anthropic.claude-haiku-4-5-20251001-v1:0"
+# MARKET_AGENT_MODEL_ID lets this be swapped (e.g. to a Nova model) without a
+# code change while Claude model access is pending on this AWS account.
+_MODEL_ID = os.environ.get("MARKET_AGENT_MODEL_ID", "anthropic.claude-haiku-4-5-20251001-v1:0")
 
 # §9.4 — tool sources this agent is allowed to draw claims from.
 _ALLOWED_SOURCE_KINDS = frozenset({SourceKind.WEB_PUBLIC, SourceKind.HN, SourceKind.GITHUB})

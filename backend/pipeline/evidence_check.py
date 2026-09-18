@@ -19,6 +19,7 @@ this produces to run its 14 checks; it does not belong here.
 
 from __future__ import annotations
 
+import os
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Callable, NamedTuple, Optional
@@ -39,7 +40,8 @@ from backend.schemas.entities import (
     SourceKind,
 )
 
-_MODEL_ID = "anthropic.claude-haiku-4-5-20251001-v1:0"
+# See backend/agents/market_agent.py's identical env override.
+_MODEL_ID = os.environ.get("EVIDENCE_CHECK_MODEL_ID", "anthropic.claude-haiku-4-5-20251001-v1:0")
 _TOOL_NAME = "emit_claim_support"
 
 # §11.4's table is a small set of semantic categories, not a field Signal
