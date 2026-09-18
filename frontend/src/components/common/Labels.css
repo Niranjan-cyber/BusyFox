@@ -1,0 +1,51 @@
+.label {
+    display: inline-block;
+    font-size: var(--text-micro);
+    line-height: var(--leading-micro);
+    font-weight: var(--weight-semibold);
+    letter-spacing: 0.04em;
+    padding: var(--space-1) var(--space-2);
+    border-radius: var(--radius-chip);
+    white-space: nowrap;
+}
+
+/* Claim labels (§13.3): solid, outlined, dashed — three border treatments, one hue.
+   Text uses --text-secondary-on-bg rather than --muted: these labels render on --bg inside
+   ServedBanner as well as on --surface, and --muted clears 4.5:1 only on --surface. */
+.label-observed {
+    background: var(--slate);
+    color: var(--on-slate);
+    border: 1px solid var(--slate);
+}
+
+.label-inferred {
+    background: transparent;
+    color: var(--text-secondary-on-bg);
+    border: 1px solid var(--border-strong);
+}
+
+.label-assumed {
+    background: transparent;
+    color: var(--text-secondary-on-bg);
+    border: 1px dashed var(--border-strong);
+}
+
+/* Source labels (§7.2): the same escalation read downwards — live is the strongest
+   statement the product can make, demo fixture the weakest, and the border says so. */
+.label-live {
+    background: var(--accent);
+    color: var(--on-accent);
+    border: 1px solid var(--accent);
+}
+
+.label-cached {
+    background: transparent;
+    color: var(--text-secondary-on-bg);
+    border: 1px solid var(--accent);
+}
+
+.label-demo_fixture {
+    background: transparent;
+    color: var(--text-secondary-on-bg);
+    border: 1px dashed var(--border-strong);
+}

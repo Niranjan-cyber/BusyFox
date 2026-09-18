@@ -1,0 +1,88 @@
+.polarity {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.polarity-bar {
+    display: flex;
+    height: 3rem;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-bar);
+    overflow: hidden;
+}
+
+.polarity-positive,
+.polarity-negative {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    padding: 0 var(--space-2);
+    overflow: hidden;
+}
+
+.polarity-positive {
+    background: var(--accent);
+    color: var(--on-accent);
+}
+
+/* The complaint side is a hatch over the page background rather than a solid fill: it reads
+   as distinct from the praise side in greyscale, and keeps the one solid accent fill on the
+   bar meaningful. */
+.polarity-negative {
+    background: repeating-linear-gradient(135deg,
+            var(--bg),
+            var(--bg) 5px,
+            var(--surface) 5px,
+            var(--surface) 10px);
+    color: var(--text-primary);
+    justify-content: flex-end;
+    border-left: 1px solid var(--border-strong);
+}
+
+.polarity-figure {
+    font-size: var(--text-small);
+    font-weight: var(--weight-semibold);
+}
+
+.polarity-caption {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-4);
+    font-size: var(--text-small);
+    color: var(--text-secondary-on-bg);
+}
+
+.polarity-caption span {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.polarity-key {
+    width: 0.75rem;
+    height: 0.75rem;
+    border: 1px solid var(--border-strong);
+}
+
+.polarity-key-positive {
+    background: var(--accent);
+}
+
+.polarity-key-negative {
+    background: repeating-linear-gradient(135deg,
+            var(--bg),
+            var(--bg) 3px,
+            var(--surface) 3px,
+            var(--surface) 6px);
+}
+
+.polarity-total {
+    margin-left: auto;
+}
+
+.polarity-empty {
+    color: var(--text-secondary-on-bg);
+    font-size: var(--text-small);
+}

@@ -1,0 +1,79 @@
+.goal-bar {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    background: var(--slate);
+    color: var(--on-slate);
+    border-radius: var(--radius-card);
+    padding: var(--space-4);
+}
+
+.goal-bar h2 {
+    color: var(--on-slate);
+    font-size: var(--text-title);
+}
+
+.goal-bar-head {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.goal-bar-identified {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+    color: var(--accent-on-dark);
+    font-size: var(--text-heading);
+    font-weight: var(--weight-semibold);
+}
+
+/* The ASSUMED label sits on a dark surface here, so it needs the dark-surface treatment
+   rather than the light-background one it carries elsewhere. */
+.goal-bar-identified .label-assumed {
+    color: var(--on-slate);
+    border-color: var(--muted);
+}
+
+.goal-track {
+    position: relative;
+    height: 1.5rem;
+    background: transparent;
+    border: 1px solid var(--muted);
+    border-radius: var(--radius-bar);
+    overflow: hidden;
+}
+
+/* Two stacked fills: the high end as a hatch, the low end solid on top of it. The gap
+   between them is the uncertainty, drawn rather than averaged away. */
+.goal-fill-high {
+    position: absolute;
+    inset-block: 0;
+    left: 0;
+    background: repeating-linear-gradient(135deg,
+            transparent,
+            transparent 5px,
+            var(--muted) 5px,
+            var(--muted) 10px);
+}
+
+.goal-fill-low {
+    position: absolute;
+    inset-block: 0;
+    left: 0;
+    background: var(--accent);
+}
+
+.goal-bar-note {
+    font-size: var(--text-micro);
+    color: var(--bg);
+    opacity: 0.85;
+    max-width: var(--measure);
+}
+
+@media (min-width: 48rem) {
+    .goal-bar {
+        padding: var(--space-6);
+    }
+}

@@ -1,0 +1,113 @@
+/* Three readings, three shapes. See the note at the top of Metrics.tsx. */
+
+/* 1 — Priority: a chip. Filled for the ranked tiers, outlined for Blocked, because
+   Blocked is not a rank at all (§13.1) and should not read as one. */
+.priority {
+    display: inline-block;
+    font-size: var(--text-micro);
+    line-height: var(--leading-micro);
+    font-weight: var(--weight-semibold);
+    letter-spacing: 0.02em;
+    padding: var(--space-1) var(--space-2);
+    border-radius: var(--radius-chip);
+    white-space: nowrap;
+}
+
+.priority-high {
+    background: var(--accent);
+    color: var(--on-accent);
+    border: 1px solid var(--accent);
+}
+
+.priority-medium {
+    background: transparent;
+    color: var(--text-primary);
+    border: 1px solid var(--border-strong);
+}
+
+.priority-low {
+    background: transparent;
+    color: var(--text-secondary);
+    border: 1px dashed var(--border-strong);
+}
+
+.priority-blocked {
+    background: transparent;
+    color: var(--warning);
+    border: 1px solid var(--warning);
+}
+
+/* 2 — Evidence confidence: a stepped meter. */
+.confidence {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--text-small);
+}
+
+.confidence-label {
+    color: var(--text-secondary);
+}
+
+.confidence-value {
+    font-weight: var(--weight-semibold);
+    color: var(--text-primary);
+}
+
+.confidence-steps {
+    display: inline-flex;
+    gap: 3px;
+}
+
+.step {
+    width: 0.75rem;
+    height: 0.375rem;
+    border: 1px solid var(--border-strong);
+    background: transparent;
+}
+
+.step-on {
+    background: var(--slate);
+}
+
+/* 3 — Potential value: a figure plus its arithmetic, never a bar that invites comparison
+   against the other two readings. */
+.value-headline {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+}
+
+.value-amount {
+    font-size: var(--text-heading);
+    font-weight: var(--weight-semibold);
+}
+
+.value-details {
+    margin-top: var(--space-2);
+    font-size: var(--text-small);
+    color: var(--text-secondary);
+}
+
+.value-details summary {
+    cursor: pointer;
+    color: var(--text-primary);
+    font-weight: var(--weight-medium);
+}
+
+.value-details ul {
+    margin: var(--space-2) 0 0;
+    padding-left: var(--space-4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+}
+
+.value-arithmetic {
+    margin-top: var(--space-2);
+    padding-top: var(--space-2);
+    border-top: 1px solid var(--border);
+    font-size: var(--text-micro);
+    line-height: var(--leading-small);
+}

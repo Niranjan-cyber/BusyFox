@@ -1,0 +1,23 @@
+# Amplify Hosting build spec — Lane B, todo.md Task 7.
+# Gate order follows the quality-gate pipeline: lint -> typecheck -> build.
+# `npm run build` is `tsc -b && vite build`, so the typecheck gate is inside it
+# rather than duplicated as its own command.
+version: 1
+applications:
+  - appRoot: frontend
+    frontend:
+      phases:
+        preBuild:
+          commands:
+            - npm ci
+        build:
+          commands:
+            - npm run lint
+            - npm run build
+      artifacts:
+        baseDirectory: dist
+        files:
+          - '**/*'
+      cache:
+        paths:
+          - node_modules/**/*
