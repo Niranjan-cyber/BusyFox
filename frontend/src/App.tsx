@@ -3,6 +3,7 @@ import { SCREENS } from './components/layout/screens'
 import { useHashRoute } from './lib/useHashRoute'
 import { BusinessScreen } from './screens/Business/BusinessScreen'
 import { InboxScreen } from './screens/Inbox/InboxScreen'
+import { InvestigationScreen } from './screens/Investigation/InvestigationScreen'
 import { TokensScreen } from './screens/Tokens/TokensScreen'
 
 /**
@@ -23,11 +24,13 @@ function UnavailableScreen({ route }: { route: string }) {
       <h1>{known ? known.label : 'No such screen'}</h1>
       <p>
         {known
-          ? 'This screen lands on day 3. Screens 1 and 3 are built.'
+          ? 'This screen lands later on day 3. Screens 1, 2 and 3 are built.'
           : `There is no screen at #/${route}.`}
       </p>
       <p>
-        <a href="#/business">Business & feedback</a> · <a href="#/inbox">Opportunity inbox</a>
+        <a href="#/business">Business & feedback</a> ·{' '}
+        <a href="#/investigation">Live investigation</a> ·{' '}
+        <a href="#/inbox">Opportunity inbox</a>
       </p>
     </>
   )
@@ -41,8 +44,11 @@ function App() {
   return (
     <AppShell route={route}>
       {route === 'business' ? <BusinessScreen businessId={BUSINESS_ID} /> : null}
+      {route === 'investigation' ? <InvestigationScreen businessId={BUSINESS_ID} /> : null}
       {route === 'inbox' ? <InboxScreen businessId={BUSINESS_ID} /> : null}
-      {route !== 'business' && route !== 'inbox' ? <UnavailableScreen route={route} /> : null}
+      {route !== 'business' && route !== 'investigation' && route !== 'inbox' ? (
+        <UnavailableScreen route={route} />
+      ) : null}
     </AppShell>
   )
 }

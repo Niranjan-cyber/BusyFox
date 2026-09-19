@@ -8,6 +8,8 @@ import { PolaritySplitBar } from '../components/polarity/PolaritySplitBar'
 import { EmptyState, ErrorState, LoadingState, ServedBanner } from '../components/common/ScreenState'
 import { claims, opportunities, rejectedIdeas } from '../fixtures/opportunities'
 import { feedbackSummary } from '../fixtures/business'
+import { investigationSignals } from '../fixtures/investigation'
+import { signalLane } from '../lib/viewModels'
 import type { Served } from '../api/client'
 
 /**
@@ -196,6 +198,17 @@ describe('screen states', () => {
   it('makes an empty screen an invitation rather than a shrug', () => {
     const html = renderToStaticMarkup(<EmptyState>Run an investigation.</EmptyState>)
     expect(html).toContain('Run an investigation.')
+  })
+})
+
+describe('signalLane', () => {
+  it('sorts every fixture signal into exactly one of the three §16.1 lanes', () => {
+    for (const signal of investigationSignals) {
+      expect(['market', 'feedback', 'competitive']).toContain(signalLane(signal))
+    }
+    const lanes = new Set(investigationSignals.map(signalLane))
+    // The fixture set deliberately covers all three so screen 2 never renders an empty column.
+    expect(lanes).toEqual(new Set(['market', 'feedback', 'competitive']))
   })
 })
 

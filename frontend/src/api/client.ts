@@ -1,4 +1,5 @@
 import { business, feedbackSignals } from '../fixtures/business'
+import { investigationSignals } from '../fixtures/investigation'
 import { claims, opportunities, rejectedIdeas } from '../fixtures/opportunities'
 import type { Business, Claim, Opportunity, RetrievalMode, Signal } from '../types/entities'
 import type { RejectedIdea, ServedMode } from '../lib/viewModels'
@@ -134,6 +135,12 @@ export function fetchBusiness(businessId: string): Promise<Served<Business>> {
     shape; grouping into themes happens client-side (see lib/viewModels.ts). */
 export function fetchFeedbackSignals(businessId: string): Promise<Served<Signal[]>> {
   return servedOrFixture(`/businesses/${businessId}/feedback-summary`, feedbackSignals)
+}
+
+/** docs/contract.md — Task 30's screen-2 route, unfiltered `Signal[]`; the frontend groups
+    into Market/Feedback/Competitive lanes itself (`lib/viewModels.ts::signalLane`). */
+export function fetchSignals(businessId: string): Promise<Served<Signal[]>> {
+  return servedOrFixture(`/businesses/${businessId}/signals`, investigationSignals)
 }
 
 export function fetchOpportunities(businessId: string): Promise<Served<Opportunity[]>> {

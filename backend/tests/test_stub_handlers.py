@@ -15,7 +15,7 @@ import json
 import pytest
 
 from backend.db.dynamo import put_entity
-from backend.fixtures.fixtures import BUSINESS, CLAIMS, COMPETITOR_SENTRY, EVIDENCE_ALERT_NOISE, OPPORTUNITY, REJECTED_IDEAS
+from backend.fixtures.fixtures import BUSINESS, CLAIMS, COMPETITOR_SENTRY, EVIDENCE_ALERT_NOISE, OPPORTUNITY, REJECTED_IDEAS, SIGNALS
 from backend.handlers import businesses_stub, claims_stub, competitors_stub, opportunities_stub
 from backend.schemas.entities import (
     Business,
@@ -51,6 +51,22 @@ def test_get_business_feedback_summary_returns_signals():
     assert len(body) > 0
     for item in body:
         Signal.model_validate(item)
+
+
+def test_list_signals_returns_task1_shaped_payload():
+    response = businesses_stub.list_signals(_event(id="biz_pulsestack"), None)
+    body = _body(response)
+    assert len(body) > 0
+    for item in body:
+        Signal.model_validate(item)
+
+
+def test_list_signals_is_not_filtered_by_producer():
+    """Unlike get_feedback_summary, screen 2 needs every lane — the frontend
+    groups by produced_by itself (lib/viewModels.ts::signalLane)."""
+    response = businesses_stub.list_signals(_event(id="biz_pulsestack"), None)
+    body = _body(response)
+    assert {item["produced_by"] for item in body} == {s.produced_by for s in SIGNALS}
 
 
 def test_list_opportunities_returns_task1_shaped_payload():
@@ -191,6 +207,16 @@ def test_list_claims_prefers_real_dynamo_rows_when_running_in_lambda(monkeypatch
     assert len(body) == len(CLAIMS)
 
 
+def test_list_signals_prefers_real_dynamo_rows_when_running_in_lambda(monkeypatch):
+    biz_key = f"{DynamoKeyPrefix.BUSINESS.value}{BUSINESS.id}"
+    table = _fake_table_with((BUSINESS, None), (SIGNALS[0], biz_key))
+    monkeypatch.setenv("AWS_LAMBDA_FUNCTION_NAME", "test")
+    monkeypatch.setattr("backend.db.dynamo.get_table", lambda: table)
+
+    body = _body(businesses_stub.list_signals(_event(id="biz_pulsestack"), None))
+    assert [Signal.model_validate(item).id for item in body] == [SIGNALS[0].id]
+
+
 def test_unknown_id_still_404s_when_running_in_lambda_with_empty_table(monkeypatch):
     monkeypatch.setenv("AWS_LAMBDA_FUNCTION_NAME", "test")
     monkeypatch.setattr("backend.db.dynamo.get_table", lambda: _FakeTable())
@@ -208,6 +234,7 @@ def test_unknown_id_still_404s_when_running_in_lambda_with_empty_table(monkeypat
 
 def test_fixture_served_responses_are_labelled_demo_fixture():
     assert businesses_stub.get_business(_event(id="biz_pulsestack"), None)["headers"]["X-Retrieval-Mode"] == "demo_fixture"
+    assert businesses_stub.list_signals(_event(id="biz_pulsestack"), None)["headers"]["X-Retrieval-Mode"] == "demo_fixture"
     assert opportunities_stub.get_opportunity(_event(id="opp_001"), None)["headers"]["X-Retrieval-Mode"] == "demo_fixture"
     assert claims_stub.list_claims(_event(id="opp_001"), None)["headers"]["X-Retrieval-Mode"] == "demo_fixture"
     assert competitors_stub.list_competitors(_event(), None)["headers"]["X-Retrieval-Mode"] == "demo_fixture"

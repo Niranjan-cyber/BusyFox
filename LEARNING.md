@@ -394,6 +394,22 @@ Kept from Day 1 per the event rules (learning is a scored judging criterion). On
   HTTP timeout is 10s, so the function needed 20s. Any handler whose fallback runs *after* a slow
   external call needs a timeout longer than that call, or the fallback never gets to run.
 
+- Task 30 (Screen 2): `docs/contract.md`'s Task-2-era note excluding Screen 2 from the API table
+  ("streaming, not a simple REST shape, Day 2 work") had gone stale — by Day 3 the pipeline
+  persists Signal rows per business already (Task 20/21), so the real gap was just a missing
+  *route*, not missing data. Closed it the same way Tasks 22/23 closed their gaps: one more
+  DynamoDB-first/fixture-fallback handler (`GET /businesses/{id}/signals`, unfiltered), not a new
+  mechanism. Cheaper to notice a stale exclusion note than to build the websocket the old note
+  implied was necessary.
+- Reused `feedbackSignals` (the Task 8/9 fixture that expands each theme into one entry per
+  mention count, for §1's polarity totals) as the Feedback lane's fixture data and only caught the
+  bug by actually loading the screen in a browser: 170 near-duplicate cards, not signals arriving.
+  Component tests (`toEqual(investigationSignals)`) couldn't have caught this — they'd pass either
+  way, since they only check the client returns whatever the fixture array contains. A fixture
+  shaped for one screen's aggregate math isn't automatically right for another screen's per-item
+  list; the type checker and unit tests agreed it was fine, and it wasn't. Fixed by deduping to one
+  representative signal per theme before rendering.
+
 ## Day 4 — Sept 20, 2026
 
 *(Not yet written.)*

@@ -91,6 +91,34 @@ export interface FeedbackSummary {
 /** Groups feedback signals by aspect + polarity. One signal's `claim_text` stands in as both
     the theme summary and the representative quote — nothing here is written that isn't
     already on a Signal. */
+/** §16.1 screen 2's three research lanes. */
+export type ResearchLane = 'market' | 'feedback' | 'competitive'
+
+export const RESEARCH_LANES: ResearchLane[] = ['market', 'feedback', 'competitive']
+
+export const LANE_LABEL: Record<ResearchLane, string> = {
+  market: 'Market',
+  feedback: 'Feedback',
+  competitive: 'Competitive',
+}
+
+const FEEDBACK_PRODUCERS = new Set([
+  'feedback_pipeline',
+  'feedback_pipeline_agent',
+  'feedback_pipeline_labeller',
+  'pulsestack_simulator',
+])
+const COMPETITIVE_PRODUCERS = new Set(['competitor_agent'])
+
+/** A signal's `produced_by` (§14.7) names the agent that emitted it; every research agent
+    belongs to exactly one lane. Anything not named above (`market_agent`, and any future
+    market-lane producer) defaults to Market rather than getting dropped from the screen. */
+export function signalLane(signal: Pick<Signal, 'produced_by'>): ResearchLane {
+  if (FEEDBACK_PRODUCERS.has(signal.produced_by)) return 'feedback'
+  if (COMPETITIVE_PRODUCERS.has(signal.produced_by)) return 'competitive'
+  return 'market'
+}
+
 export function summariseFeedback(signals: Signal[]): FeedbackSummary {
   const byTheme = new Map<string, Signal[]>()
   for (const signal of signals) {

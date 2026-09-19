@@ -8,7 +8,7 @@ export interface ScreenRoute {
 
 export const SCREENS: ScreenRoute[] = [
   { path: 'business', label: 'Business & feedback', available: true },
-  { path: 'investigation', label: 'Live investigation', available: false },
+  { path: 'investigation', label: 'Live investigation', available: true },
   { path: 'inbox', label: 'Opportunity inbox', available: true },
   { path: 'opportunity', label: 'Opportunity detail', available: false },
   { path: 'execution', label: 'Execution pack', available: false },

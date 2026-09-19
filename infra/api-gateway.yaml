@@ -148,6 +148,21 @@ Resources:
             Path: /businesses/{id}/feedback-summary
             Method: GET
 
+  ListBusinessSignals:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: backend.handlers.businesses_stub.list_signals
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref OpportunityEngineTable
+      Events:
+        Api:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref OpportunityEngineApi
+            Path: /businesses/{id}/signals
+            Method: GET
+
   ListOpportunities:
     Type: AWS::Serverless::Function
     Properties:

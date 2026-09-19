@@ -60,6 +60,7 @@ five are the gap PRD §15 leaves implicit for screens 1, 3, 4, 5 (flagged in
 |---|---|---|---|---|---|
 | GET | `/businesses/{id}` | Business profile: name, capability chips, ICP, goal | 1 | `Business` | implied |
 | GET | `/businesses/{id}/feedback-summary` | "What customers love / complain about" — signals from the business's own feedback, by polarity | 1 | `Signal[]` | implied |
+| GET | `/businesses/{id}/signals` | Every signal any research lane has produced this run, unfiltered — screen 2 groups into Market/Feedback/Competitive lanes client-side (`lib/viewModels.ts::signalLane`) | 2 | `Signal[]` | Task 30 |
 | GET | `/businesses/{id}/opportunities` | Opportunity Inbox list (goal bar + cards by type + rejected ideas) | 3 | `Opportunity[]` | implied |
 | GET | `/opportunities/{id}` | Opportunity detail: mechanism, strengths, pains, competitive context, evidence diversity, confidence, priority, value | 4 | `Opportunity` | implied |
 | GET | `/opportunities/{id}/claims` | List an opportunity's Claims, each with `evidence_ids` | 4 | `Claim[]` | §15 |
@@ -68,9 +69,12 @@ five are the gap PRD §15 leaves implicit for screens 1, 3, 4, 5 (flagged in
 | GET | `/competitors` | Named competitors + sentiment summaries | — | `Competitor[]` | §15 |
 | GET | `/competitors/{id}/evidence/{evidenceId}/live` | Re-fetch/re-verify a competitor quote; falls back Live → Cached → Demo Fixture (§7.2/§12.2) | 4 (evidence drawer) | `Evidence` | §15 |
 
-Screen 2 (Live investigation) is intentionally excluded — it's a streaming
-view over Run/Signal events, not a simple REST list/detail shape, and is
-Day 2 pipeline work, not part of Task 2's stub contract.
+Screen 2 (Live investigation) was intentionally excluded from Task 2's stub
+contract — at that point there was no pipeline yet to have signals to show.
+Task 30 closes the gap with a polling read over `/businesses/{id}/signals`
+(added above) rather than a real event stream: PRD §16.1's acceptance
+criteria explicitly allow polling for a hackathon-scale demo, and every
+other Signal-shaped route already served fine as a bare list.
 
 ### Gaps found wiring the frontend to this table (Tasks 22–23)
 

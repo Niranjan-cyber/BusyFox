@@ -6,10 +6,12 @@ import {
   fetchInbox,
   fetchOpportunities,
   fetchRejectedIdeas,
+  fetchSignals,
   weakestMode,
 } from './client'
 import type { Served } from './client'
 import { business, feedbackSignals } from '../fixtures/business'
+import { investigationSignals } from '../fixtures/investigation'
 import { claims, opportunities, rejectedIdeas } from '../fixtures/opportunities'
 
 /**
@@ -65,7 +67,35 @@ describe('with no VITE_API_BASE_URL configured', () => {
     expect(rejected.data).toEqual(rejectedIdeas)
     expect(rejected.retrieval_mode).toBe('demo_fixture')
 
+    const signals = await fetchSignals('biz_pulsestack')
+    expect(signals.data).toEqual(investigationSignals)
+    expect(signals.retrieval_mode).toBe('demo_fixture')
+
     expect(calls).toEqual([])
+  })
+})
+
+describe('signals for the live investigation screen', () => {
+  it('calls the contract route and reports the declared retrieval mode', async () => {
+    vi.stubEnv('VITE_API_BASE_URL', BASE)
+    const calls = stubFetch(() => jsonResponse([], { 'X-Retrieval-Mode': 'live' }))
+
+    const signals = await fetchSignals('biz_pulsestack')
+
+    expect(calls).toEqual([`${BASE}/businesses/biz_pulsestack/signals`])
+    expect(signals.data).toEqual([])
+    expect(signals.retrieval_mode).toBe('live')
+  })
+
+  it('falls back to the committed fixture, labelled, when the endpoint fails', async () => {
+    vi.stubEnv('VITE_API_BASE_URL', BASE)
+    stubFetch(() => new Response('{}', { status: 500 }))
+
+    const signals = await fetchSignals('biz_pulsestack')
+
+    expect(signals.data).toEqual(investigationSignals)
+    expect(signals.retrieval_mode).toBe('demo_fixture')
+    expect(signals.fallback_reason).toContain('500')
   })
 })
 

@@ -128,7 +128,16 @@ Full detail for every task below: `tasks/plan.md`, Phase 3.
 - [ ] Task 29: Evaluation run vs. gold set — **blocked on Task 24 (deferred)**, do not start
 
 ### Lane B — Frontend/UX
-- [ ] Task 30: Screen 2 — Live investigation (3 streaming research lanes)
+- [x] Task 30: Screen 2 — Live investigation (3 streaming research lanes) — closed the
+  contract.md gap Task 2 left open (Screen 2 had no endpoint): added
+  `GET /businesses/{id}/signals` (unfiltered `Signal[]`, same DynamoDB-first/fixture-fallback
+  pattern as every other handler) plus its SAM route. Frontend polls it every 4s
+  (`InvestigationScreen.tsx`, no websockets — acceptance criteria allow polling) and groups by
+  lane via `lib/viewModels.ts::signalLane` (`produced_by` → Market/Feedback/Competitive). Each
+  signal card carries its own `SourceLabel`, not just the screen banner. Manually verified in a
+  browser (Playwright): 3 lanes render, no console errors, nav/labels correct. 9 new backend
+  tests, 3 new frontend tests (client + lane classification), all passing (202 backend / 122
+  frontend). See `LEARNING.md`, Day 3.
 - [ ] Task 31: Screen 4 — Opportunity detail + live Evidence Check diagram (§21's named
   best differentiator — real design attention, not a placeholder chart)
 - [ ] Task 32: Screen 5 — Execution pack (can build against fixture first, re-point at

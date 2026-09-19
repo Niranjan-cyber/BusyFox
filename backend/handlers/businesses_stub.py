@@ -40,3 +40,22 @@ def get_feedback_summary(event: dict, context: object) -> dict:
     if business_id != BUSINESS.id:
         return ok([], retrieval_mode=RetrievalMode.LIVE)
     return ok([s for s in SIGNALS if s.produced_by == "feedback_pipeline"], retrieval_mode=RetrievalMode.DEMO_FIXTURE)
+
+
+def list_signals(event: dict, context: object) -> dict:
+    """GET /businesses/{id}/signals — every signal any research lane
+    (Market/Feedback/Competitive) has produced this run, for screen 2's live
+    investigation view (§16.1). Unlike `get_feedback_summary`, no
+    `produced_by` filter: the frontend groups signals into lanes itself
+    (`lib/viewModels.ts::signalLane`)."""
+    business_id = path_param(event, "id")
+    business = dynamo_get(DynamoKeyPrefix.BUSINESS, business_id, Business)
+    if business is None and business_id != BUSINESS.id:
+        return not_found(f"no business with id {business_id!r}")
+
+    signals = dynamo_children(f"{DynamoKeyPrefix.BUSINESS.value}{business_id}", DynamoKeyPrefix.SIGNAL, Signal)
+    if signals:
+        return ok(signals, retrieval_mode=RetrievalMode.LIVE)
+    if business_id != BUSINESS.id:
+        return ok([], retrieval_mode=RetrievalMode.LIVE)
+    return ok(SIGNALS, retrieval_mode=RetrievalMode.DEMO_FIXTURE)
