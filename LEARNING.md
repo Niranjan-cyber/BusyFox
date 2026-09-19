@@ -410,6 +410,29 @@ Kept from Day 1 per the event rules (learning is a scored judging criterion). On
   list; the type checker and unit tests agreed it was fine, and it wasn't. Fixed by deduping to one
   representative signal per theme before rendering.
 
+- Task 31 (Screen 4): Evidence has no `quote_exists` boolean of its own — quote-exists is a
+  check `backend/pipeline/evidence_check.py::build_evidence` runs *before* ever calling the
+  semantic-support model, and when it fails, the only trace left in the response is the exact
+  literal string `"quote not found in source text"` in `claim_support.reason`. The frontend has
+  to string-match that exact reason to tell "missing citation" apart from "quote exists but
+  doesn't support the claim" — two outcomes §21's demo beat both needs. Documented the coupling
+  in `lib/viewModels.ts::evidenceCheckResult` rather than hiding it, since a backend wording
+  change would silently break the diagram's rejection labelling with no type error to catch it.
+- Backend's own demo fixture (`backend/fixtures/fixtures.py::EVIDENCE_BY_ID`) has zero reject
+  examples — every evidence item there is `status: supports`. §21's signature diagram beat
+  (accept + two distinct reject shapes) can't actually be demoed off that fixture alone. Didn't
+  touch Lane A's file for this; added both reject shapes to the *frontend's own* fixture set
+  instead (`frontend/src/fixtures/evidence.ts`), which is enough to prove the diagram's logic
+  end-to-end and to demo it with no backend configured. Someone still needs to add a real reject
+  example to the backend fixture (or get one from a live run) before the actual recorded demo,
+  since a judge asking to see it against the live API today would only see accepts and
+  `rejected_unsupported` — worth flagging before §21 shot-list recording (Task 34).
+- Verified the diagram against the real deployed API's `opp_run_7f023794a99d_0`, not just
+  fixtures: every one of its evidence items comes back `rejected_unsupported` (quote exists,
+  semantic check says no) — consistent with Task 26's note that this run has zero verified
+  strengths. A live run that fails Evidence Check cleanly is itself a useful thing to have
+  actually seen happen, not just unit-tested.
+
 ## Day 4 — Sept 20, 2026
 
 *(Not yet written.)*

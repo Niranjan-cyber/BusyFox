@@ -1,0 +1,146 @@
+.evidence-check-diagram {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+}
+
+.evidence-check-claim-head {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+    margin-bottom: var(--space-1);
+}
+
+.claim-status-tag {
+    font-size: var(--text-micro);
+    color: var(--text-secondary);
+    text-transform: capitalize;
+}
+
+.claim-status-unsupported {
+    color: var(--negative);
+}
+
+.evidence-check-list {
+    list-style: none;
+    margin: var(--space-3) 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+.evidence-check-row {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--border-strong);
+    border-radius: var(--radius-card);
+    padding: var(--space-3);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    /* The "replay" moment: each row's checks reveal in the order Evidence Check actually runs
+       them, not all at once. Pure CSS — no timers, no animation library. */
+    animation: evidence-check-reveal 240ms ease-out both;
+}
+
+@keyframes evidence-check-reveal {
+    from {
+        opacity: 0;
+        transform: translateY(2px);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+.evidence-check-accepted {
+    border-left-color: var(--positive);
+}
+
+.evidence-check-rejected_missing_citation,
+.evidence-check-rejected_unsupported {
+    border-left-color: var(--negative);
+}
+
+.evidence-check-quote {
+    margin: 0;
+    font-size: var(--text-small);
+    font-style: italic;
+    color: var(--text-primary);
+}
+
+.evidence-check-source {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--text-micro);
+}
+
+.evidence-check-steps {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    font-size: var(--text-micro);
+    /* Each step reveals slightly after the last, echoing the order the check actually runs. */
+}
+
+.evidence-check-steps .check-step:nth-child(1) {
+    animation: evidence-check-reveal 200ms ease-out 80ms both;
+}
+
+.evidence-check-steps .check-step:nth-child(2) {
+    animation: evidence-check-reveal 200ms ease-out 200ms both;
+}
+
+.evidence-check-steps .check-step:nth-child(3) {
+    animation: evidence-check-reveal 200ms ease-out 320ms both;
+}
+
+.check-step-pass {
+    color: var(--positive);
+}
+
+.check-step-fail {
+    color: var(--negative);
+}
+
+.check-step-skipped {
+    color: var(--text-secondary);
+    font-size: var(--text-micro);
+}
+
+.evidence-check-reason {
+    margin: 0;
+    font-size: var(--text-micro);
+    color: var(--text-secondary);
+}
+
+.evidence-check-verdict {
+    display: inline-block;
+    align-self: flex-start;
+    font-size: var(--text-micro);
+    font-weight: var(--weight-semibold);
+    padding: var(--space-1) var(--space-2);
+    border-radius: var(--radius-chip);
+    animation: evidence-check-reveal 200ms ease-out 440ms both;
+}
+
+.evidence-check-verdict-accepted {
+    background: var(--accent);
+    color: var(--on-accent);
+}
+
+.evidence-check-verdict-rejected_missing_citation,
+.evidence-check-verdict-rejected_unsupported {
+    background: transparent;
+    color: var(--negative);
+    border: 1px solid var(--negative);
+}
+
+.evidence-check-empty {
+    font-size: var(--text-small);
+    color: var(--text-secondary);
+}

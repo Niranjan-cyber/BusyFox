@@ -1,16 +1,19 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import {
   fetchBusiness,
+  fetchClaimEvidence,
   fetchClaims,
   fetchFeedbackSignals,
   fetchInbox,
   fetchOpportunities,
+  fetchOpportunity,
   fetchRejectedIdeas,
   fetchSignals,
   weakestMode,
 } from './client'
 import type { Served } from './client'
 import { business, feedbackSignals } from '../fixtures/business'
+import { evidenceForClaim } from '../fixtures/evidence'
 import { investigationSignals } from '../fixtures/investigation'
 import { claims, opportunities, rejectedIdeas } from '../fixtures/opportunities'
 
@@ -270,6 +273,56 @@ describe('the inbox keeps opportunities and their claims consistent', () => {
     expect(inbox.data.claims).toEqual(claims)
     // No point asking for the claims of opportunities that were never served.
     expect(calls).toEqual([`${BASE}/businesses/biz_pulsestack/opportunities`])
+  })
+})
+
+describe('screen 4: opportunity detail and its evidence chain', () => {
+  it('fetches one opportunity by id from the contract route', async () => {
+    vi.stubEnv('VITE_API_BASE_URL', BASE)
+    const calls = stubFetch(() => jsonResponse(opportunities[0], { 'X-Retrieval-Mode': 'live' }))
+
+    const opportunity = await fetchOpportunity('opp_07')
+
+    expect(calls).toEqual([`${BASE}/opportunities/opp_07`])
+    expect(opportunity.retrieval_mode).toBe('live')
+    expect(opportunity.data).toEqual(opportunities[0])
+  })
+
+  it('falls back to a fixture opportunity, labelled, when the live call fails', async () => {
+    vi.stubEnv('VITE_API_BASE_URL', BASE)
+    stubFetch(() => new Response('{}', { status: 500 }))
+
+    const opportunity = await fetchOpportunity('opp_07')
+
+    expect(opportunity.retrieval_mode).toBe('demo_fixture')
+    expect(opportunity.data).toEqual(opportunities[0])
+  })
+
+  it('resolves a claim\'s full evidence chain from the contract route', async () => {
+    vi.stubEnv('VITE_API_BASE_URL', BASE)
+    const liveEvidence = evidenceForClaim('claim_0701')
+    const calls = stubFetch(() => jsonResponse(liveEvidence, { 'X-Retrieval-Mode': 'live' }))
+
+    const evidence = await fetchClaimEvidence('claim_0701')
+
+    expect(calls).toEqual([`${BASE}/claims/claim_0701/evidence`])
+    expect(evidence.retrieval_mode).toBe('live')
+    expect(evidence.data).toEqual(liveEvidence)
+  })
+
+  it('serves the fixture evidence chain with no backend configured', async () => {
+    const calls = stubFetch(() => {
+      throw new Error('must not call fetch with no base URL configured')
+    })
+
+    const evidence = await fetchClaimEvidence('claim_0701')
+
+    expect(calls).toEqual([])
+    expect(evidence.retrieval_mode).toBe('demo_fixture')
+    expect(evidence.data.length).toBeGreaterThan(0)
+    expect(evidence.data.map((item) => item.id)).toEqual(
+      claims.find((claim) => claim.id === 'claim_0701')!.evidence_ids,
+    )
   })
 })
 

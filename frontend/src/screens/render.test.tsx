@@ -6,10 +6,13 @@ import { GoalBar } from '../components/inbox/GoalBar'
 import { RejectedIdeas } from '../components/inbox/RejectedIdeas'
 import { PolaritySplitBar } from '../components/polarity/PolaritySplitBar'
 import { EmptyState, ErrorState, LoadingState, ServedBanner } from '../components/common/ScreenState'
+import { EditableValueRange, EvidenceDiversityReadout } from '../components/common/Metrics'
+import { EvidenceCheckDiagram } from '../components/evidence-check/EvidenceCheckDiagram'
 import { claims, opportunities, rejectedIdeas } from '../fixtures/opportunities'
+import { evidenceForClaim } from '../fixtures/evidence'
 import { feedbackSummary } from '../fixtures/business'
 import { investigationSignals } from '../fixtures/investigation'
-import { signalLane } from '../lib/viewModels'
+import { evidenceCheckResult, signalLane } from '../lib/viewModels'
 import type { Served } from '../api/client'
 
 /**
@@ -222,5 +225,122 @@ describe('AppShell', () => {
     expect(html).toContain('aria-current="page"')
     expect(html).toContain('not built yet')
     expect(html).toContain('Skip to content')
+  })
+
+  it('says how to reach opportunity detail instead of "not built yet", since it now exists', () => {
+    const html = renderToStaticMarkup(
+      <AppShell route="inbox">
+        <p>content</p>
+      </AppShell>,
+    )
+    expect(html).toContain('open one from the inbox')
+  })
+})
+
+describe('evidenceCheckResult', () => {
+  it('accepts evidence whose quote exists and supports the claim', () => {
+    const [supporting] = evidenceForClaim('claim_0701')
+    expect(evidenceCheckResult(supporting)).toEqual({ quoteExists: true, outcome: 'accepted' })
+  })
+
+  it('rejects for a missing citation when the quote was never found', () => {
+    const [missing] = evidenceForClaim('claim_1503') // evd_023 — quote not found in source text
+    expect(evidenceCheckResult(missing)).toEqual({
+      quoteExists: false,
+      outcome: 'rejected_missing_citation',
+    })
+  })
+
+  it('rejects for lack of support when the quote exists but does not back the claim', () => {
+    const [unsupported] = evidenceForClaim('claim_2101') // evd_031 — quote exists, off-topic
+    expect(evidenceCheckResult(unsupported)).toEqual({
+      quoteExists: true,
+      outcome: 'rejected_unsupported',
+    })
+  })
+})
+
+describe('EvidenceCheckDiagram', () => {
+  const claimsFor = (id: string) => claims.filter((claim) => claim.opportunity_id === id)
+
+  it('replays a real accepted claim, walking quote, support and freshness checks', () => {
+    const opp07Claims = claimsFor('opp_07')
+    const html = renderToStaticMarkup(
+      <EvidenceCheckDiagram
+        claims={opp07Claims}
+        evidenceByClaimId={Object.fromEntries(
+          opp07Claims.map((claim) => [claim.id, evidenceForClaim(claim.id)]),
+        )}
+      />,
+    )
+    expect(html).toContain('Quote found in source')
+    expect(html).toContain('Supports the claim')
+    expect(html).toContain('Accepted')
+  })
+
+  it('replays a real rejection for a missing citation, and a separate one for lack of support', () => {
+    const opp15Claims = claimsFor('opp_15')
+    const opp21Claims = claimsFor('opp_21')
+    const html = renderToStaticMarkup(
+      <>
+        <EvidenceCheckDiagram
+          claims={opp15Claims}
+          evidenceByClaimId={Object.fromEntries(
+            opp15Claims.map((claim) => [claim.id, evidenceForClaim(claim.id)]),
+          )}
+        />
+        <EvidenceCheckDiagram
+          claims={opp21Claims}
+          evidenceByClaimId={Object.fromEntries(
+            opp21Claims.map((claim) => [claim.id, evidenceForClaim(claim.id)]),
+          )}
+        />
+      </>,
+    )
+    expect(html).toContain('Rejected — quote not found')
+    expect(html).toContain('Rejected — quote exists but does not support the claim')
+    expect(html).toContain('quote not found in source text')
+  })
+
+  it('names a claim with no loaded evidence rather than rendering an empty chain', () => {
+    const html = renderToStaticMarkup(
+      <EvidenceCheckDiagram claims={claimsFor('opp_07')} evidenceByClaimId={{}} />,
+    )
+    expect(html).toContain('No evidence chain loaded')
+  })
+})
+
+describe('EvidenceDiversityReadout', () => {
+  it('states all three counts and the underlying-event risk in text', () => {
+    const opportunity = opportunities.find((o) => o.id === 'opp_07')!
+    const html = renderToStaticMarkup(
+      <EvidenceDiversityReadout diversity={opportunity.evidence_diversity} />,
+    )
+    expect(html).toContain('3')
+    expect(html).toContain('4')
+    expect(html).toContain('6')
+    expect(html).toContain('unknown')
+  })
+})
+
+describe('EditableValueRange', () => {
+  it('renders the model range as editable inputs, not a fixed figure', () => {
+    const opportunity = opportunities.find((o) => o.id === 'opp_07')!
+    const html = renderToStaticMarkup(<EditableValueRange value={opportunity.value} />)
+    expect(html).toContain('<input')
+    expect(html).toContain('value="5940"')
+    expect(html).toContain('value="17820"')
+    expect(html).toContain('ASSUMED')
+    // Untouched inputs must not claim an edit happened.
+    expect(html).not.toContain('not saved anywhere')
+  })
+
+  it('still shows every assumption with its own OBSERVED/ASSUMED label', () => {
+    const opportunity = opportunities.find((o) => o.id === 'opp_07')!
+    const html = renderToStaticMarkup(<EditableValueRange value={opportunity.value} />)
+    for (const assumption of opportunity.value.assumptions) {
+      expect(html).toContain(assumption.description)
+    }
+    expect(html).toContain('OBSERVED')
   })
 })

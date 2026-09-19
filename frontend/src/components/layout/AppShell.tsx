@@ -28,9 +28,9 @@ export function AppShell({ route, children }: { route: string; children: ReactNo
                     {screen.label}
                   </a>
                 ) : (
-                  <span className="rail-link rail-link-pending" title="Lands on day 3">
+                  <span className="rail-link rail-link-pending" title={screen.note ?? 'Lands on day 3'}>
                     {screen.label}
-                    <span className="rail-pending-note">not built yet</span>
+                    <span className="rail-pending-note">{screen.note ?? 'not built yet'}</span>
                   </span>
                 )}
               </li>

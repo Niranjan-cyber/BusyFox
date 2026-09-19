@@ -91,14 +91,6 @@
     font-size: var(--text-small);
 }
 
-.diversity {
-    font-size: var(--text-micro);
-    color: var(--text-secondary);
-    padding-top: var(--space-3);
-    border-top: 1px solid var(--border);
-    max-width: none;
-}
-
 @media (min-width: 48rem) {
     .readings {
         flex-direction: row;
@@ -116,7 +108,9 @@
     }
 }
 
-.pending-controls {
-    font-size: var(--text-micro);
-    color: var(--text-secondary);
+.card-detail-link {
+    display: inline-block;
+    font-size: var(--text-small);
+    font-weight: var(--weight-medium);
+    color: var(--text-primary);
 }

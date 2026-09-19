@@ -1,8 +1,7 @@
 import type { Claim, Opportunity } from '../../types/entities'
 import { Card, CardBody, CardFooter, CardHeader } from '../common/Card'
 import { ClaimLabel } from '../common/Labels'
-import { ConfidenceMeter, PriorityChip, ValueRange } from '../common/Metrics'
-import { count } from '../../lib/format'
+import { ConfidenceMeter, EvidenceDiversityReadout, PriorityChip, ValueRange } from '../common/Metrics'
 import { claimLabel, opportunityTitle } from '../../lib/viewModels'
 import './OpportunityCard.css'
 
@@ -94,19 +93,13 @@ export function OpportunityCard({
           </div>
         ) : null}
 
-        <p className="diversity">
-          Source diversity: <span className="tabular">{count(diversity.source_kind_count)}</span>{' '}
-          kinds, <span className="tabular">{count(diversity.domain_count)}</span> domains,{' '}
-          <span className="tabular">{count(diversity.author_count)}</span> authors · underlying-event
-          risk {diversity.underlying_event_risk}
-        </p>
+        <EvidenceDiversityReadout diversity={diversity} />
       </CardBody>
 
       <CardFooter>
-        <p className="pending-controls">
-          The evidence chain (Claim → Evidence → Source) and editable assumptions open on the
-          opportunity detail screen, which lands on day 3.
-        </p>
+        <a className="card-detail-link" href={`#/opportunities/${opportunity.id}`}>
+          View evidence chain and editable assumptions →
+        </a>
       </CardFooter>
     </Card>
   )

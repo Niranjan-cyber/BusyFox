@@ -138,8 +138,33 @@ Full detail for every task below: `tasks/plan.md`, Phase 3.
   browser (Playwright): 3 lanes render, no console errors, nav/labels correct. 9 new backend
   tests, 3 new frontend tests (client + lane classification), all passing (202 backend / 122
   frontend). See `LEARNING.md`, Day 3.
-- [ ] Task 31: Screen 4 — Opportunity detail + live Evidence Check diagram (§21's named
-  best differentiator — real design attention, not a placeholder chart)
+- [x] Task 31: Screen 4 — Opportunity detail + live Evidence Check diagram (§21's named
+  best differentiator — real design attention, not a placeholder chart). New
+  `frontend/src/screens/OpportunityDetail/` reached from an opportunity card's
+  "View evidence chain" link (`#/opportunities/{id}`), wired to the three
+  already-live routes (`/opportunities/{id}`, `/opportunities/{id}/claims`,
+  `/claims/{id}/evidence` — all built in Task 21/26, nothing new on the backend).
+  New `EvidenceCheckDiagram` (`components/evidence-check/`) replays each claim's
+  real per-evidence `claim_support` into the three PRD §21 outcomes (accepted /
+  rejected-missing-citation / rejected-unsupported) via
+  `lib/viewModels.ts::evidenceCheckResult`, which detects the missing-citation
+  case off the exact literal string `backend/pipeline/evidence_check.py`
+  hardcodes ("quote not found in source text") since Evidence carries no
+  separate `quote_exists` boolean. New frontend fixture evidence set
+  (`fixtures/evidence.ts`) deliberately includes both reject shapes so the
+  diagram has real data to walk even with no backend configured — the backend's
+  own demo fixture (`backend/fixtures/fixtures.py`) has zero reject examples.
+  Value-model range is editable (`EditableValueRange`, session-only, not
+  persisted — no route exists to save it, Task 27's note that `ValueAssumption`
+  has no numeric fields to recompute from still stands). `EvidenceDiversityReadout`
+  extracted out of `OpportunityCard` so the inbox card and detail screen share
+  one readout. 12 new component/client tests (frontend now 136 passing);
+  `npm run build`/`lint` clean. Manually verified in a browser (Playwright)
+  against fixtures (all three Evidence Check outcomes render, editable inputs
+  work) and against the deployed API for the real `opp_run_7f023794a99d_0`
+  (LIVE banner, real claim/evidence text, diagram correctly shows every
+  evidence item as `rejected_unsupported` — consistent with that run's known
+  zero-verified-strengths state, Task 26's note); no console errors either way.
 - [ ] Task 32: Screen 5 — Execution pack (can build against fixture first, re-point at
   Task 26 once real)
 - [ ] Task 33: `browser-testing-with-devtools` pass on all 5 screens (after 30–32)

@@ -1,6 +1,7 @@
 import type {
   Claim,
   ClaimType,
+  Evidence,
   ObservedInferredAssumed,
   Opportunity,
   Polarity,
@@ -148,4 +149,31 @@ export function summariseFeedback(signals: Signal[]): FeedbackSummary {
     negative_count: signals.filter((signal) => signal.polarity === 'negative').length,
     themes,
   }
+}
+
+/**
+ * §12.1's three-outcome Evidence Check, read off one Evidence item — screen 4's diagram
+ * (§16.1, §21 1:35-1:55). Evidence has no `quote_exists` boolean of its own: quote-exists is a
+ * check the backend runs before ever calling the semantic-support model
+ * (`backend/pipeline/evidence_check.py::build_evidence`), and when it fails, the exact literal
+ * reason `"quote not found in source text"` is what lands in `claim_support.reason` — that
+ * string is the only signal the client has that this branch, not semantic support, is why the
+ * evidence was rejected.
+ */
+export type EvidenceCheckStep = 'quote_exists' | 'supports_claim' | 'fresh'
+export type EvidenceCheckOutcome = 'accepted' | 'rejected_missing_citation' | 'rejected_unsupported'
+
+const QUOTE_NOT_FOUND_REASON = 'quote not found in source text'
+
+export interface EvidenceCheckResult {
+  quoteExists: boolean
+  outcome: EvidenceCheckOutcome
+}
+
+export function evidenceCheckResult(evidence: Pick<Evidence, 'claim_support'>): EvidenceCheckResult {
+  const { status, reason } = evidence.claim_support
+  const quoteExists = !(status === 'unsupported' && reason === QUOTE_NOT_FOUND_REASON)
+  if (!quoteExists) return { quoteExists, outcome: 'rejected_missing_citation' }
+  if (status === 'supports') return { quoteExists, outcome: 'accepted' }
+  return { quoteExists, outcome: 'rejected_unsupported' }
 }

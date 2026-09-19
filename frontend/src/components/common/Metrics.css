@@ -111,3 +111,37 @@
     font-size: var(--text-micro);
     line-height: var(--leading-small);
 }
+
+/* §11.2 source-diversity readout — shared by the inbox card and screen 4. */
+.diversity {
+    font-size: var(--text-micro);
+    color: var(--text-secondary);
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--border);
+    max-width: none;
+}
+
+/* Screen 4's editable value range (Task 31): same headline shape as the read-only one, with
+   two number inputs standing in for the fixed figure. */
+.value-input-group {
+    display: inline-flex;
+    align-items: baseline;
+    gap: var(--space-1);
+}
+
+.value-input {
+    width: 5.5rem;
+    font: inherit;
+    font-variant-numeric: tabular-nums;
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-chip);
+    padding: var(--space-1) var(--space-2);
+    color: var(--text-primary);
+}
+
+.value-edited-note {
+    margin-top: var(--space-2);
+    font-size: var(--text-micro);
+    color: var(--text-secondary);
+}

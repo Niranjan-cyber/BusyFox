@@ -1,7 +1,8 @@
 import { business, feedbackSignals } from '../fixtures/business'
+import { evidenceForClaim } from '../fixtures/evidence'
 import { investigationSignals } from '../fixtures/investigation'
 import { claims, opportunities, rejectedIdeas } from '../fixtures/opportunities'
-import type { Business, Claim, Opportunity, RetrievalMode, Signal } from '../types/entities'
+import type { Business, Claim, Evidence, Opportunity, RetrievalMode, Signal } from '../types/entities'
 import type { RejectedIdea, ServedMode } from '../lib/viewModels'
 
 /**
@@ -205,4 +206,20 @@ export async function fetchInbox(businessId: string): Promise<Served<InboxPayloa
     live/fallback treatment as every other endpoint below. */
 export function fetchRejectedIdeas(businessId: string): Promise<Served<RejectedIdea[]>> {
   return servedOrFixture(`/businesses/${businessId}/rejected-ideas`, rejectedIdeas)
+}
+
+/**
+ * Screen 4's single-opportunity fetch. Falls back to the first fixture opportunity if the
+ * requested id isn't one of the small fixture set — only reachable if fixture mode is hit with
+ * an id that came from a live backend, which the demo build never does.
+ */
+export function fetchOpportunity(opportunityId: string): Promise<Served<Opportunity>> {
+  const fixture = opportunities.find((o) => o.id === opportunityId) ?? opportunities[0]
+  return servedOrFixture(`/opportunities/${opportunityId}`, fixture)
+}
+
+/** docs/contract.md — resolves one claim's full evidence chain (Evidence -> SourceDocument),
+    the data screen 4's Evidence Check diagram walks (Task 18's `run_evidence_check` output). */
+export function fetchClaimEvidence(claimId: string): Promise<Served<Evidence[]>> {
+  return servedOrFixture(`/claims/${claimId}/evidence`, evidenceForClaim(claimId))
 }

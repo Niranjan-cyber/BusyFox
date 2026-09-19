@@ -4,7 +4,10 @@ import { useHashRoute } from './lib/useHashRoute'
 import { BusinessScreen } from './screens/Business/BusinessScreen'
 import { InboxScreen } from './screens/Inbox/InboxScreen'
 import { InvestigationScreen } from './screens/Investigation/InvestigationScreen'
+import { OpportunityDetailScreen } from './screens/OpportunityDetail/OpportunityDetailScreen'
 import { TokensScreen } from './screens/Tokens/TokensScreen'
+
+const OPPORTUNITY_ROUTE_PREFIX = 'opportunities/'
 
 /**
  * The business is fixed for the hackathon scope: PulseStack is the only business in the
@@ -38,17 +41,22 @@ function UnavailableScreen({ route }: { route: string }) {
 
 function App() {
   const route = useHashRoute('business')
+  const opportunityId = route.startsWith(OPPORTUNITY_ROUTE_PREFIX)
+    ? route.slice(OPPORTUNITY_ROUTE_PREFIX.length)
+    : null
 
   if (route === 'tokens') return <TokensScreen />
 
+  const known =
+    route === 'business' || route === 'investigation' || route === 'inbox' || opportunityId !== null
+
   return (
-    <AppShell route={route}>
+    <AppShell route={opportunityId !== null ? 'opportunity' : route}>
       {route === 'business' ? <BusinessScreen businessId={BUSINESS_ID} /> : null}
       {route === 'investigation' ? <InvestigationScreen businessId={BUSINESS_ID} /> : null}
       {route === 'inbox' ? <InboxScreen businessId={BUSINESS_ID} /> : null}
-      {route !== 'business' && route !== 'investigation' && route !== 'inbox' ? (
-        <UnavailableScreen route={route} />
-      ) : null}
+      {opportunityId !== null ? <OpportunityDetailScreen opportunityId={opportunityId} /> : null}
+      {!known ? <UnavailableScreen route={route} /> : null}
     </AppShell>
   )
 }

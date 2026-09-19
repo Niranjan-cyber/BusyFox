@@ -1,5 +1,6 @@
-import type { EvidenceConfidence, Priority, ValueModel } from '../../types/entities'
-import { usdRange } from '../../lib/format'
+import { useState } from 'react'
+import type { EvidenceConfidence, EvidenceDiversity, Priority, ValueModel } from '../../types/entities'
+import { count, usdRange } from '../../lib/format'
 import { ClaimLabel } from './Labels'
 import './Metrics.css'
 
@@ -65,6 +66,81 @@ export function ValueRange({ value }: { value: ValueModel }) {
         <ClaimLabel value="ASSUMED" />
       </div>
       <details className="value-details">
+        <summary>Based on</summary>
+        <ul>
+          {value.assumptions.map((assumption) => (
+            <li key={assumption.key}>
+              {assumption.description} <ClaimLabel value={assumption.label} />
+            </li>
+          ))}
+        </ul>
+      </details>
+    </div>
+  )
+}
+
+/**
+ * §11.2's source-diversity readout. Shared between the inbox card and screen 4's detail view —
+ * same three counts and risk flag, no separate summary invented for the detail screen.
+ */
+export function EvidenceDiversityReadout({ diversity }: { diversity: EvidenceDiversity }) {
+  return (
+    <p className="diversity">
+      Source diversity: <span className="tabular">{count(diversity.source_kind_count)}</span>{' '}
+      kinds, <span className="tabular">{count(diversity.domain_count)}</span> domains,{' '}
+      <span className="tabular">{count(diversity.author_count)}</span> authors · underlying-event
+      risk {diversity.underlying_event_risk}
+    </p>
+  )
+}
+
+/**
+ * Screen 4's editable value range (Task 31). The canonical `ValueAssumption` (§13.2) has no
+ * numeric fields to recompute from — see Task 27's note — so this edits the headline range
+ * directly, client-side only. Nothing here is sent anywhere: there is no route to save an
+ * edited value model, so the edit is scoped to this browser tab for as long as the screen stays
+ * open, and says so rather than implying it persisted.
+ */
+export function EditableValueRange({ value }: { value: ValueModel }) {
+  const [low, setLow] = useState(value.monthly_usd.low)
+  const [high, setHigh] = useState(value.monthly_usd.high)
+  const edited = low !== value.monthly_usd.low || high !== value.monthly_usd.high
+
+  return (
+    <div className="value value-editable">
+      <div className="value-headline">
+        <span className="value-amount tabular value-input-group">
+          $
+          <input
+            className="value-input"
+            type="number"
+            min={0}
+            inputMode="numeric"
+            aria-label="Adjust the low end of the monthly value range"
+            value={low}
+            onChange={(event) => setLow(Number(event.target.value))}
+          />
+          –$
+          <input
+            className="value-input"
+            type="number"
+            min={0}
+            inputMode="numeric"
+            aria-label="Adjust the high end of the monthly value range"
+            value={high}
+            onChange={(event) => setHigh(Number(event.target.value))}
+          />{' '}
+          MRR
+        </span>
+        <ClaimLabel value="ASSUMED" />
+      </div>
+      {edited ? (
+        <p className="value-edited-note">
+          Adjusted from the model&apos;s {usdRange(value.monthly_usd.low, value.monthly_usd.high)}{' '}
+          range for this browser tab only — not saved anywhere.
+        </p>
+      ) : null}
+      <details className="value-details" open>
         <summary>Based on</summary>
         <ul>
           {value.assumptions.map((assumption) => (
