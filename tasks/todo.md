@@ -206,7 +206,14 @@ Full detail for every task below: `tasks/plan.md`, Phase 3.
   every 4s poll returns 200.
 
 ### Lane C — Floating
-- [ ] Task 34: Demo-video shot list against §21's scene table — start now, not blocked
+- [x] Task 34: Demo-video shot list against §21's scene table — `docs/demo-shot-list.md`.
+  Maps every scene to what's actually recordable today: most beats are live off the deployed
+  app or the committed `opp_07` fixture (the only live opportunity has zero verified strengths,
+  so it can't carry the 1:35–2:15 beats — those need `opp_07`). Found 3 real gaps needing a
+  decision before recording, not just recording work: Anveshan Precision (2:15–2:25) doesn't
+  exist anywhere in the system (`BUSINESS_ID` is hardcoded to `biz_pulsestack`), the three
+  headline metrics (2:25–2:40, §19.1) are uncomputed since Task 24/29 are still blocked, and no
+  architecture diagram exists yet for 2:40–2:50.
 - [ ] Task 35: Anveshan Precision clip — **conditional**, only if Tasks 26–28/30–33 done by 4pm
 
 ### Everyone, before 8pm

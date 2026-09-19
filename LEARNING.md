@@ -483,4 +483,15 @@ Kept from Day 1 per the event rules (learning is a scored judging criterion). On
 
 ## Day 4 — Sept 20, 2026
 
-*(Not yet written.)*
+**Demo shot list (Task 34)**
+- Writing the shot list against the real app (not the PRD's assumed state) surfaced that the
+  script's own climax beats (1:35–2:15: Evidence Check diagram + execution pack) can't be shot
+  against the one real live opportunity — `opp_run_7f023794a99d_0` has zero verified strengths,
+  so every evidence item is `rejected_unsupported` and there's no outreach draft. The committed
+  `opp_07` fixture is the only asset with all three Evidence Check outcomes. Worth knowing before
+  recording, not during: the "live" badge and the demo's best beat are in tension for this
+  particular opportunity.
+- The PRD's "Quick cut to Anveshan Precision" (2:15–2:25) assumes a second business exists.
+  It doesn't — `App.tsx` hardcodes `BUSINESS_ID = 'biz_pulsestack'` with a comment saying a
+  second business becomes a route param "when one exists." One never got built. That's a script
+  beat resting on an assumption nobody checked against the code until now.
