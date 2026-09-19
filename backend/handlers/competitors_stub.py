@@ -52,7 +52,8 @@ def get_competitor_evidence_live(event: dict, context: object) -> dict:
 
     try:
         live = _refetch_live(evidence)
-    except Exception:
+    except Exception as exc:
+        print(f"live re-fetch of {evidence_id} failed, falling back: {exc!r}")  # -> CloudWatch
         live = None
     if live is not None:
         if _running_in_lambda():
