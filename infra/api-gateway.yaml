@@ -23,6 +23,15 @@ AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
 Description: Opportunity Engine — P0 API surface (stub Lambdas, Task 2)
 
+Parameters:
+  # Pass at deploy time (`--parameter-overrides TavilyApiKey=...`); never
+  # committed. Empty means the evidence drawer's live re-fetch always fails
+  # over to the cache/fixture — which is also how to rehearse Level 2/3.
+  TavilyApiKey:
+    Type: String
+    NoEcho: true
+    Default: ""
+
 Globals:
   Function:
     Runtime: python3.13
@@ -241,10 +250,31 @@ Resources:
             Path: /competitors
             Method: GET
 
+  # Task 28: Level 2 of the §7.2 ladder. Written only after a successful live
+  # re-fetch, so nothing in here was ever seeded from a fixture.
+  EvidenceCacheBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
   GetCompetitorEvidenceLive:
     Type: AWS::Serverless::Function
     Properties:
       Handler: backend.handlers.competitors_stub.get_competitor_evidence_live
+      # Tavily's own timeout is 10s; the global 10s Function timeout would
+      # kill the Lambda before it could fall back to the cache/fixture.
+      Timeout: 20
+      Environment:
+        Variables:
+          EVIDENCE_CACHE_BUCKET: !Ref EvidenceCacheBucket
+          TAVILY_API_KEY: !Ref TavilyApiKey
+      Policies:
+        - S3CrudPolicy:
+            BucketName: !Ref EvidenceCacheBucket
       Events:
         Api:
           Type: HttpApi

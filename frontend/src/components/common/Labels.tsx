@@ -33,12 +33,12 @@ const SOURCE_TEXT: Record<ServedMode, { short: string; full: string }> = {
     full: 'Fetched fresh during this run',
   },
   cached: {
-    short: 'CACHED VERIFIED SOURCE',
+    short: 'CACHED VERIFIED SOURCE · collected earlier in this run',
     full: 'Real evidence collected earlier in this run, re-served now',
   },
   demo_fixture: {
-    short: 'DEMO FIXTURE',
-    full: 'Pre-collected and verified, not this run live search',
+    short: "DEMO FIXTURE · pre-collected and verified, not this run's live search",
+    full: "Pre-collected and verified, not this run's live search",
   },
   // Not a fourth rung on the §7.2 ladder — the state of a response that did not name its rung.
   // Saying so is the only honest option: the other three are all claims we cannot back.
