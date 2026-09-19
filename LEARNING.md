@@ -362,6 +362,19 @@ Kept from Day 1 per the event rules (learning is a scored judging criterion). On
   past that prompt (`--no-confirm-changeset`, piping `y`) as a "blind apply," even with the
   human's prior go-ahead to deploy. Correct behavior: a live infra change gets a human looking at
   the actual changeset, not a pre-committed yes. Left for the human to run interactively.
+- After that first deploy, the live endpoint still 404'd with the exact same message the old
+  fixture-only code produced — a false negative on "code didn't ship." Real cause:
+  `GetExecutionPack` was defined in `infra/api-gateway.yaml` back when it was permanently
+  fixture-only (Task 2/6) and never got a `DynamoDBReadPolicy`, unlike every sibling handler that
+  already reads the table. Once Task 26 made it call `dynamo_children`, the Lambda's IAM role had
+  no `dynamodb:Query` permission — `_common.py`'s blanket `except Exception: return None` (added
+  so local dev/test never hangs on missing credentials) swallowed the AccessDenied and looked
+  identical to "table has no rows yet." Fixed by adding the same `DynamoDBReadPolicy` the other
+  read handlers already have; second `sam deploy` confirmed it — `GET .../execution-pack` now
+  returns `200`, `X-Retrieval-Mode: live`, the real pack. Lesson: that broad exception swallow is
+  exactly right for the local-dev case it was built for, but it means a live IAM gap on a *new*
+  DynamoDB-reading handler looks like an empty table from the outside — worth an explicit CloudWatch
+  check, not just a curl, whenever a handler gains its first real Dynamo read.
 
 ## Day 4 — Sept 20, 2026
 

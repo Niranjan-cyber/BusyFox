@@ -188,6 +188,9 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: backend.handlers.opportunities_stub.get_execution_pack
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref OpportunityEngineTable
       Events:
         Api:
           Type: HttpApi
