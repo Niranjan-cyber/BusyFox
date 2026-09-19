@@ -422,7 +422,7 @@ Goal: Phase 3's feature freeze holds — everything left closes out the submissi
 **Description:** Problem, build, AWS integration, AI tools used — first-class deliverable, not an afterthought.
 
 **Acceptance criteria:**
-- [ ] Writeup covers all four required sections
+- [x] Writeup covers all four required sections — `WRITEUP.md`
 
 **Dependencies:** None to start; benefits from Task 40 existing for reference
 
@@ -433,7 +433,11 @@ Goal: Phase 3's feature freeze holds — everything left closes out the submissi
 **Description:** Last pass on the three docs that are themselves submission artifacts — README's known Amplify env-var gap already fixed (Day 3 8pm checkpoint), confirm nothing else is stale.
 
 **Acceptance criteria:**
-- [ ] All three reflect current, deployed state — no stale instructions or broken links
+- [x] All three reflect current, deployed state — no stale instructions or broken links —
+  `README.md` gained a product intro, submission-docs index and "Tools we used" section
+  (AI-tool disclosure, previously missing); `CREDITS.md` created (previously didn't exist
+  despite `AGENTS.md` requiring it since Day 1); `LEARNING.md` already current through Task 39,
+  Day 4 entry added for this gap itself
 
 **Dependencies:** None
 

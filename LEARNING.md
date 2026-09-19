@@ -562,3 +562,13 @@ Kept from Day 1 per the event rules (learning is a scored judging criterion). On
   handed the wrong deploy command from memory instead of grepping this file first. Confirms the
   Day 3 entry's own lesson generalizes past "the person driving the terminal": an agent handing
   over infra commands needs the same grep-this-file-first habit as a human would.
+
+**Tasks 41–42: writeup and doc finalisation**
+- `AGENTS.md` has required a `CREDITS.md` and an AI-tools disclosure mirrored in `README.md`
+  since Day 1 ("Locked technical decisions" / hard event constraints) — neither had actually
+  been created until Task 42, three days later. Nobody had been assigned to own "the docs that
+  are themselves submission artifacts" the way a code task owns a file, so a checklist item with
+  no code behind it drifted the same way an unset env var did (Day 3's checkpoint entry above):
+  invisible until something forces a direct look, in this case a task, not a live-URL check.
+  Worth a standing habit for future events: treat a compliance-only requirement (no acceptance
+  test, no deploy to verify) as higher risk of silent drift than a coded one, not lower.

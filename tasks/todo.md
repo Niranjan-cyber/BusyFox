@@ -305,8 +305,13 @@ Full detail for every task below: `tasks/plan.md`, Phase 3.
     (human-run, no AWS creds in the harness — see Task 37 note above for what that deploy hit).
   - Screens 1, 2, 5 checked clean, no bugs found.
 - [ ] Task 40: Record demo video ≤3:00 per §21 script
-- [ ] Task 41: Write the writeup (problem, build, AWS integration, AI tools used)
-- [ ] Task 42: Finalise README.md, CREDITS.md, LEARNING.md
+- [x] Task 41: Write the writeup (problem, build, AWS integration, AI tools used) —
+  `WRITEUP.md`, covers all four required sections including the honest Bedrock→OpenCode Go
+  substitution
+- [x] Task 42: Finalise README.md, CREDITS.md, LEARNING.md — `README.md` gained a product
+  intro, submission-docs index, and the "Tools we used" AI-disclosure section AGENTS.md has
+  required since Day 1 but nobody had written; `CREDITS.md` created from scratch (didn't exist
+  before); `LEARNING.md` Day 4 entry added noting the gap. See `LEARNING.md`, Day 4.
 - [ ] Task 43: Submit; confirm registration went through
 
 ### Checkpoint: Submission complete
