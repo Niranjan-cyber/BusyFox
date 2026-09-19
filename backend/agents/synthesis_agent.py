@@ -168,7 +168,11 @@ def build_opportunity(
     pains = [
         PainToFix(signal_id=s.id, reason=s.claim_text, severity=raw.pain_severity)
         for s in matched
-        if s.polarity == Polarity.NEGATIVE and s.produced_by == "feedback_pipeline_labeller"
+        # "our pain" only means first-party feedback about our own product —
+        # feedback_pipeline_labeller for a real business, pulsestack_simulator
+        # for the demo one (orchestrator.run_feedback_stage uses whichever
+        # applies; both emit the same Signal/Evidence shape).
+        if s.polarity == Polarity.NEGATIVE and s.produced_by in {"feedback_pipeline_labeller", "pulsestack_simulator"}
     ]
     competitive_context = [
         CompetitiveContextItem(
@@ -352,13 +356,15 @@ def _build_live_agent(contract: AgentRuntimeContract, budget: RuntimeBudget):
         tools=[emit_candidate_opportunity],
         system_prompt=(
             "You are the Synthesis Agent. Combine the signals below using the "
-            "§9.3 pattern table (competitor pain + our strength -> competitive "
-            "gap; our pain + inbound demand -> unmet need with a fix-first "
-            "step; our strength with no demand signal is a proof point, not "
-            "an opportunity — don't emit one for it). Every candidate needs a "
+            "§9.3 pattern table (competitor pain + our strength -> "
+            "competitive_gap; our pain + inbound demand -> unmet_need; our "
+            "strength with no demand signal is a proof point, not an "
+            "opportunity — don't emit one for it). Every candidate needs a "
             "concrete opportunity_mechanism stating a real shared segment and "
             "a real reason it's actionable now (§9.5) — pain and strength "
-            "correlating is not by itself a reason to act. Call "
+            "correlating is not by itself a reason to act. opportunity_type "
+            f"must be exactly one of: {', '.join(sorted(_KNOWN_TYPES))} — no "
+            "other spelling or variant is accepted. Call "
             "emit_candidate_opportunity once per candidate."
         ),
         hooks=[_before_model_call, _before_tool_call],
@@ -370,11 +376,39 @@ def live_collect() -> RawCandidateCollector:
     """Returns a `collect` callable that runs a real Strands agent — pass
     this as `run_synthesis_agent`'s `collect` argument in production."""
 
-    def collect(contract: AgentRuntimeContract, signals: list[Signal]) -> list[RawCandidate]:
+    def _attempt(contract: AgentRuntimeContract, signals: list[Signal]) -> list[RawCandidate]:
+        from strands.types.exceptions import MaxTokensReachedException
+
         budget = RuntimeBudget(contract)
         agent, collected = _build_live_agent(contract, budget)
-        agent(f"Signals for this run:\n{_signals_prompt(signals)}")
+        prompt = f"Signals for this run:\n{_signals_prompt(signals)}"
+        # ponytail: OpenCode Go's reasoning length is highly variable run to
+        # run — a single completion sometimes overruns max_tokens before it
+        # finishes. Strands keeps the partial turn in history, so resuming
+        # with the same agent picks up where it stopped rather than losing
+        # the run; capped at 3 attempts so a genuinely stuck model still
+        # surfaces the exception instead of retrying forever.
+        for attempt in range(3):
+            try:
+                agent(prompt)
+                break
+            except MaxTokensReachedException:
+                if attempt == 2:
+                    raise
+                prompt = "Continue: finish emitting any remaining candidate_opportunity calls, then stop."
         return collected
+
+    def collect(contract: AgentRuntimeContract, signals: list[Signal]) -> list[RawCandidate]:
+        # ponytail: distinct failure mode from the max-tokens retry above —
+        # the model sometimes rambles through its whole budget without ever
+        # calling the tool (no exception, just an empty turn). A fresh agent
+        # on a second attempt reliably breaks that specific rut; capped at 2
+        # full attempts total.
+        for attempt in range(2):
+            collected = _attempt(contract, signals)
+            if collected or attempt == 1:
+                return collected
+        return []
 
     return collect
 

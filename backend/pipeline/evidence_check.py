@@ -59,7 +59,7 @@ def freshness_limit_days(*, aspect: str, produced_by: str) -> int:
         return _PRICING_LIMIT_DAYS
     if "integration" in aspect or "capability" in aspect:
         return _NO_STRICT_LIMIT_DAYS
-    if produced_by == "feedback_pipeline_labeller":
+    if produced_by in {"feedback_pipeline_labeller", "pulsestack_simulator"}:
         return _OWN_FEEDBACK_LIMIT_DAYS
     if produced_by == "competitor_agent":
         return _COMPETITOR_COMPLAINT_LIMIT_DAYS

@@ -15,7 +15,9 @@ expires after 30 days" rule for SourceDocument without a cleanup job.
 
 from __future__ import annotations
 
+import json
 import os
+from decimal import Decimal
 from typing import TypeVar
 
 import boto3
@@ -76,7 +78,10 @@ def to_item(model: BaseModel, *, parent_key: str | None = None) -> dict:
     """
     prefix = prefix_for(model)
     own_key = f"{prefix.value}{model.id}"
-    item: dict = {"PK": own_key, "SK": "METADATA", **model.model_dump(mode="json")}
+    # DynamoDB's boto3 resource rejects native float (wants Decimal) — round-trip
+    # through json with parse_float to convert every float in the tree at once.
+    dumped = json.loads(model.model_dump_json(), parse_float=Decimal)
+    item: dict = {"PK": own_key, "SK": "METADATA", **dumped}
     if parent_key is not None:
         item["GSI1PK"] = parent_key
         item["GSI1SK"] = own_key

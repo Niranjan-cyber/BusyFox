@@ -49,18 +49,24 @@ Full detail and rationale for each task: `tasks/plan.md`. Check items off here a
 - [x] Task 18: Evidence Check (quote-exists + quote-supports-claim + freshness)
 - [x] Task 19: Quality Gate + Ranker (14 checks, rule-table priority, no composite score)
 - [x] Task 20: DynamoDB table design + writes for all core entities
-- [x] Task 21: Orchestrator wiring — full pipeline end to end
+- [x] Task 21: Orchestrator wiring — full pipeline end to end. First real live run
+  2026-09-19 via `scripts/run_live_pipeline.py`, persisting `opp_run_7f023794a99d_0`
+  (`unmet_need`, priority `Blocked`, `LOW` confidence) to the deployed table. Getting
+  there fixed six real bugs (stale rename, Windows stdout encoding, DynamoDB float/Decimal,
+  flaky OpenCode Go token budgets, `opportunity_type` prompt/schema mismatch, and a
+  `produced_by` gap that silently dropped every "our pain" signal for the simulated
+  business) — see `LEARNING.md`, Day 3.
 
 ### Lane B — Frontend/UX
-- [~] Task 22: Screen 1 on real data — client wired to the contract routes and verified in a
+- [x] Task 22: Screen 1 on real data — client wired to the contract routes and verified in a
   browser against the deployed stage; blockers 1 (retrieval-mode header), 3 (table deployed +
-  wired), and 4 (CORS) resolved. All named infra blockers cleared — what's left is that the table
-  is still empty (no pipeline run has persisted anything). See `frontend/README.md`,
-  "Known blockers"
-- [~] Task 23: Screen 3 on real data — inbox groups and ranks the live opportunity with its
+  wired), and 4 (CORS) resolved. Table is no longer empty — `scripts/run_live_pipeline.py`
+  persisted a real gate-passed opportunity 2026-09-19 (see Task 21 note below); verified live via
+  `GET /businesses/biz_pulsestack/opportunities` returning it with `X-Retrieval-Mode: live`.
+- [x] Task 23: Screen 3 on real data — inbox groups and ranks the live opportunity with its
   claims off `/opportunities/{id}/claims`; blockers 1, 2 (rejected-candidate route, Task 19), 3,
-  and 5 resolved. Same remaining gap as Task 22: an empty table, not a missing route. See
-  `frontend/README.md`, "Known blockers"
+  and 5 resolved. Same fix as Task 22 unblocks this: `GET /opportunities/{id}/claims` returns real
+  claims, each with populated `evidence_ids`.
 
 ### Lane C — Floating
 - [~] Task 24: Gold-set labelling (80 sim + 20 real, independent) — corpus built
@@ -74,7 +80,9 @@ Full detail and rationale for each task: `tasks/plan.md`. Check items off here a
   benign AST multi-edge collapse) — see `graphify-out/GRAPH_REPORT.md`.
 
 ### Checkpoint: End of Day 2
-- [ ] ≥1 gate-passed opportunity visible in real inbox, claims traceable to evidence
+- [x] ≥1 gate-passed opportunity visible in real inbox, claims traceable to evidence — met
+  2026-09-19 (Day 3), not Day 2 itself; `opp_run_7f023794a99d_0` live via the deployed API,
+  every claim's `evidence_ids` populated. See Task 21 note.
 - [ ] Risk watch: if Tavily unusable live, fall back to Level 2/3 rather than debug under pressure
 
 ## Phase 3 — Day 3 (re-break-down at Day 3 morning stand-up)

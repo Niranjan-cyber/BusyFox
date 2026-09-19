@@ -299,6 +299,47 @@ Kept from Day 1 per the event rules (learning is a scored judging criterion). On
   produce something that looks authoritative whether or not the source page actually said all of
   it — worth the extra live call before hardcoding anything from it.
 
+**First real end-to-end pipeline run — the table wasn't empty because of one bug, it was five**
+- `scripts/run_live_pipeline.py` still imported `bedrock_semantic_support_checker`, a name the
+  Bedrock→OpenCode Go rename (above) missed — caught immediately by the import error, cheap fix.
+- Windows' console defaults `sys.stdout` to `cp1252`; strands' callback handler `print()`s the
+  model's raw reasoning text, and OpenCode Go's model uses non-ASCII characters (e.g. `→`) in its
+  chain-of-thought often enough that every live run crashed on it. `sys.stdout.reconfigure(encoding=
+  "utf-8")` at the top of the script fixed it — a Windows-only failure mode that unit tests (which
+  don't print model reasoning) never would have caught.
+- `boto3`'s DynamoDB `Table.put_item` rejects native Python `float` outright ("Use Decimal types
+  instead") — `backend/db/dynamo.py::to_item` used `model.model_dump(mode="json")`, which keeps
+  floats as floats. Fixed by round-tripping through `json.loads(model.model_dump_json(),
+  parse_float=Decimal)` instead — converts every float in the tree in one pass, stdlib only.
+- OpenCode Go's model is dramatically more verbose in tool-call reasoning than Bedrock's was, and
+  its response length is highly variable run to run — the same `max_tokens` that worked once threw
+  `MaxTokensReachedException` on the next attempt, and sometimes the model burned its whole budget
+  narrating without ever calling the tool (no exception, just an empty turn — a different failure
+  mode from hitting the cap). Fixed with two independent retries in `synthesis_agent.live_collect`:
+  resume the same agent on `MaxTokensReachedException` (strands keeps the partial turn in history),
+  and restart with a fresh agent if a full attempt produces zero tool calls at all.
+- The Synthesis system prompt described the §9.3 pattern table in prose ("unmet need with a
+  fix-first step") but never stated the literal `opportunity_type` enum values the tool parameter
+  must equal — the model reasonably paraphrased it to `"unmet_need_fix_first"`, which
+  `validate_candidates` silently rejected as `unknown_opportunity_type`. Only surfaced because
+  `orchestrator.run_pipeline` was discarding synthesis-level rejections into a `_`-prefixed
+  variable — added `synthesis_rejected` to `PipelineResult` so this class of failure is visible
+  in the pipeline output instead of just showing up as "zero opportunities, no explanation."
+- The real bug once all of the above were visible: `synthesis_agent.build_opportunity`'s
+  "our pain" filter only recognized `produced_by == "feedback_pipeline_labeller"` (Task 13/14's
+  real-business pipeline), but the demo business's own feedback signals come from
+  `run_feedback_stage` → PulseStack simulator, `produced_by="pulsestack_simulator"`. Every
+  negative-polarity signal about our own product was silently dropped from
+  `pains_to_fix_first` for the simulated business specifically — the one business this repo can
+  actually demo against live. Same gap existed in `evidence_check.freshness_limit_days`. A
+  produced_by check like this needs to be written against "what are all the producers of
+  first-party feedback," not just the one that existed when the line was first written.
+- Net effect of chasing all five root causes instead of raising `max_tokens` and moving on: the
+  first real opportunity (`opp_run_7f023794a99d_0`, `unmet_need`, priority `Blocked`) is now live
+  in DynamoDB, reachable through the deployed API (`X-Retrieval-Mode: live`), with every claim
+  carrying real `evidence_ids` — Day 2's checkpoint, made real on Day 3 rather than left as a
+  known gap into Day 3's own feature work.
+
 ## Day 4 — Sept 20, 2026
 
 *(Not yet written.)*

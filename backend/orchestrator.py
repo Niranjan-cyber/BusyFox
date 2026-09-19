@@ -210,6 +210,7 @@ class PipelineResult(NamedTuple):
     ranked: list[Opportunity]
     blocked: list[Opportunity]
     rejected: list
+    synthesis_rejected: list  # candidates Synthesis itself dropped (§10.3), never reaching the gate
 
 
 def run_pipeline(
@@ -248,7 +249,7 @@ def run_pipeline(
         for s in feedback.signals
     }
 
-    synthesis_output, synthesis_invocation, _synth_rejected = run_synthesis_agent(
+    synthesis_output, synthesis_invocation, synth_rejected = run_synthesis_agent(
         all_signals, run_id=run_id, contract=synthesis_contract, collect=synthesis_collect
     )
 
@@ -302,6 +303,7 @@ def run_pipeline(
         ranked=gate_result.ranked,
         blocked=gate_result.blocked,
         rejected=gate_result.rejected,
+        synthesis_rejected=synth_rejected,
     )
 
 

@@ -1,10 +1,10 @@
-"""Runs the real pipeline (Task 21's run_pipeline) against the live Bedrock
-agents/collectors and persists to the deployed DynamoDB table — the Day 2
+"""Runs the real pipeline (Task 21's run_pipeline) against the live OpenCode
+Go agents/collectors and persists to the deployed DynamoDB table — the Day 2
 checkpoint's "a full run produces at least one gate-passed opportunity",
 made real rather than the fake-collector version backend/tests exercise.
 
-Needs TAVILY_API_KEY/PRODUCT_HUNT_TOKEN (repo .env) and an AWS profile with
-Bedrock + the deployed table's access, e.g.:
+Needs TAVILY_API_KEY/PRODUCT_HUNT_TOKEN/OPENCODE_GO_API_KEY (repo .env) and
+an AWS profile with the deployed table's access, e.g.:
 
     set -a; source .env; set +a
     AWS_PROFILE=<profile> DYNAMO_TABLE_NAME=<table> python scripts/run_live_pipeline.py
@@ -19,11 +19,18 @@ from datetime import datetime, timezone
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+# ponytail: strands' callback_handler print()s raw model reasoning text,
+# which breaks on Windows' cp1252 console default the moment the model
+# emits a non-ASCII char (e.g. "->" as U+2192). utf-8 stdout, stdlib-only.
+sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+
 from backend.agents import competitor_agent, market_agent, synthesis_agent
 from backend.db.dynamo import get_table
 from backend.fixtures.fixtures import BUSINESS
 from backend.orchestrator import persist, run_pipeline
-from backend.pipeline.evidence_check import bedrock_semantic_support_checker
+from backend.pipeline.evidence_check import opencode_go_semantic_support_checker
+from backend.schemas.entities import AgentRuntimeContract
 
 
 def _business_context(business) -> str:
@@ -51,17 +58,30 @@ def main() -> None:
         market_collect=market_agent.live_collect(context),
         competitor_collect=competitor_agent.live_collect(context, business.named_competitors),
         synthesis_collect=synthesis_agent.live_collect(),
-        semantic_check=bedrock_semantic_support_checker(),
+        semantic_check=opencode_go_semantic_support_checker(),
+        # ponytail: OpenCode Go's model is far more verbose in its tool-call
+        # reasoning than the Bedrock model these 1024-token defaults were
+        # tuned for — it was hitting MaxTokensReachedException mid-run.
+        # Bumped for this live script only; unit-tested agent defaults
+        # (backend/agents/*.py _CONTRACT) are untouched.
+        market_contract=AgentRuntimeContract(max_tokens=4096),
+        competitor_contract=AgentRuntimeContract(max_tokens=4096),
+        synthesis_contract=AgentRuntimeContract(max_tokens=8192),
     )
 
     print(f"signals: {len(result.signals)}")
     print(f"ranked (gate-passed): {len(result.ranked)}")
     print(f"blocked: {len(result.blocked)}")
     print(f"rejected: {len(result.rejected)}")
+    print(f"synthesis_rejected (never reached the gate): {len(result.synthesis_rejected)}")
     for opp in result.ranked:
         print(f"  ranked  {opp.id}  {opp.priority}  {opp.evidence_confidence}")
     for opp in result.blocked:
         print(f"  blocked {opp.id}  {opp.priority}  {opp.evidence_confidence}")
+    for r in result.rejected:
+        print(f"  gate_rejected  {r.opportunity_id}  because={r.rejected_because}  failed_gate={r.failed_gate}")
+    for r in result.synthesis_rejected:
+        print(f"  synthesis_rejected  reason={r.reason}  type={r.raw.opportunity_type}  signals={r.raw.signal_ids}")
 
     persist(get_table(), result)
     print(f"persisted to {os.environ.get('DYNAMO_TABLE_NAME', '<default table name>')}")
