@@ -88,12 +88,35 @@ Full detail and rationale for each task: `tasks/plan.md`. Check items off here a
   every claim's `evidence_ids` populated. See Task 21 note.
 - [ ] Risk watch: if Tavily unusable live, fall back to Level 2/3 rather than debug under pressure
 
-## Phase 3 — Day 3 (re-break-down at Day 3 morning stand-up)
+## Phase 3 — Day 3 (broken down at Day 3 morning stand-up, 2026-09-19)
 
-- [ ] Lane A: Action Agent + ExecutionPack w/ `outreach_policy` enforcement; value model; evidence drawer fallback rehearsed at least once; evaluation run vs. gold set
-- [ ] Lane B: screens 2, 4, 5 feature-complete; Evidence Check diagram polish; devtools pass on all 5 screens
-- [ ] Lane C: Anveshan Precision clip (if P0 done by 4pm); demo-video shot list started
-- [ ] Everyone: code-review-and-quality + code-simplification + ponytail-review pass before 8pm
+Full detail for every task below: `tasks/plan.md`, Phase 3.
+
+### Lane A — Backend/Agents
+- [ ] Task 26: Action Agent + ExecutionPack generation, `outreach_policy` enforced in prompt
+  and post-generation check
+- [ ] Task 27: Real value model computation (§13.2 formula, editable labelled range) —
+  replaces Synthesis's placeholder `ValueModel`
+- [ ] Task 28: Evidence drawer Level 2 (Cached) fallback, rehearsed with a real forced
+  failure — this closes out Day 2 checkpoint's unfinished Tavily risk-watch item, don't
+  track it twice
+- [ ] Task 29: Evaluation run vs. gold set — **blocked on Task 24 (deferred)**, do not start
+
+### Lane B — Frontend/UX
+- [ ] Task 30: Screen 2 — Live investigation (3 streaming research lanes)
+- [ ] Task 31: Screen 4 — Opportunity detail + live Evidence Check diagram (§21's named
+  best differentiator — real design attention, not a placeholder chart)
+- [ ] Task 32: Screen 5 — Execution pack (can build against fixture first, re-point at
+  Task 26 once real)
+- [ ] Task 33: `browser-testing-with-devtools` pass on all 5 screens (after 30–32)
+
+### Lane C — Floating
+- [ ] Task 34: Demo-video shot list against §21's scene table — start now, not blocked
+- [ ] Task 35: Anveshan Precision clip — **conditional**, only if Tasks 26–28/30–33 done by 4pm
+
+### Everyone, before 8pm
+- [ ] Task 36: `code-review-and-quality` + `code-simplification` + `ponytail-review` pass,
+  time-boxed to finish by 8pm
 
 ### Checkpoint: Feature freeze — Day 3, 8pm
 - [ ] Golden path runs start to finish

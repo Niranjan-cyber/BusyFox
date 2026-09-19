@@ -173,14 +173,187 @@ Goal per BUILD_PLAN.md: a full run produces ≥1 gate-passed opportunity, visibl
 
 ---
 
-### Phase 3: Day 3 — milestone level
+### Phase 3: Day 3 — broken down at the Day 3 morning stand-up (2026-09-19)
 
-Goal: opportunity-to-action works end to end; feature freeze at 8pm.
+Goal: opportunity-to-action works end to end; feature freeze at 8pm. Nothing here starts before Day 2's checkpoint items land (it did, minus the Tavily fallback rehearsal — see Task 28, which absorbs that unfinished item rather than duplicating it).
 
-- [ ] **Lane A:** Action Agent + ExecutionPack enforcing `outreach_policy` in prompt and post-generation check; value model (`saas_arr`) as an editable labelled range; evidence drawer's live re-fetch + 3-level fallback, **rehearsed failing over at least once**; evaluation run against Day 2's gold set
-- [ ] **Lane B:** Finish screens 2, 4, 5 — all five P0 screens feature-complete; the live Evidence Check diagram on screen 4 gets real design attention (§21's named best differentiator); `browser-testing-with-devtools` pass on all five screens
-- [ ] **Lane C:** If P0 done by 4pm — Anveshan Precision clip; start the demo-video shot list against §21
-- [ ] **Everyone, before 8pm:** `code-review-and-quality` + `code-simplification` + a `ponytail-review` pass across both lanes
+#### Lane A — Backend/Agents
+
+##### Task 26: Action Agent + ExecutionPack generation
+
+**Description:** New `backend/agents/action_agent.py` (Strands, Sonnet), same shape as `synthesis_agent.py`: a live-agent path plus a pure `build_execution_pack`-style function tests can call directly. Takes one gate-passed `Opportunity` (ranked or blocked) and produces an `ExecutionPack` (offer, proposal, `outreach_drafts[]`) per §14.10/§18. `outreach_policy` (`never_reveal_surveillance_source`, `never_quote_private_or_sensitive_information`, `use_public_evidence_only_as_internal_reasoning`) is enforced twice: stated in the system prompt, and checked again after generation (keyword/regex scan for leaked source language) — belt-and-suspenders per §18.1, matching how Synthesis's `mechanism_holds` is both asked-for and independently re-checked. Each `OutreachDraft` must set `proof_point_signal_id` and `outreach_policy_checked=true` only after the post-generation check actually passes.
+
+**Acceptance criteria:**
+- [ ] `run_action_agent`/`build_execution_pack` produces a real `ExecutionPack` from a real `Opportunity` (no hardcoded fixture)
+- [ ] A draft that would leak `never_reveal_surveillance_source` language is caught by the post-generation check and rejected/retried, not just relied on the prompt
+- [ ] `GET /opportunities/{id}/execution-pack` (already routed to `opportunities_stub.get_execution_pack`, currently fixture-only) returns a real, persisted pack for `opp_run_7f023794a99d_0`
+
+**Verification:**
+- [ ] Unit tests: `backend/tests/test_action_agent.py` (new), same fake-collector pattern as `test_synthesis_agent.py`
+- [ ] Manual check: run against the live opportunity persisted 2026-09-19, confirm the pack shows up via the deployed API with `X-Retrieval-Mode: live`
+
+**Dependencies:** Task 21 (orchestrator; a real Opportunity to act on already exists)
+
+**Files likely touched:** `backend/agents/action_agent.py`, `backend/handlers/opportunities_stub.py`, `backend/orchestrator.py` (persist the pack), `backend/tests/test_action_agent.py`
+
+**Estimated scope:** Medium
+
+##### Task 27: Real value model computation
+
+**Description:** Replace Synthesis's placeholder `ValueModel` (`monthly_usd=0.0/0.0`, assumption `pending_quality_gate`) with §13.2's actual formula: `estimated_monthly_value = estimated_qualified_accounts × expected_conversion × ARPA`, each variable labelled `OBSERVED`/`INFERRED`/`ASSUMED` per `ValueAssumption`, always rendered as a `MonthlyRange` (low/high), never a single point number. Runs as part of Quality Gate + Ranker (Task 19's module), not Synthesis — Synthesis still shouldn't claim a real number before the gate has verified evidence.
+
+**Acceptance criteria:**
+- [ ] `run_quality_gate` (or a new function it calls) replaces the placeholder `ValueModel` on every surviving `Opportunity` with a real range and per-variable assumption labels
+- [ ] At least one assumption is `OBSERVED` when business pricing data is available (`Business.current_mrr_usd` etc. already on the schema), `ASSUMED` otherwise — never silently defaulting to a made-up number with no label
+- [ ] No composite score anywhere near this — value stays a separate field from priority/confidence (AGENTS.md hard rule)
+
+**Verification:**
+- [ ] Unit tests in `backend/tests/test_quality_gate.py`: assert the range and assumption labels for a known input
+- [ ] Manual check: confirm `opp_run_7f023794a99d_0`'s persisted `value` field is no longer the placeholder after a fresh pipeline run
+
+**Dependencies:** None (Quality Gate already exists; this extends it)
+
+**Files likely touched:** `backend/pipeline/quality_gate.py`, `backend/tests/test_quality_gate.py`
+
+**Estimated scope:** Small–Medium
+
+##### Task 28: Evidence drawer Level 2 (Cached) fallback — closes out Day 2's unfinished risk-watch item
+
+**Description:** The resilience ladder (§7.2/§12.2) only has two of its three levels implemented — every handler returns `LIVE` or `DEMO_FIXTURE`, `CACHED` doesn't exist anywhere (confirmed by grep 2026-09-19). Build the missing middle level: an S3-backed cache of prior live evidence fetches, checked before falling all the way to the fixture. `GET /competitors/{id}/evidence/{evidenceId}/live` (already routed, currently fixture-only) tries live → falls back to the S3 cache if the live call fails → falls back to the fixture if the cache is also empty, each labelled exactly per §7.2 ("LIVE RESEARCH" / "CACHED VERIFIED SOURCE · collected earlier in this run" / "DEMO FIXTURE · pre-collected and verified, not this run's live search"). This *is* the Day 2 checkpoint's unfinished "Tavily risk watch" item — don't track it twice.
+
+**Acceptance criteria:**
+- [ ] `CACHED` is a real, reachable `RetrievalMode` for at least the evidence-drawer live-refetch path
+- [ ] The fallback is **rehearsed at least once with a real forced failure** (e.g. a bad Tavily key or a deliberately broken endpoint), not just unit-tested — screenshot or note the result
+- [ ] UI label text matches §7.2's exact three strings, word for word
+
+**Verification:**
+- [ ] Unit tests: cache-hit, cache-miss-falls-to-fixture, live-succeeds-skips-cache
+- [ ] Manual rehearsal: force a live failure against the deployed stack, confirm the drawer shows `CACHED` or `DEMO FIXTURE` correctly instead of erroring
+
+**Dependencies:** Task 20 (DynamoDB/S3 wiring), Task 5 (Tavily failure modes already characterized)
+
+**Files likely touched:** `backend/handlers/competitors_stub.py`, new `backend/db/evidence_cache.py` (S3), `infra/api-gateway.yaml` (S3 permissions), `frontend/src/lib/viewModels.ts` (label strings)
+
+**Estimated scope:** Medium
+
+##### Task 29: Evaluation run against the gold set — blocked
+
+**Description:** §19.2's Label F1 metric needs Task 24's gold set, which is deferred (P1, per 2026-09-19 decision — not required before Day 3's P0 work). This task is a placeholder, not active work: do not start it before Task 24 unblocks. If Day 3's P0 (Tasks 26–28, 30–33) lands well before 8pm, revisit deferring Task 24 first.
+
+**Acceptance criteria:** N/A while blocked.
+
+**Dependencies:** Task 24 (deferred)
+
+**Estimated scope:** N/A — blocked
+
+#### Lane B — Frontend/UX
+
+##### Task 30: Screen 2 — Live investigation
+
+**Description:** Per §16.1: three streaming research lanes (Market / Feedback / Competitive) showing signals arriving in real time, feeding into candidate opportunity cards as Synthesis produces them. Greenfield — only Screens 1 (`Business`) and 3 (`Inbox`) exist today.
+
+**Acceptance criteria:**
+- [ ] Three visually distinct lanes, each showing its own signals as they arrive (poll or stream — polling is fine for a hackathon demo, don't build websockets for this)
+- [ ] Uses Task 8's theme, consistent with Screens 1 & 3
+- [ ] Retrieval-mode labelling (§7.2 exact strings) shown per signal, not just per screen
+
+**Verification:**
+- [ ] Component tests alongside existing `frontend/src/screens/*` test pattern
+- [ ] Manual check in a browser against the deployed stage with a real run in flight
+
+**Dependencies:** Task 9 (screen-shell pattern), Task 22 (live data wiring already proven on Screens 1/3)
+
+**Files likely touched:** `frontend/src/screens/Investigation/` (new), `frontend/src/lib/viewModels.ts`
+
+**Estimated scope:** Medium
+
+##### Task 31: Screen 4 — Opportunity detail + live Evidence Check diagram
+
+**Description:** Per §16.1/§21: claims shown with their evidence, priority/confidence/value as three visually separate fields (never composited — AGENTS.md hard rule), evidence grouped by polarity and source diversity, editable value-model assumptions (Task 27), and the **live accept/reject Evidence Check diagram** — §21 names this the single best differentiator, "demonstrated not asserted." Real design attention here, not a placeholder chart.
+
+**Acceptance criteria:**
+- [ ] Every claim shows its `OBSERVED`/`INFERRED`/`ASSUMED` label (§13.3)
+- [ ] Evidence confidence, potential value, priority render as three separate UI elements, never combined into one score
+- [ ] The Evidence Check diagram actually animates/replays a real accept or reject decision from `run_evidence_check`'s output, not a static mock
+- [ ] Value-model range (Task 27) is editable in the UI, assumptions visible
+
+**Verification:**
+- [ ] Component tests
+- [ ] Manual check: load `opp_run_7f023794a99d_0`, confirm the diagram reflects its real evidence/claim data
+
+**Dependencies:** Task 22/23 (live data wiring), Task 27 (real value model), Task 18 (Evidence Check output already exists)
+
+**Files likely touched:** `frontend/src/screens/OpportunityDetail/` (new), evidence-diagram component (new)
+
+**Estimated scope:** Large — if it doesn't split cleanly into diagram + rest-of-screen sub-tasks once started, split it then rather than build it as one sitting
+
+##### Task 32: Screen 5 — Execution pack
+
+**Description:** Per §16.1: offer, proposal, and outreach drafts, each outreach draft showing its cited `proof_point_signal_id` traceably. Can be built against the fixture first and re-pointed at Task 26's real data once that lands — don't block Screen 5 on Action Agent being finished if Lane A is still mid-task.
+
+**Acceptance criteria:**
+- [ ] Offer/proposal/outreach drafts all rendered, each outreach draft's proof point clickable back to its source signal
+- [ ] Works against fixture data even before Task 26 is done; swaps to live data with no UI change once it is
+
+**Verification:**
+- [ ] Component tests against fixture data
+- [ ] Manual check against Task 26's real pack once available
+
+**Dependencies:** Task 9/22 pattern; Task 26 for real (not fixture) data
+
+**Files likely touched:** `frontend/src/screens/ExecutionPack/` (new)
+
+**Estimated scope:** Medium
+
+##### Task 33: `browser-testing-with-devtools` pass, all five screens
+
+**Description:** Once Screens 2/4/5 exist, run the devtools skill across all five P0 screens — console errors, network requests, visual output — not just the two that existed before today.
+
+**Acceptance criteria:**
+- [ ] All five screens pass with no console errors on the golden path
+- [ ] Any real bugs found get fixed, not just logged
+
+**Dependencies:** Tasks 30, 31, 32
+
+**Estimated scope:** Small, but only after 30–32 land
+
+#### Lane C — Floating
+
+##### Task 34: Demo-video shot list
+
+**Description:** Draft the shot list against §21's 10-scene table now, independent of P0 completion — the shot list is a planning artifact, not a recording. Flag scene 1:35–1:55 (the live Evidence Check diagram) as depending on Task 31.
+
+**Acceptance criteria:**
+- [ ] One shot per §21 scene, with which screen/state each needs
+- [ ] Notes which shots are blocked on Lane A/B tasks above vs. already shootable
+
+**Dependencies:** None to start; individual shots depend on 30–32
+
+**Files likely touched:** `docs/demo-shot-list.md` (new)
+
+**Estimated scope:** XS
+
+##### Task 35: Anveshan Precision clip — conditional
+
+**Description:** Only if all of Lane A/B's P0 tasks (26–28, 30–33) are done by 4pm. Do not start early at the cost of P0 work — CLAUDE.md's hard rule (no P1/P2 while P0 is open) applies here too.
+
+**Dependencies:** Tasks 26–28, 30–33 all complete
+
+**Estimated scope:** Small, conditional
+
+#### Everyone, before 8pm
+
+##### Task 36: Quality pass — `code-review-and-quality` + `code-simplification` + `ponytail-review`
+
+**Description:** Across both lanes' Day 3 diffs, before feature freeze. Not a rewrite pass — findings get fixed if small, ticketed as Day 4 polish if not.
+
+**Acceptance criteria:**
+- [ ] All three passes run against today's diff
+- [ ] Findings triaged: fixed now, or explicitly deferred to Day 4 with a one-line reason
+
+**Dependencies:** Tasks 26–33 substantially done
+
+**Estimated scope:** Medium (time-boxed — this must finish by 8pm, not run until it's perfect)
 
 ### Checkpoint: Feature freeze, Day 3, 8pm
 - [ ] Golden path runs start to finish: goal → investigation → inbox → detail → execution pack
