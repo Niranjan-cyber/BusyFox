@@ -1,0 +1,6 @@
+2026-09-19T14:36:55Z  rehearsal started, stack opportunity-engine-skeleton (eu-north-1)
+2026-09-19T14:37:01Z  local dry run: live re-fetch of evd_hn_31781473 OK
+2026-09-19T14:52:01Z  PASS  A: real Tavily key -> live (retrieved_at 2026-09-19T14:52:00.320655Z)
+2026-09-19T15:08:26Z  PASS  B: forced Tavily failure, cache populated -> cached (retrieved_at 2026-09-19T14:52:00.320655Z)
+2026-09-19T15:10:53Z  PASS  C: forced Tavily failure, cache empty -> demo_fixture (retrieved_at 2026-09-19T20:10:00+05:30)
+2026-09-19T15:22:10Z  PASS  F: real key restored -> live (retrieved_at 2026-09-19T15:22:09.943002Z)

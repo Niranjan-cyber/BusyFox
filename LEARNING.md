@@ -376,6 +376,24 @@ Kept from Day 1 per the event rules (learning is a scored judging criterion). On
   DynamoDB-reading handler looks like an empty table from the outside — worth an explicit CloudWatch
   check, not just a curl, whenever a handler gains its first real Dynamo read.
 
+- Task 28's rehearsal failed its first dry run for a reason no unit test could see: `evd_001` and
+  `evd_002` (Task 2 fixtures) point at a real HN item that has nothing to do with the quote they
+  carry — the quote was invented. So a genuine live re-verify ("is the quote still at the URL?")
+  can never pass on them, and §7.2's Level 3 promise ("manually verified real evidence") isn't
+  actually met by those two. Found by running Tavily's extract on the URL and grepping for the
+  quote, *before* deploying. Added one genuinely real fixture, `evd_hn_31781473` (verbatim HN
+  comment about Sentry's noise, confirmed present in Tavily's extract), which is what the
+  rehearsal used. Still open: the golden-path demo's fixtures should be replaced with real
+  quotes the same way, before the video.
+- Rehearsal result (deployed stack, 2026-09-19): real key -> `live`; bad key -> `cached` with the
+  *original* `retrieved_at` (14:52Z, not now — the cache re-serves an earlier real fetch, it
+  doesn't re-stamp it); cache emptied -> `demo_fixture`; key restored -> `live`. The fixture
+  record itself is stored with `retrieval_mode="live"`, so the handler has to overwrite it to
+  `demo_fixture` on the way out or it would be served under the wrong label.
+- `Timeout: 10` in `Globals` would have killed this Lambda before it could fall back: Tavily's own
+  HTTP timeout is 10s, so the function needed 20s. Any handler whose fallback runs *after* a slow
+  external call needs a timeout longer than that call, or the fallback never gets to run.
+
 ## Day 4 — Sept 20, 2026
 
 *(Not yet written.)*

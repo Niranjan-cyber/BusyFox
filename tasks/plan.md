@@ -222,13 +222,13 @@ Goal: opportunity-to-action works end to end; feature freeze at 8pm. Nothing her
 **Description:** The resilience ladder (§7.2/§12.2) only has two of its three levels implemented — every handler returns `LIVE` or `DEMO_FIXTURE`, `CACHED` doesn't exist anywhere (confirmed by grep 2026-09-19). Build the missing middle level: an S3-backed cache of prior live evidence fetches, checked before falling all the way to the fixture. `GET /competitors/{id}/evidence/{evidenceId}/live` (already routed, currently fixture-only) tries live → falls back to the S3 cache if the live call fails → falls back to the fixture if the cache is also empty, each labelled exactly per §7.2 ("LIVE RESEARCH" / "CACHED VERIFIED SOURCE · collected earlier in this run" / "DEMO FIXTURE · pre-collected and verified, not this run's live search"). This *is* the Day 2 checkpoint's unfinished "Tavily risk watch" item — don't track it twice.
 
 **Acceptance criteria:**
-- [ ] `CACHED` is a real, reachable `RetrievalMode` for at least the evidence-drawer live-refetch path
-- [ ] The fallback is **rehearsed at least once with a real forced failure** (e.g. a bad Tavily key or a deliberately broken endpoint), not just unit-tested — screenshot or note the result
-- [ ] UI label text matches §7.2's exact three strings, word for word
+- [x] `CACHED` is a real, reachable `RetrievalMode` for at least the evidence-drawer live-refetch path
+- [x] The fallback is **rehearsed at least once with a real forced failure** (e.g. a bad Tavily key or a deliberately broken endpoint), not just unit-tested — screenshot or note the result
+- [x] UI label text matches §7.2's exact three strings, word for word
 
 **Verification:**
-- [ ] Unit tests: cache-hit, cache-miss-falls-to-fixture, live-succeeds-skips-cache
-- [ ] Manual rehearsal: force a live failure against the deployed stack, confirm the drawer shows `CACHED` or `DEMO FIXTURE` correctly instead of erroring
+- [x] Unit tests: cache-hit, cache-miss-falls-to-fixture, live-succeeds-skips-cache
+- [x] Manual rehearsal: force a live failure against the deployed stack, confirm the drawer shows `CACHED` or `DEMO FIXTURE` correctly instead of erroring
 
 **Dependencies:** Task 20 (DynamoDB/S3 wiring), Task 5 (Tavily failure modes already characterized)
 

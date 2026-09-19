@@ -109,9 +109,16 @@ Full detail for every task below: `tasks/plan.md`, Phase 3.
   auto-mode won't script past the changeset confirmation). See `LEARNING.md`, Day 3.
 - [ ] Task 27: Real value model computation (§13.2 formula, editable labelled range) —
   replaces Synthesis's placeholder `ValueModel`
-- [ ] Task 28: Evidence drawer Level 2 (Cached) fallback, rehearsed with a real forced
+- [x] Task 28: Evidence drawer Level 2 (Cached) fallback, rehearsed with a real forced
   failure — this closes out Day 2 checkpoint's unfinished Tavily risk-watch item, don't
-  track it twice
+  track it twice. `GET /competitors/{id}/evidence/{evidenceId}/live` now does live Tavily
+  re-verify -> S3 cache (`backend/db/evidence_cache.py`) -> fixture; body and
+  `X-Retrieval-Mode` always name the rung served; labels render §7.2's exact strings; 9 unit
+  tests. Rehearsed against the deployed stack 2026-09-19 (real key -> `live`, bad key ->
+  `cached`, cache emptied -> `demo_fixture`, key restored -> `live`; all PASS, log in
+  `docs/rehearsals/task28-evidence-fallback.txt`). Rehearsal needed a new real fixture
+  (`evd_hn_31781473`) — see `LEARNING.md`, Day 3. Nothing in the frontend calls this route
+  yet; the drawer wiring is Task 31.
 - [ ] Task 29: Evaluation run vs. gold set — **blocked on Task 24 (deferred)**, do not start
 
 ### Lane B — Frontend/UX
