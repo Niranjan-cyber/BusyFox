@@ -69,13 +69,16 @@ Full detail and rationale for each task: `tasks/plan.md`. Check items off here a
   claims, each with populated `evidence_ids`.
 
 ### Lane C — Floating
-- [ ] Task 24: **Deferred 2026-09-19** — Label F1 (§19.2) lives in the full metrics
-  table, which is explicitly P1 ("if P0 done by Day 3, 4pm" — PRD §19.2 intro).
+- [ ] Task 24: **Deferred 2026-09-19, deferral confirmed 2026-09-20** — Label F1 (§19.2) lives in
+  the full metrics table, which is explicitly P1 ("if P0 done by Day 3, 4pm" — PRD §19.2 intro).
   It's not part of the Day 2 checkpoint either. Per `CLAUDE.md`'s hard rule, no
   P1 starts while Day 3's P0 (Action Agent, screens 2/4/5) is open, so 100-row
   manual labelling is on hold until P0 lands. Corpus + blank sheets are ready
   (`tasks/gold_set/labels_{niranjan,swarali}.csv`, `scripts/build_gold_set.py`)
-  whenever it's picked back up.
+  whenever it's picked back up. Re-confirmed on Day 4 while closing Task 34's shot-list gaps:
+  with the demo needed today, staying deferred for good (not "picked back up") — the video runs
+  the qualitative "planted opportunities + red herrings" narrative without the three headline
+  numbers instead. See `docs/demo-shot-list.md`.
 - [x] Task 25: Re-run `/graphify` before evening stand-up — scoped via
   `.graphifyignore` (`.agents/`, `.claude/`) this time, per Day 1's own
   lesson. 112 files, 1237 nodes, 87 communities. Health check flagged 96

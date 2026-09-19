@@ -495,3 +495,22 @@ Kept from Day 1 per the event rules (learning is a scored judging criterion). On
   It doesn't — `App.tsx` hardcodes `BUSINESS_ID = 'biz_pulsestack'` with a comment saying a
   second business becomes a route param "when one exists." One never got built. That's a script
   beat resting on an assumption nobody checked against the code until now.
+- Closing the shot list's gaps (decision with the human, not a unilateral call): cut Anveshan
+  rather than build it on the last day; drop the three headline-metric numbers rather than rush
+  Task 24/29; build the architecture diagram.
+
+**Architecture diagram (§21, 2:30–2:45) surfaced two more honesty gaps mid-build**
+- Drawing the diagram from `infra/api-gateway.yaml`'s real resource names, not the PRD's
+  intended architecture, caught two more places the deployed system has drifted from plan since
+  Day 3, neither previously written down anywhere outside scattered Day 3 log entries: (1) every
+  live LLM call actually runs on OpenCode Go, not Bedrock (Bedrock's real-time inference quota
+  is 0 req/min, confirmed dead Day 3 — Bedrock is IAM-wired and access-approved but unusable);
+  (2) the deployed Step Functions state machine is still Day 1's single-stub-Lambda skeleton —
+  the real 5-stage research pipeline that produced the one live opportunity ran via
+  `scripts/run_live_pipeline.py`, a local script, never through Step Functions at all.
+- Both would have shipped silently into the video if the diagram had been drawn from the plan
+  instead of the deployed template — a PRD-shaped diagram doesn't lie on its own, it's just
+  stale. Decided (with the human) to show both honestly labelled rather than picking one true
+  thing to show and omitting the other; consistent with the project's own rule that a
+  substitution is always labelled, never silent, applied here to infrastructure instead of data
+  sources.

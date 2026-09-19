@@ -18,20 +18,19 @@ asset the script names doesn't exist yet — needs a decision, not just a record
 | 1:10–1:35 | Inbox → one Competitive Gap opportunity → detail: 4 claims, each with evidence, priority/confidence/value as 3 separate numbers | Screen 3 (`#/inbox`) → Screen 4 (`#/opportunities/{id}`) | **FIXTURE** (`opp_07`) | The only live opportunity, `opp_run_7f023794a99d_0`, is type `unmet_need` (not Competitive Gap) with zero verified strengths — doesn't match the script's "Competitive Gap" framing. `opp_07` in fixtures is built for exactly this beat (4 claims, real evidence set) |
 | 1:35–1:55 | Evidence Check diagram live: one accepted, one rejected (missing citation), one rejected (unsupported) | Screen 4's `EvidenceCheckDiagram`, still on `opp_07` | **FIXTURE** | Live opportunity can't show this beat at all — every evidence item on `opp_run_7f023794a99d_0` is `rejected_unsupported` (zero verified strengths, see Task 26/31 notes). `opp_07`'s fixture evidence (`evd_001`=supports, `evd_023`=missing citation, `evd_031`=unsupported-but-cited) is the only asset with all three outcomes |
 | 1:55–2:15 | Execution pack: offer/proposal/outreach draft citing a verified proof point, no surveillance framing | Screen 5 (`#/opportunities/opp_07/execution-pack`) | **FIXTURE** | Live opportunity has no outreach draft (same zero-verified-strengths state) — real API correctly renders "No outreach draft yet" instead of crashing, which is *not* the shot the script wants. `opp_07`'s execution pack fixture cites `sig_311`, already on-screen in `strengths_it_builds_on` |
-| 2:15–2:25 | Quick cut to Anveshan Precision running the same engine | — | **GAP** | Anveshan Precision doesn't exist anywhere in the running system. `BUSINESS_ID` is hardcoded to `biz_pulsestack` in `App.tsx` ("the business is fixed for the hackathon scope... when a second one exists it becomes part of the route, not a constant") — there is no second business, scenario, or fixture set for it. Needs a decision now: build a second scenario, cut this beat, or replace it with something that exists |
-| 2:25–2:40 | "3 planted opportunities, 2 red herrings" line + three headline metrics (opportunity recall, evidence validity, noise rejection, §19.1) | — | **GAP** | Blocked on Task 24 (gold-set labelling, deferred) and Task 29 (eval run, blocked on 24) per `tasks/todo.md`. No computed numbers exist. Needs a decision: unblock Task 24/29 before recording, or soften this beat to qualitative framing without hard numbers |
-| 2:40–2:50 | Architecture diagram, Run details cost panel | — | **GAP** | No architecture diagram file exists in the repo. No cost/run-details panel is built in the UI (PRD §19.1's own note says this is fine as a video-only overlay, not a dedicated screen) — diagram needs to be made, cost numbers pulled from a real run's logs/DynamoDB record |
-| 2:50–3:00 | "What we learned"; URL and repo | — | n/a | Ready (voiceover + on-screen URL/repo, pull 1–2 lines from `LEARNING.md`) |
+| ~~2:15–2:25~~ | ~~Quick cut to Anveshan Precision~~ | **CUT** | n/a | Decided 2026-09-20: Anveshan Precision doesn't exist anywhere in the system (`BUSINESS_ID` is hardcoded to `biz_pulsestack`, no second scenario ever built) and won't be built on the last day. Beat is dropped; ~10s of slack opens up under the 3:00 cap — spend it on the Evidence Check beat (1:35–1:55) or leave as buffer, don't pad with a new beat |
+| 2:15–2:30 | "3 planted opportunities, 2 red herrings" line, qualitative only — no hard numbers | Narration over Screen 3 (inbox) or a rejected-ideas view | LIVE | Decided 2026-09-20: Task 24/29 (gold-set labelling + eval run) stay blocked, per the Day 2 checkpoint's own hard rule — not worth the time cost on the last day. Script drops the three headline-metric numbers and keeps only the qualitative claim: *"We planted opportunities and distractions in this scenario. Here's the inbox — real signal surfaced, distractions rejected with reasons shown."* Point at the rejected-ideas list as the visual proof instead of a metrics card |
+| 2:30–2:45 | Architecture diagram, Run details | `docs/architecture-diagram.md` (Mermaid, GitHub-rendered) | Ready | Built 2026-09-20. Two honesty notes baked in per decision: Bedrock is shown as IAM-wired/quota-blocked since Day 3, with OpenCode Go as the actual production inference for all 4 LLM call sites; Step Functions is shown as the deployed Day-1 skeleton (proves wiring), with the real 5-stage pipeline shown running via `scripts/run_live_pipeline.py` instead — both labelled honestly rather than glossed over. Pull real cost/timing numbers from that script's run log before recording |
+| 2:45–3:00 | "What we learned"; URL and repo | — | n/a | Ready (voiceover + on-screen URL/repo, pull 1–2 lines from `LEARNING.md`) |
 
-## Decisions needed before recording (blocking, in priority order)
+## Gaps — resolved 2026-09-20
 
-1. **Anveshan Precision (2:15–2:25)** — build it, cut it, or substitute. Cutting it loses the
-   "generality" beat entirely; the PRD doesn't offer a fallback.
-2. **Headline metrics (2:25–2:40)** — decide whether Task 24/29 get unblocked today given the
-   feature-freeze checkpoint is already open, or the beat runs qualitative-only.
-3. **Architecture diagram (2:40–2:50)** — smallest lift of the three gaps; can be built directly
-   from `infra/` (API Gateway, Step Functions, Lambda, DynamoDB, S3, Amplify are all already
-   deployed, just not drawn).
+All three decisions from the first pass are made; nothing left blocking a recording:
 
-Everything else on the table is recordable today, either live or against the committed `opp_07`
-fixture — no code changes needed for those beats.
+1. **Anveshan Precision** — cut, not built. See row above.
+2. **Headline metrics** — qualitative framing only, Task 24/29 stay deferred.
+3. **Architecture diagram** — built at `docs/architecture-diagram.md`, including the Bedrock→
+   OpenCode Go and Step-Functions-vs-real-pipeline honesty notes surfaced while building it (see
+   `LEARNING.md`, Day 4).
+
+Full script now fits at ~2:50 with ~10s of slack under the 3:00 cap.
