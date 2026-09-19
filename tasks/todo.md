@@ -253,8 +253,17 @@ Full detail for every task below: `tasks/plan.md`, Phase 3.
   enforcement) — not worth a schema change this late.
 
 ### Checkpoint: Feature freeze — Day 3, 8pm
-- [ ] Golden path runs start to finish
-- [ ] No new features after this point
+- [x] Golden path runs start to finish — closed 2026-09-20 (Day 4), not Day 3: the deployed
+  Amplify app had never actually had `VITE_API_BASE_URL` set (flagged in `README.md` on Day 1,
+  never followed up), so every prior "LIVE-verified" screen (Tasks 22/23/30/31/32/33) was
+  checked against local dev or the API directly — the public URL anyone would open, including
+  for the demo video, was serving `DEMO FIXTURE` on every screen the whole time. Fixed by
+  setting the env var as an Amplify app-level variable and redeploying (human-run, no AWS creds
+  in the harness). Re-verified live via Playwright straight after redeploy, clicking the full
+  path on `https://main.dw3gwg5t169l9.amplifyapp.com/`: `#/business` → `#/investigation` →
+  `#/inbox` → `#/opportunities/opp_run_7f023794a99d_0` → `.../execution-pack`. Every screen
+  `LIVE RESEARCH`, every network call 200, zero console errors throughout. See `LEARNING.md`.
+- [x] No new features after this point — holding since Task 36; today's work is bug fixes only
 
 ## Phase 4 — Day 4
 

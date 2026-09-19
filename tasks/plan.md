@@ -356,8 +356,10 @@ Goal: opportunity-to-action works end to end; feature freeze at 8pm. Nothing her
 **Estimated scope:** Medium (time-boxed — this must finish by 8pm, not run until it's perfect)
 
 ### Checkpoint: Feature freeze, Day 3, 8pm
-- [ ] Golden path runs start to finish: goal → investigation → inbox → detail → execution pack
-- [ ] No new features accepted after this point — bug fixes and rehearsal only
+- [x] Golden path runs start to finish: goal → investigation → inbox → detail → execution pack —
+  see `tasks/todo.md`'s Day 3 8pm checkpoint entry for the full note (closed Day 4, real Amplify
+  env-var gap found and fixed, not a rubber-stamp)
+- [x] No new features accepted after this point — bug fixes and rehearsal only
 
 ---
 

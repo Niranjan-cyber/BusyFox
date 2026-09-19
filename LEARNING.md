@@ -523,3 +523,23 @@ Kept from Day 1 per the event rules (learning is a scored judging criterion). On
   function still running the old code. Grep-for-the-old-name would have caught it faster than
   reading comments about it. It was never wired into the orchestrator yet, so it hadn't failed
   live — the review caught it before a real business upload would have.
+
+**Day 3 8pm checkpoint: golden path (closed Day 4, not Day 3)**
+- Verifying "golden path runs start to finish" against the actual deployed URL (not local dev)
+  found that `VITE_API_BASE_URL` had never been set as an Amplify environment variable —
+  `README.md` flagged this gap on Day 1 with an explicit "wire that once Task 20/21 land real
+  data" note, and nobody came back to it once Task 20/21 actually landed on Day 2/3. Every
+  "LIVE-verified" claim in Tasks 22/23/30/31/32/33 was checked against local dev's
+  `.env.local` proxy or the API directly, never through the public Amplify URL itself — the one
+  URL a judge or the demo video would actually open had been serving `DEMO FIXTURE` on every
+  screen since the app was first stood up, invisibly, because the fallback is silent-to-the-user
+  by design (it just labels itself correctly) and nobody happened to load that exact URL fresh
+  after the backend went live.
+- The lesson isn't "the fallback lied" — it labelled itself correctly every time. It's that a
+  screen-by-screen live-verification habit doesn't catch a build-configuration gap on the one
+  surface that combines all of them: the actual public deployment. Fixed by setting the env var
+  in Amplify and forcing a redeploy (env var changes don't trigger a build on their own); the
+  harness has no AWS credentials, so this — like every `sam deploy` this project — had to be
+  done by hand through the console. Re-verified live via Playwright immediately after: full path
+  `#/business → #/investigation → #/inbox → #/opportunities/{id} → .../execution-pack`, every
+  screen `LIVE RESEARCH`, zero console errors, all network calls 200.
