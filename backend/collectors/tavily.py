@@ -41,6 +41,17 @@ def _post_json(url: str, payload: dict) -> dict:
         return json.loads(response.read())
 
 
+def extract_text(url: str, api_key: str, *, post: Post = _post_json) -> str:
+    """Raw text of one page. Unlike `probe`, this raises on any failure —
+    the caller (evidence-drawer re-fetch, §12.2) treats *any* failure as
+    "fall to the next level", so there's nothing to characterize here."""
+
+    results = post(_EXTRACT_URL, {"api_key": api_key, "urls": [url]}).get("results") or []
+    if not results or not results[0].get("raw_content"):
+        raise ValueError(f"empty extract for {url}")
+    return results[0]["raw_content"]
+
+
 def probe(query: str, api_key: str, *, post: Post = _post_json) -> dict:
     """One search call, then one extract call on the top result.
 
