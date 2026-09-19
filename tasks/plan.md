@@ -388,7 +388,7 @@ Goal: Phase 3's feature freeze holds — everything left closes out the submissi
 **Description:** Exact deadline hour has been unpublished since Day 1 (§22, flagged in plan.md's open questions). Re-check the official schedule page first thing — this gates how the rest of the day is paced.
 
 **Acceptance criteria:**
-- [ ] Deadline hour confirmed and written down (this file's Open Questions, or wherever the team is tracking it)
+- [x] Deadline hour confirmed and written down: **8pm, 2026-09-20** (this file's Open Questions)
 
 **Dependencies:** None — do this first
 
@@ -470,5 +470,5 @@ Goal: Phase 3's feature freeze holds — everything left closes out the submissi
 
 ## Open questions
 
-- Exact submission deadline hour — unpublished as of Day 1 per PRD §22; re-check schedule page daily.
+- ~~Exact submission deadline hour~~ **Resolved 2026-09-20 (Task 38): 8pm today.**
 - Whether `docs/contract.md` or the code files themselves are the source of truth if they ever drift — recommend: code is truth, `docs/contract.md` is a generated/manually-synced mirror, checked at each stand-up.

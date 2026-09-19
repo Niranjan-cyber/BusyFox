@@ -277,8 +277,8 @@ Full detail for every task below: `tasks/plan.md`, Phase 3.
   workaround into a real, driftable second copy of `backend/`) or add a `.samignore` (confirmed
   inert twice now, Day 1 and Day 3 — see `LEARNING.md`). Not yet re-verified on a real `sam
   deploy` (next one will confirm the upload stays near Day 1's ~125MB baseline).
-- [ ] Task 38: Re-check official schedule for actual deadline hour — do this first, it paces
-  the rest of the day
+- [x] Task 38: Deadline confirmed — **8pm, 2026-09-20**. That's the pacing constraint for
+  everything below.
 - [ ] Task 39: Polish all 5 screens, fix Day 3 bugs — check live on Amplify, not local dev
 - [ ] Task 40: Record demo video ≤3:00 per §21 script
 - [ ] Task 41: Write the writeup (problem, build, AWS integration, AI tools used)
