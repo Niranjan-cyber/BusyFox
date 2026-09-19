@@ -196,7 +196,7 @@ def run_evidence_check(
 # Real semantic checker — OpenCode Go (OpenAI-compatible), forced tool
 # choice for structured output. Network/credential-dependent; tests inject a
 # fake `SemanticSupportChecker` instead, same treatment as Task 14's
-# `bedrock_labeller`. Was a raw Bedrock Converse call until 2026-09-19 —
+# `opencode_go_labeller`. Was a raw Bedrock Converse call until 2026-09-19 —
 # every AWS account available to this project has a 0 req/min real-time
 # Bedrock inference quota (see backend/agents/market_agent.py::
 # opencode_go_client_args), so this now goes through OpenCode Go's gateway

@@ -3,7 +3,7 @@
 Only the pure logic is exercised here; the real Strands/Bedrock wiring in
 `_build_live_agent`/`live_collect` is network/credential-dependent and not
 unit-tested, same treatment as Task 5's `tavily.probe` and Task 14's
-`bedrock_labeller`.
+`opencode_go_labeller`.
 """
 
 from __future__ import annotations

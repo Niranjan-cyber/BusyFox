@@ -514,3 +514,12 @@ Kept from Day 1 per the event rules (learning is a scored judging criterion). On
   thing to show and omitting the other; consistent with the project's own rule that a
   substitution is always labelled, never silent, applied here to infrastructure instead of data
   sources.
+
+**Task 36 code review**
+- The 2026-09-19 Bedrock→OpenCode Go migration missed one caller: `feedback_labelling.py`'s
+  `bedrock_labeller`. Ironic near-miss — every other migrated file's comment explicitly names
+  `bedrock_labeller` as the landmark example of "the old pattern," which is exactly why nobody
+  re-checked the file itself; the comments referencing it as history were more visible than the
+  function still running the old code. Grep-for-the-old-name would have caught it faster than
+  reading comments about it. It was never wired into the orchestrator yet, so it hadn't failed
+  live — the review caught it before a real business upload would have.

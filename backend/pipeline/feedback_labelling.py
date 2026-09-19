@@ -8,12 +8,12 @@ a §9.3 sentiment-balance gate before a theme is allowed to become a Signal.
 from __future__ import annotations
 
 import hashlib
+import json
+import os
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from difflib import SequenceMatcher
 from typing import Callable, NamedTuple
-
-import boto3
 
 from backend.pipeline.feedback_pipeline import RawFeedbackItem
 from backend.schemas.entities import (
@@ -59,7 +59,7 @@ _THEME_GROWTH_RATIO = 0.5
 # signal. Revisit if gold-set labelling (Task 24) shows it's too strict/loose.
 _DOMINANT_POLARITY_RATIO = 2.0
 
-_MODEL_ID = "anthropic.claude-haiku-4-5-20251001-v1:0"
+_MODEL_ID = os.environ.get("FEEDBACK_LABELLER_MODEL_ID", "deepseek-v4.1-flash")
 _TOOL_NAME = "emit_feedback_labels"
 
 
@@ -264,8 +264,14 @@ def run_labelling_pipeline(
 
 
 # ---------------------------------------------------------------------------
-# Real labeller — Bedrock Converse, Claude Haiku 4.5, forced structured output.
-# Network/credential-dependent; tests inject a fake `Labeller` instead.
+# Real labeller — OpenCode Go (OpenAI-compatible), forced tool choice for
+# structured output. Network/credential-dependent; tests inject a fake
+# `Labeller` instead. Was a raw Bedrock Converse call until 2026-09-20 —
+# every AWS account available to this project has a 0 req/min real-time
+# Bedrock inference quota (see backend/agents/market_agent.py::
+# opencode_go_client_args), so this now goes through OpenCode Go's gateway
+# with the `openai` SDK instead of `boto3`, same migration every other
+# model-calling component in this codebase got on 2026-09-19.
 # ---------------------------------------------------------------------------
 
 _TOOL_SCHEMA = {
@@ -290,32 +296,37 @@ _TOOL_SCHEMA = {
 }
 
 
-def bedrock_labeller(client=None, model_id: str = _MODEL_ID) -> Labeller:
-    bedrock = client or boto3.client("bedrock-runtime")
+def opencode_go_labeller(client=None, model_id: str = _MODEL_ID) -> Labeller:
+    from backend.agents.market_agent import opencode_go_client_args
+    from openai import OpenAI
+
+    oai = client or OpenAI(**opencode_go_client_args())
 
     def labeller(text: str) -> list[RawLabel]:
-        response = bedrock.converse(
-            modelId=model_id,
-            messages=[{"role": "user", "content": [{"text": text}]}],
-            toolConfig={
-                "tools": [{"toolSpec": {"name": _TOOL_NAME, "inputSchema": {"json": _TOOL_SCHEMA}}}],
-                "toolChoice": {"tool": {"name": _TOOL_NAME}},
-            },
+        response = oai.chat.completions.create(
+            model=model_id,
+            messages=[{"role": "user", "content": text}],
+            tools=[{"type": "function", "function": {"name": _TOOL_NAME, "parameters": _TOOL_SCHEMA}}],
+            # See evidence_check.py's opencode_go_semantic_support_checker: Go's
+            # "thinking mode" models reject a forced tool_choice.
+            tool_choice="auto",
         )
-        for block in response["output"]["message"]["content"]:
-            if "toolUse" in block:
-                entries = block["toolUse"]["input"].get("labels", [])
-                return [
-                    RawLabel(
-                        aspect=entry["aspect"],
-                        polarity=entry["polarity"],
-                        intents=tuple(entry.get("intents", [])),
-                        segment_hint=entry["segment_hint"],
-                        evidence_span=entry["evidence_span"],
-                    )
-                    for entry in entries
-                ]
-        return []
+        tool_calls = response.choices[0].message.tool_calls
+        if not tool_calls:
+            return []
+        entries = json.loads(tool_calls[0].function.arguments).get("labels", [])
+        return [
+            RawLabel(
+                aspect=entry["aspect"],
+                polarity=entry["polarity"],
+                intents=tuple(entry.get("intents", [])),
+                segment_hint=entry["segment_hint"],
+                evidence_span=entry["evidence_span"],
+            )
+            for entry in entries
+        ]
+
+    return labeller
 
     return labeller
 

@@ -48,7 +48,7 @@ from backend.agents.action_agent import RawExecutionPackCollector, run_action_ag
 from backend.agents.synthesis_agent import RawCandidateCollector, run_synthesis_agent
 from backend.db.dynamo import put_entity
 from backend.pipeline.evidence_check import EvidenceCandidate, SemanticSupportChecker, run_evidence_check
-from backend.pipeline.quality_gate import QualityGateResult, run_quality_gate
+from backend.pipeline.quality_gate import QualityGateResult, run_quality_gate, signal_ids
 from backend.schemas.entities import (
     AgentInvocation,
     AgentRuntimeContract,
@@ -131,18 +131,6 @@ def run_feedback_stage(*, run_id: str, seed: int = 1) -> PulseStackFeedback:
     both return the same `evidence`+`signals` shape this module consumes."""
 
     return generate_pulsestack_feedback(load_scenario(), run_id, seed)
-
-
-def _matched_signal_ids(opportunity: Opportunity) -> set[str]:
-    """Every signal Synthesis cited when building this opportunity — mirrors
-    `quality_gate._signal_ids`, duplicated rather than imported since that
-    helper is private to its own module."""
-
-    return (
-        {s.signal_id for s in opportunity.strengths_it_builds_on}
-        | {p.signal_id for p in opportunity.pains_to_fix_first}
-        | {c.signal_id for c in opportunity.competitive_context}
-    )
 
 
 def _candidates_for_claim(
@@ -258,7 +246,7 @@ def run_pipeline(
     signals_by_id = {s.id: s for s in all_signals}
     candidates: list[EvidenceCandidate] = []
     for opportunity in synthesis_output.candidate_opportunities:
-        matched = _matched_signal_ids(opportunity)
+        matched = signal_ids(opportunity)
         for claim_id in opportunity.claim_ids:
             candidates.extend(
                 _candidates_for_claim(

@@ -10,19 +10,10 @@ import { EvidenceCheckDiagram } from '../../components/evidence-check/EvidenceCh
 import { ClaimLabel } from '../../components/common/Labels'
 import { ConfidenceMeter, EditableValueRange, EvidenceDiversityReadout, PriorityChip } from '../../components/common/Metrics'
 import { EmptyState, ErrorState, LoadingState, ServedBanner } from '../../components/common/ScreenState'
-import { claimLabel, opportunityTitle } from '../../lib/viewModels'
+import { CLAIM_HEADING, CLAIM_ORDER, claimLabel, opportunityTitle } from '../../lib/viewModels'
 import type { Claim, Evidence } from '../../types/entities'
 import { useServed } from '../../lib/useServed'
 import './OpportunityDetailScreen.css'
-
-const CLAIM_HEADING: Record<Claim['type'], string> = {
-  why_this: 'Why this',
-  why_you: 'Why you',
-  why_now: 'Why now',
-  mechanism: 'Mechanism',
-}
-
-const CLAIM_ORDER: Claim['type'][] = ['why_this', 'why_you', 'why_now', 'mechanism']
 
 type EvidenceState =
   | { status: 'loading' }
@@ -88,6 +79,10 @@ export function OpportunityDetailScreen({ opportunityId }: { opportunityId: stri
   const sources = [
     { label: 'Opportunity', served: opportunity.served },
     { label: 'Claims', served: claims.served },
+    ...orderedClaims.map((claim) => ({
+      label: `Evidence (${CLAIM_HEADING[claim.type]})`,
+      served: evidence.byClaimId[claim.id],
+    })),
   ]
 
   return (

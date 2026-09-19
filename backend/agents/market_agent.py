@@ -7,7 +7,7 @@ Split the same way Task 14 split the feedback labeller: pure, testable
 logic below (claim validation, budget enforcement, output assembly) with no
 Strands/AWS dependency; the real Strands wiring at the bottom is
 network/credential-dependent and only smoke-tested here, same as
-`backend/pipeline/feedback_labelling.py`'s `bedrock_labeller`.
+`backend/pipeline/feedback_labelling.py`'s `opencode_go_labeller`.
 """
 
 from __future__ import annotations
@@ -179,7 +179,7 @@ def assemble_research_output(
 # ---------------------------------------------------------------------------
 # Real Strands wiring — network/AWS-credential-dependent. Tests inject a
 # fake `raw_signals` producer instead of a live Agent (mirrors Task 5's
-# `probe()` / Task 14's `bedrock_labeller`, neither unit-tested against a
+# `probe()` / Task 14's `opencode_go_labeller`, neither unit-tested against a
 # live network call).
 # ---------------------------------------------------------------------------
 

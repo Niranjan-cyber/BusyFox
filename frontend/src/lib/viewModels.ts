@@ -41,6 +41,17 @@ export function claimLabel(claim: Pick<Claim, 'type'>): ObservedInferredAssumed 
   return CLAIM_TYPE_LABEL[claim.type]
 }
 
+/** §14.6 display heading and card/screen order for the four claim types. Shared by the inbox
+    card and the opportunity detail screen so the two never drift. */
+export const CLAIM_HEADING: Record<ClaimType, string> = {
+  why_this: 'Why this',
+  why_you: 'Why you',
+  why_now: 'Why now',
+  mechanism: 'Mechanism',
+}
+
+export const CLAIM_ORDER: ClaimType[] = ['why_this', 'why_you', 'why_now', 'mechanism']
+
 /** §13.1's Blocked tier: a real, gate-passed opportunity with a product fix in the way.
     Derived from whether a pain-to-fix-first is on record, not a separate stored flag. */
 export function fixFirstFlag(opportunity: Pick<Opportunity, 'pains_to_fix_first'>): boolean {

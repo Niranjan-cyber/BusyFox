@@ -220,8 +220,37 @@ Full detail for every task below: `tasks/plan.md`, Phase 3.
 - [ ] Task 35: Anveshan Precision clip — **conditional**, only if Tasks 26–28/30–33 done by 4pm
 
 ### Everyone, before 8pm
-- [ ] Task 36: `code-review-and-quality` + `code-simplification` + `ponytail-review` pass,
-  time-boxed to finish by 8pm
+- [x] Task 36: `code-review-and-quality` + `code-simplification` + `ponytail-review` pass,
+  time-boxed to finish by 8pm — done 2026-09-20 (Day 4), two parallel reviews (backend/scripts,
+  frontend), all three lenses combined, explicit check against the four CLAUDE.md guardrails
+  (all clear — no composite score, agents structurally emit `signals[]` only, retrieval-mode
+  labelling never silently substituted). 6 real findings fixed:
+  - **Security:** `backend/collectors/producthunt.py` built its GraphQL query by raw f-string
+    interpolation of `slug` (sourced from an LLM tool call) — a `"` or newline could break out
+    of the query. Fixed with `json.dumps(slug)`.
+  - **Correctness/production bug:** `backend/pipeline/feedback_labelling.py`'s `bedrock_labeller`
+    was the one component never migrated off Bedrock in the 2026-09-19 sweep (every AWS account
+    has 0 req/min real-time inference quota, see MEMORY.md) — would hang/fail on any real
+    uploaded-data business. Migrated to OpenCode Go, same pattern as
+    `evidence_check.opencode_go_semantic_support_checker`, renamed to `opencode_go_labeller`.
+  - **Correctness:** `frontend/src/screens/Business/BusinessScreen.tsx` called `exactUsd()` on
+    `Pricing`'s optional fields without a null check — a business missing one pricing tier
+    rendered `$NaN/mo`. Filtered undefined entries before mapping.
+  - **Guardrail-adjacent:** `OpportunityDetailScreen.tsx`'s `ServedBanner` only tracked
+    Opportunity + Claims `Served` sources, not each claim's evidence fetch — the top banner
+    could read "LIVE" while the evidence chain underneath had silently fallen back to
+    `demo_fixture`, exactly the per-screen version of the labelling guardrail. Added each
+    claim's evidence `Served` to the banner's `sources`.
+  - **Simplification:** `CLAIM_HEADING`/`CLAIM_ORDER` were duplicated verbatim in
+    `OpportunityCard.tsx` and `OpportunityDetailScreen.tsx`; moved to `lib/viewModels.ts`, one
+    source of truth. `orchestrator._matched_signal_ids` duplicated
+    `quality_gate._signal_ids`; made the latter public (`signal_ids`) and imported it instead.
+  - **Dead code:** deleted unused `EntityIdPrefix` enum from `backend/schemas/entities.py` (zero
+    references; ids are built with raw f-strings everywhere).
+  Verified: `npm run build`/lint clean, frontend 139/142 (3 pre-existing `.env.local` failures,
+  unchanged from Task 32's note), backend 202/202 passing. One low-likelihood nit flagged but
+  left alone per freeze (`quality_gate.quote_found`'s sentinel-pairing assumption has no schema
+  enforcement) — not worth a schema change this late.
 
 ### Checkpoint: Feature freeze — Day 3, 8pm
 - [ ] Golden path runs start to finish

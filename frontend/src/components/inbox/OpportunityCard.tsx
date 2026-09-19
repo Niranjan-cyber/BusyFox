@@ -2,19 +2,10 @@ import type { Claim, Opportunity } from '../../types/entities'
 import { Card, CardBody, CardFooter, CardHeader } from '../common/Card'
 import { ClaimLabel } from '../common/Labels'
 import { ConfidenceMeter, EvidenceDiversityReadout, PriorityChip, ValueRange } from '../common/Metrics'
-import { claimLabel, opportunityTitle } from '../../lib/viewModels'
+import { CLAIM_HEADING, CLAIM_ORDER, claimLabel, opportunityTitle } from '../../lib/viewModels'
 import './OpportunityCard.css'
 
 /** The card from §1.4. Every line on it is either evidence-backed or labelled as not. */
-
-const CLAIM_HEADING: Record<Claim['type'], string> = {
-  why_this: 'Why this',
-  why_you: 'Why you',
-  why_now: 'Why now',
-  mechanism: 'Mechanism',
-}
-
-const CLAIM_ORDER: Claim['type'][] = ['why_this', 'why_you', 'why_now', 'mechanism']
 
 function ClaimRow({ claim }: { claim: Claim }) {
   return (

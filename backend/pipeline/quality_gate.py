@@ -228,7 +228,7 @@ def check_attribution_safety(opportunity: Opportunity, signals_by_id: dict[str, 
     return None
 
 
-def _signal_ids(opportunity: Opportunity) -> set[str]:
+def signal_ids(opportunity: Opportunity) -> set[str]:
     return (
         {s.signal_id for s in opportunity.strengths_it_builds_on}
         | {p.signal_id for p in opportunity.pains_to_fix_first}
@@ -249,11 +249,11 @@ def _merge_duplicates(survivors: list[Opportunity]) -> tuple[list[Opportunity], 
     for i, a in enumerate(survivors):
         if a.id in dropped:
             continue
-        a_signals = _signal_ids(a)
+        a_signals = signal_ids(a)
         for b in survivors[i + 1 :]:
             if b.id in dropped or b.type != a.type or not a_signals:
                 continue
-            b_signals = _signal_ids(b)
+            b_signals = signal_ids(b)
             if not b_signals:
                 continue
             overlap = len(a_signals & b_signals) / min(len(a_signals), len(b_signals))

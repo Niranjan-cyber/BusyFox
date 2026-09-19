@@ -140,12 +140,14 @@ export function BusinessScreen({ businessId }: { businessId: string }) {
                 ))}
               </ul>
               <dl className="pricing">
-                {Object.entries(business.pricing).map(([plan, price]) => (
-                  <div key={plan}>
-                    <dt>{humanise(plan.replace('_usd_month', ''))}</dt>
-                    <dd className="tabular">{exactUsd(price)}/mo</dd>
-                  </div>
-                ))}
+                {Object.entries(business.pricing)
+                  .filter((entry): entry is [string, number] => entry[1] !== undefined)
+                  .map(([plan, price]) => (
+                    <div key={plan}>
+                      <dt>{humanise(plan.replace('_usd_month', ''))}</dt>
+                      <dd className="tabular">{exactUsd(price)}/mo</dd>
+                    </div>
+                  ))}
               </dl>
             </CardBody>
           </Card>

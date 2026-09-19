@@ -137,19 +137,6 @@ class OutreachChannel(str, Enum):
 # ---------------------------------------------------------------------------
 
 
-class EntityIdPrefix(str, Enum):
-    BUSINESS = "biz_"
-    RUN = "run_"
-    SOURCE_DOCUMENT = "src_"
-    EVIDENCE = "evd_"
-    CLAIM = "claim_"
-    SIGNAL = "sig_"
-    OPPORTUNITY = "opp_"
-    TARGET = "tgt_"
-    EXECUTION_PACK = "pack_"
-    COMPETITOR = "cmp_"
-
-
 class DynamoKeyPrefix(str, Enum):
     BUSINESS = "BIZ#"
     RUN = "RUN#"

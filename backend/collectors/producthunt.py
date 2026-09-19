@@ -51,7 +51,7 @@ def fetch_producthunt_signals(
 ) -> list[Signal]:
     """Most recent launch comments for a product slug, mapped to Signals."""
 
-    query = f'query {{ post(slug: "{slug}") {{ comments(first: 20) {{ edges {{ node {{ id body }} }} }} }} }}'
+    query = f"query {{ post(slug: {json.dumps(slug)}) {{ comments(first: 20) {{ edges {{ node {{ id body }} }} }} }} }}"
     post = fetch(query, token).get("post")
     edges = post["comments"]["edges"] if post else []
 
