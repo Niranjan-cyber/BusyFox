@@ -446,6 +446,16 @@ Kept from Day 1 per the event rules (learning is a scored judging criterion). On
   Task 32) but would pass in CI/a clean checkout. Didn't chase a fix since it's a local-only
   false negative, not a real bug; flagging so a future session doesn't burn time re-diagnosing
   the same three failures as a regression.
+- Task 33 (devtools pass, all 5 screens): a route can be fully committed — SAM template,
+  handler, frontend client, unit tests, todo.md note — and still 404 live, because `sam deploy`
+  is a separate, human-confirmed step from `git commit` in this repo. Screen 2's
+  `/businesses/{id}/signals` (added in Task 30, commit `2fa0e4c`) fell back to its fixture on
+  every real browser check today, not because of a frontend bug but because that commit's SAM
+  changes were never deployed. `curl` straight at the API Gateway origin (bypassing the vite
+  dev proxy) is the fast way to tell "not deployed" apart from "deployed but broken" — the
+  proxy's own 404 looks identical either way. Worth a standing habit: after any task that edits
+  `infra/api-gateway.yaml`, curl the new route directly before checking the task off, not just
+  the unit tests.
 
 ## Day 4 — Sept 20, 2026
 

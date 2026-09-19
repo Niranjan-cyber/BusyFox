@@ -9,3 +9,4 @@ build/
 .aws-sam/
 .env.local
 .env.*.local
+.playwright-mcp/

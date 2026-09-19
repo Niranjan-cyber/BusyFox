@@ -29,7 +29,7 @@ function UnavailableScreen({ route }: { route: string }) {
       <h1>{known ? known.label : 'No such screen'}</h1>
       <p>
         {known
-          ? 'This screen lands later on day 3. Screens 1, 2 and 3 are built.'
+          ? 'This screen needs a specific opportunity — open one from the inbox instead of linking here directly.'
           : `There is no screen at #/${route}.`}
       </p>
       <p>

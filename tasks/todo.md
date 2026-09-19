@@ -186,7 +186,21 @@ Full detail for every task below: `tasks/plan.md`, Phase 3.
   26's known state); no console errors either way. `npm run build`/`lint` clean. (3 tests fail
   locally with "no backend configured" assertions tripped by a developer `.env.local` setting
   `VITE_API_BASE_URL` — pre-existing on `main` too, not introduced here; see LEARNING.md.)
-- [ ] Task 33: `browser-testing-with-devtools` pass on all 5 screens (after 30–32)
+- [~] Task 33: `browser-testing-with-devtools` pass on all 5 screens (after 30–32) —
+  Screens 1, 3, 4, 5 clean: LIVE data end to end (`opp_run_7f023794a99d_0` through
+  business → inbox → detail → execution pack), zero console errors, all network calls
+  200. Fixed one real bug found along the way: `App.tsx`'s `UnavailableScreen` copy
+  ("lands later on day 3. Screens 1, 2 and 3 are built") was stale now that 4/5 exist —
+  reworded to explain screens 4/5 need an opportunity id. Screen 2 (`/investigation`)
+  still shows 4 console errors/poll (404 on `GET /businesses/{id}/signals`) — not a
+  frontend bug, the client falls back to a correctly-labelled DEMO FIXTURE exactly per
+  §7.2. Root cause: Task 30 added the route to `infra/api-gateway.yaml` and the handler
+  code (commit `2fa0e4c`) but it was never `sam deploy`ed — confirmed live via
+  `curl .../businesses/biz_pulsestack/signals` → 404 direct against API Gateway, same
+  class of gap as Task 26's IAM fix. Needs a human-run `sam deploy` (`bash
+  scripts/task6-deploy-wizard.sh` or manual) before this can check off clean; not
+  attempted here per this repo's standing rule that `sam deploy` changesets are
+  human-confirmed, not scripted by the harness.
 
 ### Lane C — Floating
 - [ ] Task 34: Demo-video shot list against §21's scene table — start now, not blocked
