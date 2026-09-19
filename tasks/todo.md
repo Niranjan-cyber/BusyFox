@@ -165,8 +165,27 @@ Full detail for every task below: `tasks/plan.md`, Phase 3.
   (LIVE banner, real claim/evidence text, diagram correctly shows every
   evidence item as `rejected_unsupported` — consistent with that run's known
   zero-verified-strengths state, Task 26's note); no console errors either way.
-- [ ] Task 32: Screen 5 — Execution pack (can build against fixture first, re-point at
-  Task 26 once real)
+- [x] Task 32: Screen 5 — Execution pack. New `frontend/src/screens/ExecutionPack/`
+  (`#/opportunities/{id}/execution-pack`, reached from a new "View execution pack" link at the
+  bottom of screen 4), wired to the already-live `/opportunities/{id}/execution-pack` route
+  (Task 26 — no new backend work needed). Offer/proposal/outreach-drafts rendering lives in a
+  pure `components/execution-pack/ExecutionPackBody.tsx`, same fetch/presentation split as
+  screen 4's `EvidenceCheckDiagram`. Each outreach draft's `proof_point_signal_id` is looked up
+  against the opportunity's own `strengths_it_builds_on` (already on screen, no second fetch)
+  and rendered as its reason text, linking back to `#/opportunities/{id}`; `outreach_policy_checked`
+  (§18.1) is shown per draft with a ✓/✗. New frontend fixture (`fixtures/executionPacks.ts`)
+  deliberately cites `sig_311`, a real signal already on `opp_07`'s `strengths_it_builds_on`, so
+  the proof-point trace has a genuine cross-reference to render even with no backend configured.
+  9 new component/client tests (frontend now 142 total, 1 existing AppShell test updated to
+  match the nav's new copy — see LEARNING.md). Manually verified in a browser (Playwright) both
+  ways: against fixtures
+  (`opp_07`, real fallback triggered by a 404 from the deployed API, proof-point link resolves
+  correctly) and against the deployed API for the real `opp_run_7f023794a99d_0` — LIVE banner,
+  real Action-Agent-generated offer/proposal text, and the "No outreach draft yet" empty state
+  correctly rendered rather than crashing (that opportunity has zero verified strengths, Task
+  26's known state); no console errors either way. `npm run build`/`lint` clean. (3 tests fail
+  locally with "no backend configured" assertions tripped by a developer `.env.local` setting
+  `VITE_API_BASE_URL` — pre-existing on `main` too, not introduced here; see LEARNING.md.)
 - [ ] Task 33: `browser-testing-with-devtools` pass on all 5 screens (after 30–32)
 
 ### Lane C — Floating

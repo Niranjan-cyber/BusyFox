@@ -8,8 +8,10 @@ import { PolaritySplitBar } from '../components/polarity/PolaritySplitBar'
 import { EmptyState, ErrorState, LoadingState, ServedBanner } from '../components/common/ScreenState'
 import { EditableValueRange, EvidenceDiversityReadout } from '../components/common/Metrics'
 import { EvidenceCheckDiagram } from '../components/evidence-check/EvidenceCheckDiagram'
+import { ExecutionPackBody } from '../components/execution-pack/ExecutionPackBody'
 import { claims, opportunities, rejectedIdeas } from '../fixtures/opportunities'
 import { evidenceForClaim } from '../fixtures/evidence'
+import { executionPackFor } from '../fixtures/executionPacks'
 import { feedbackSummary } from '../fixtures/business'
 import { investigationSignals } from '../fixtures/investigation'
 import { evidenceCheckResult, signalLane } from '../lib/viewModels'
@@ -216,24 +218,18 @@ describe('signalLane', () => {
 })
 
 describe('AppShell', () => {
-  it('marks the current screen and says which screens are not built', () => {
+  it('marks the current screen and explains how to reach pending, id-scoped screens', () => {
     const html = renderToStaticMarkup(
       <AppShell route="inbox">
         <p>content</p>
       </AppShell>,
     )
     expect(html).toContain('aria-current="page"')
-    expect(html).toContain('not built yet')
-    expect(html).toContain('Skip to content')
-  })
-
-  it('says how to reach opportunity detail instead of "not built yet", since it now exists', () => {
-    const html = renderToStaticMarkup(
-      <AppShell route="inbox">
-        <p>content</p>
-      </AppShell>,
-    )
+    // Both screen 4 and screen 5 only make sense for a specific opportunity, so the nav says
+    // where to open one from rather than a generic "not built yet".
     expect(html).toContain('open one from the inbox')
+    expect(html).toContain('open one from an opportunity detail screen')
+    expect(html).toContain('Skip to content')
   })
 })
 
@@ -342,5 +338,43 @@ describe('EditableValueRange', () => {
       expect(html).toContain(assumption.description)
     }
     expect(html).toContain('OBSERVED')
+  })
+})
+
+describe('ExecutionPackBody', () => {
+  const opportunity = opportunities.find((o) => o.id === 'opp_07')!
+  const pack = executionPackFor('opp_07')
+
+  it('renders offer, proposal and every outreach draft with its policy check', () => {
+    const html = renderToStaticMarkup(<ExecutionPackBody pack={pack} opportunity={opportunity} />)
+    expect(html).toContain(pack.offer)
+    expect(html).toContain(pack.proposal)
+    expect(html).toContain(pack.outreach_drafts[0].draft)
+    expect(html).toContain('outreach policy checked')
+  })
+
+  it("traces an outreach draft's proof point back to its source signal's reason", () => {
+    const html = renderToStaticMarkup(<ExecutionPackBody pack={pack} opportunity={opportunity} />)
+    const strength = opportunity.strengths_it_builds_on.find(
+      (item) => item.signal_id === pack.outreach_drafts[0].proof_point_signal_id,
+    )!
+    expect(html).toContain(strength.reason)
+    expect(html).toContain(`href="#/opportunities/${opportunity.id}"`)
+  })
+
+  it('never names how the evidence behind a proof point was found', () => {
+    // §16.1's signature moment for this screen: a draft cites the strength itself, never the
+    // research method behind it.
+    const html = renderToStaticMarkup(<ExecutionPackBody pack={pack} opportunity={opportunity} />).toLowerCase()
+    for (const banned of ['hacker news', 'app store', 'product hunt', 'tavily', 'scraped']) {
+      expect(html).not.toContain(banned)
+    }
+  })
+
+  it('shows a real empty state rather than crashing when there is no outreach draft yet', () => {
+    const html = renderToStaticMarkup(
+      <ExecutionPackBody pack={{ ...pack, outreach_drafts: [] }} opportunity={opportunity} />,
+    )
+    expect(html).toContain('No outreach draft yet')
   })
 })

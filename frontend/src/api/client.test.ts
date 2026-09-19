@@ -3,6 +3,7 @@ import {
   fetchBusiness,
   fetchClaimEvidence,
   fetchClaims,
+  fetchExecutionPack,
   fetchFeedbackSignals,
   fetchInbox,
   fetchOpportunities,
@@ -14,6 +15,7 @@ import {
 import type { Served } from './client'
 import { business, feedbackSignals } from '../fixtures/business'
 import { evidenceForClaim } from '../fixtures/evidence'
+import { executionPackFor } from '../fixtures/executionPacks'
 import { investigationSignals } from '../fixtures/investigation'
 import { claims, opportunities, rejectedIdeas } from '../fixtures/opportunities'
 
@@ -323,6 +325,43 @@ describe('screen 4: opportunity detail and its evidence chain', () => {
     expect(evidence.data.map((item) => item.id)).toEqual(
       claims.find((claim) => claim.id === 'claim_0701')!.evidence_ids,
     )
+  })
+})
+
+describe('screen 5: execution pack', () => {
+  it('fetches one opportunity\'s execution pack from the contract route', async () => {
+    vi.stubEnv('VITE_API_BASE_URL', BASE)
+    const livePack = executionPackFor('opp_07')
+    const calls = stubFetch(() => jsonResponse(livePack, { 'X-Retrieval-Mode': 'live' }))
+
+    const pack = await fetchExecutionPack('opp_07')
+
+    expect(calls).toEqual([`${BASE}/opportunities/opp_07/execution-pack`])
+    expect(pack.retrieval_mode).toBe('live')
+    expect(pack.data).toEqual(livePack)
+  })
+
+  it('falls back to the fixture pack, labelled, when the endpoint fails', async () => {
+    vi.stubEnv('VITE_API_BASE_URL', BASE)
+    stubFetch(() => new Response('{}', { status: 500 }))
+
+    const pack = await fetchExecutionPack('opp_07')
+
+    expect(pack.retrieval_mode).toBe('demo_fixture')
+    expect(pack.data).toEqual(executionPackFor('opp_07'))
+    expect(pack.fallback_reason).toContain('500')
+  })
+
+  it('serves the fixture pack with no backend configured', async () => {
+    const calls = stubFetch(() => {
+      throw new Error('must not call fetch with no base URL configured')
+    })
+
+    const pack = await fetchExecutionPack('opp_07')
+
+    expect(calls).toEqual([])
+    expect(pack.retrieval_mode).toBe('demo_fixture')
+    expect(pack.data.outreach_drafts.length).toBeGreaterThan(0)
   })
 })
 

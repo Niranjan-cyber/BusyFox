@@ -176,6 +176,10 @@ export function OpportunityDetailScreen({ opportunityId }: { opportunityId: stri
           )}
         />
       </Section>
+
+      <p className="screen-lede">
+        <a href={`#/opportunities/${opportunityId}/execution-pack`}>View execution pack →</a>
+      </p>
     </>
   )
 }

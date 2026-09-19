@@ -1,8 +1,9 @@
 import { business, feedbackSignals } from '../fixtures/business'
 import { evidenceForClaim } from '../fixtures/evidence'
+import { executionPackFor } from '../fixtures/executionPacks'
 import { investigationSignals } from '../fixtures/investigation'
 import { claims, opportunities, rejectedIdeas } from '../fixtures/opportunities'
-import type { Business, Claim, Evidence, Opportunity, RetrievalMode, Signal } from '../types/entities'
+import type { Business, Claim, Evidence, ExecutionPack, Opportunity, RetrievalMode, Signal } from '../types/entities'
 import type { RejectedIdea, ServedMode } from '../lib/viewModels'
 
 /**
@@ -222,4 +223,10 @@ export function fetchOpportunity(opportunityId: string): Promise<Served<Opportun
     the data screen 4's Evidence Check diagram walks (Task 18's `run_evidence_check` output). */
 export function fetchClaimEvidence(claimId: string): Promise<Served<Evidence[]>> {
   return servedOrFixture(`/claims/${claimId}/evidence`, evidenceForClaim(claimId))
+}
+
+/** docs/contract.md — screen 5's offer/proposal/outreach drafts for one opportunity
+    (Task 26's Action Agent output). */
+export function fetchExecutionPack(opportunityId: string): Promise<Served<ExecutionPack>> {
+  return servedOrFixture(`/opportunities/${opportunityId}/execution-pack`, executionPackFor(opportunityId))
 }

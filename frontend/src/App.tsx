@@ -2,12 +2,14 @@ import { AppShell } from './components/layout/AppShell'
 import { SCREENS } from './components/layout/screens'
 import { useHashRoute } from './lib/useHashRoute'
 import { BusinessScreen } from './screens/Business/BusinessScreen'
+import { ExecutionPackScreen } from './screens/ExecutionPack/ExecutionPackScreen'
 import { InboxScreen } from './screens/Inbox/InboxScreen'
 import { InvestigationScreen } from './screens/Investigation/InvestigationScreen'
 import { OpportunityDetailScreen } from './screens/OpportunityDetail/OpportunityDetailScreen'
 import { TokensScreen } from './screens/Tokens/TokensScreen'
 
 const OPPORTUNITY_ROUTE_PREFIX = 'opportunities/'
+const EXECUTION_PACK_SUFFIX = '/execution-pack'
 
 /**
  * The business is fixed for the hackathon scope: PulseStack is the only business in the
@@ -41,9 +43,13 @@ function UnavailableScreen({ route }: { route: string }) {
 
 function App() {
   const route = useHashRoute('business')
-  const opportunityId = route.startsWith(OPPORTUNITY_ROUTE_PREFIX)
+  const opportunityMatch = route.startsWith(OPPORTUNITY_ROUTE_PREFIX)
     ? route.slice(OPPORTUNITY_ROUTE_PREFIX.length)
     : null
+  const isExecutionPack = opportunityMatch !== null && opportunityMatch.endsWith(EXECUTION_PACK_SUFFIX)
+  const opportunityId = isExecutionPack
+    ? opportunityMatch!.slice(0, -EXECUTION_PACK_SUFFIX.length)
+    : opportunityMatch
 
   if (route === 'tokens') return <TokensScreen />
 
@@ -51,11 +57,16 @@ function App() {
     route === 'business' || route === 'investigation' || route === 'inbox' || opportunityId !== null
 
   return (
-    <AppShell route={opportunityId !== null ? 'opportunity' : route}>
+    <AppShell route={opportunityId !== null ? (isExecutionPack ? 'execution' : 'opportunity') : route}>
       {route === 'business' ? <BusinessScreen businessId={BUSINESS_ID} /> : null}
       {route === 'investigation' ? <InvestigationScreen businessId={BUSINESS_ID} /> : null}
       {route === 'inbox' ? <InboxScreen businessId={BUSINESS_ID} /> : null}
-      {opportunityId !== null ? <OpportunityDetailScreen opportunityId={opportunityId} /> : null}
+      {opportunityId !== null && !isExecutionPack ? (
+        <OpportunityDetailScreen opportunityId={opportunityId} />
+      ) : null}
+      {opportunityId !== null && isExecutionPack ? (
+        <ExecutionPackScreen opportunityId={opportunityId} />
+      ) : null}
       {!known ? <UnavailableScreen route={route} /> : null}
     </AppShell>
   )

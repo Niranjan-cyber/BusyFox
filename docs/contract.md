@@ -159,6 +159,7 @@ at real rows: each tries DynamoDB first (`backend/handlers/_common.py`'s
 `AWS_LAMBDA_FUNCTION_NAME` — so local dev/test never pays boto3's several-
 second no-credentials timeout) and falls back to the Task 2 fixture only
 for the demo business/opportunity/claim ids when Dynamo has nothing yet.
-Once Action Agent (Day 3) exists, `get_execution_pack` gets the same
-treatment; today it stays fixture-only since nothing writes an
-`ExecutionPack` yet.
+Task 26's Action Agent now writes one `ExecutionPack` per gate-passed
+opportunity, and `get_execution_pack` reads it the same DynamoDB-first,
+fixture-fallback way as every other handler here — live-verified 2026-09-19
+against `opp_run_7f023794a99d_0` (Task 32).

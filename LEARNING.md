@@ -432,6 +432,20 @@ Kept from Day 1 per the event rules (learning is a scored judging criterion). On
   semantic check says no) — consistent with Task 26's note that this run has zero verified
   strengths. A live run that fails Evidence Check cleanly is itself a useful thing to have
   actually seen happen, not just unit-tested.
+- Task 32 (Screen 5): checked the last P0 screen against the real deployed
+  `opp_run_7f023794a99d_0` and it produced the cleanest possible confirmation of Task 26's
+  `outreach_policy` enforcement — a real Action-Agent-written offer and proposal, but zero
+  outreach drafts, because that opportunity has no verified strength to cite. The screen had to
+  render that as a real empty state rather than assume `outreach_drafts` is always non-empty.
+  If the frontend build had happened before Task 26's live run instead of after, the empty case
+  would have been easy to miss and ship as a silent blank block.
+- Local dev has a `.env.local` with `VITE_API_BASE_URL=/api`, which `vitest` also picks up (Vite
+  loads `.env.local` for every mode, not just `dev`). Any test asserting "no fetch call happens
+  with no backend configured" silently starts hitting the network in this environment even
+  though it's `vi.stubEnv`-free — three such tests fail locally (two pre-existing, one added by
+  Task 32) but would pass in CI/a clean checkout. Didn't chase a fix since it's a local-only
+  false negative, not a real bug; flagging so a future session doesn't burn time re-diagnosing
+  the same three failures as a regression.
 
 ## Day 4 — Sept 20, 2026
 

@@ -292,12 +292,12 @@ Goal: opportunity-to-action works end to end; feature freeze at 8pm. Nothing her
 **Description:** Per §16.1: offer, proposal, and outreach drafts, each outreach draft showing its cited `proof_point_signal_id` traceably. Can be built against the fixture first and re-pointed at Task 26's real data once that lands — don't block Screen 5 on Action Agent being finished if Lane A is still mid-task.
 
 **Acceptance criteria:**
-- [ ] Offer/proposal/outreach drafts all rendered, each outreach draft's proof point clickable back to its source signal
-- [ ] Works against fixture data even before Task 26 is done; swaps to live data with no UI change once it is
+- [x] Offer/proposal/outreach drafts all rendered, each outreach draft's proof point clickable back to its source signal
+- [x] Works against fixture data even before Task 26 is done; swaps to live data with no UI change once it is
 
 **Verification:**
-- [ ] Component tests against fixture data
-- [ ] Manual check against Task 26's real pack once available
+- [x] Component tests against fixture data
+- [x] Manual check against Task 26's real pack once available
 
 **Dependencies:** Task 9/22 pattern; Task 26 for real (not fixture) data
 
