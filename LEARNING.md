@@ -264,6 +264,41 @@ Kept from Day 1 per the event rules (learning is a scored judging criterion). On
   the `!` prefix, in their own terminal. Budgeted for that up front instead of retrying the same
   blocked call.
 
+**Bedrock was never coming back — root cause, then a real fix (Market/Competitor/Synthesis, Evidence Check)**
+- Day 1's log says Bedrock access was confirmed ("Access granted", no wait) — that checked the
+  model-access *grant*, not the account's actual invoke *quota*, and those are different things.
+  `aws bedrock list-foundation-models` showing a model as `ACTIVE` proves nothing about whether a
+  call will succeed. The only real proof is an actual `Converse`/`InvokeModel` call; every attempt
+  today returned `ValidationException: Operation not allowed`, on both this account and a second,
+  genuinely different teammate account, for Claude *and* Amazon's own Nova — ruling out a
+  per-model or per-provider access gate. `aws service-quotas list-service-quotas --service-code
+  bedrock` found the actual cause: every real-time inference quota (on-demand and cross-region,
+  requests/min and tokens/min, every model) was a hard 0 — the default for a new AWS account,
+  unrelated to which model or which account. Two independent accounts hitting the identical wall
+  is what made this diagnosable instead of "maybe try a third profile."
+- Rather than wait on an AWS quota increase with no ETA, switched all four Bedrock call sites
+  (three agents' `Agent(model=BedrockModel(...))`, plus Evidence Check's raw `boto3` Converse call
+  for semantic claim support) to OpenCode Go, an already-paid-for $10/mo subscription, via its
+  OpenAI-compatible gateway. `strands-agents` 1.56 already ships `strands.models.openai.OpenAIModel`
+  with a `client_args` escape hatch for a custom `base_url` — no new agent framework needed, just a
+  different model provider underneath the same `Agent`/`@tool` code.
+- Getting there needed two more real, only-discoverable-by-calling-it fixes: Go 400s with
+  `MissingSessionID` unless every request carries an `x-opencode-session` header (undocumented as
+  a hard requirement, mentioned only in passing as a caching optimization); and Go's models run in
+  "thinking mode," which rejects a forced `tool_choice` (`{"type": "function", ...}`) outright —
+  `tool_choice="auto"` gets the identical real tool call in practice, verified live, not assumed.
+  Also unrelated to Go specifically: `strands.models.openai.OpenAIModel` doesn't take `max_tokens`
+  as a constructor kwarg the way `BedrockModel` did — it's silently dropped with a `UserWarning`
+  unless passed inside `params={"max_tokens": ...}}`, a fix that would've been easy to miss without
+  actually reading stderr on a real run rather than just checking the tool call succeeded.
+- Asked an LLM (via WebFetch) to summarize OpenCode Go's model catalog from its docs page before
+  the real API key existed to check it against — got back a suspiciously large, neatly-formatted
+  table of model IDs. Flagged it as possibly partly invented rather than trusting it, and once a
+  real key existed, fetched `/v1/models` directly instead: the real list differed from the
+  summarized one in several entries. A page-summarizer asked "list every X with its exact ID" will
+  produce something that looks authoritative whether or not the source page actually said all of
+  it — worth the extra live call before hardcoding anything from it.
+
 ## Day 4 — Sept 20, 2026
 
 *(Not yet written.)*

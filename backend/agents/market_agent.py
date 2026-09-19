@@ -35,9 +35,9 @@ from backend.schemas.entities import (
 from strands.hooks import BeforeModelCallEvent, BeforeToolCallEvent
 
 _COMPONENT = "market_agent"
-# MARKET_AGENT_MODEL_ID lets this be swapped (e.g. to a Nova model) without a
-# code change while Claude model access is pending on this AWS account.
-_MODEL_ID = os.environ.get("MARKET_AGENT_MODEL_ID", "anthropic.claude-haiku-4-5-20251001-v1:0")
+# MARKET_AGENT_MODEL_ID lets this be swapped without a code change. Default is
+# an OpenCode Go model id (see opencode_go_client_args below), not a Bedrock one.
+_MODEL_ID = os.environ.get("MARKET_AGENT_MODEL_ID", "deepseek-v4.1-flash")
 
 # §9.4 — tool sources this agent is allowed to draw claims from.
 _ALLOWED_SOURCE_KINDS = frozenset({SourceKind.WEB_PUBLIC, SourceKind.HN, SourceKind.GITHUB})
@@ -205,7 +205,7 @@ def _build_live_agent(contract: AgentRuntimeContract, budget: RuntimeBudget):
     requires the SDK or AWS credentials to be importable/testable."""
 
     from strands import Agent, tool
-    from strands.models import BedrockModel
+    from strands.models.openai import OpenAIModel
 
     from backend.collectors.github import fetch_github_signals
     from backend.collectors.hn import fetch_hn_signals
@@ -260,7 +260,9 @@ def _build_live_agent(contract: AgentRuntimeContract, budget: RuntimeBudget):
             event.cancel_tool = "runtime contract exhausted (§10.1a)"
 
     agent = Agent(
-        model=BedrockModel(model_id=_MODEL_ID, max_tokens=contract.max_tokens, boto_session=bedrock_session()),
+        model=OpenAIModel(
+            client_args=opencode_go_client_args(), model_id=_MODEL_ID, params={"max_tokens": contract.max_tokens}
+        ),
         tools=[search_web, search_hn, search_github, emit_market_signal],
         system_prompt=(
             "You are the Market Agent. Find claim-level, count/date/source-anchored "
@@ -272,19 +274,31 @@ def _build_live_agent(contract: AgentRuntimeContract, budget: RuntimeBudget):
     return agent, collected
 
 
-def bedrock_session():
-    """BEDROCK_AWS_PROFILE routes every Bedrock call (this agent, Competitor,
-    Synthesis, Evidence Check) through a different AWS profile/account than
-    everything else (DynamoDB, collectors) — for when this account's own
-    Bedrock model access is blocked but a teammate's account isn't. Unset
-    (the normal case) falls back to the default credential chain."""
+def opencode_go_client_args() -> dict:
+    """This agent (and Competitor, Synthesis, Evidence Check) call an LLM
+    through OpenCode Go's OpenAI-compatible gateway (https://opencode.ai/docs/go/)
+    rather than Bedrock — AWS Bedrock's real-time inference quota is 0
+    requests/minute on every account available to this project (confirmed
+    against Anthropic's and Amazon's own models alike, 2026-09-19), so
+    nothing on Bedrock is actually callable regardless of which model is
+    chosen there.
 
-    profile = os.environ.get("BEDROCK_AWS_PROFILE")
-    if not profile:
-        return None
-    import boto3
+    Go requires an `x-opencode-session` header on every request ("Request is
+    missing x-opencode-session and cannot be routed efficiently") — a fresh
+    id per client is fine, it's for Go's own routing/caching, not something
+    this project needs to track or reuse across calls."""
 
-    return boto3.Session(profile_name=profile)
+    key = os.environ.get("OPENCODE_GO_API_KEY")
+    if not key:
+        raise RuntimeError("OPENCODE_GO_API_KEY not set")
+
+    import uuid
+
+    return {
+        "api_key": key,
+        "base_url": "https://opencode.ai/zen/go/v1",
+        "default_headers": {"x-opencode-session": str(uuid.uuid4())},
+    }
 
 
 def _tavily_api_key() -> str:

@@ -27,7 +27,7 @@ import os
 from dataclasses import dataclass
 from typing import Callable, NamedTuple
 
-from backend.agents.market_agent import RuntimeBudget, bedrock_session
+from backend.agents.market_agent import RuntimeBudget, opencode_go_client_args
 from backend.schemas.entities import (
     AgentInvocation,
     AgentRuntimeContract,
@@ -57,13 +57,11 @@ from backend.schemas.entities import (
 from strands.hooks import BeforeModelCallEvent, BeforeToolCallEvent
 
 _COMPONENT = "synthesis_agent"
-# PRD names "Claude Sonnet 4.6" (§10.1). The dated `-20260115-v1:0` suffix,
-# guessed to mirror Task 15/16's Haiku ID format, doesn't exist in Bedrock's
-# catalog and was never caught since this path is only smoke-tested —
-# `aws bedrock list-foundation-models` confirms the real id has no date/
-# version suffix.
-# See market_agent.py's identical env override.
-_MODEL_ID = os.environ.get("SYNTHESIS_AGENT_MODEL_ID", "anthropic.claude-sonnet-4-6")
+# See market_agent.py's identical env override and OpenCode Go note. PRD
+# names "Claude Sonnet 4.6" (§10.1); using the same OpenCode Go model as
+# Market/Competitor instead since Bedrock is unreachable on every available
+# AWS account (see opencode_go_client_args).
+_MODEL_ID = os.environ.get("SYNTHESIS_AGENT_MODEL_ID", "deepseek-v4.1-flash")
 
 _KNOWN_TYPES = frozenset(t.value for t in OpportunityType)
 
@@ -298,7 +296,7 @@ def _build_live_agent(contract: AgentRuntimeContract, budget: RuntimeBudget):
     over the signals it's handed, it never goes back out to research."""
 
     from strands import Agent, tool
-    from strands.models import BedrockModel
+    from strands.models.openai import OpenAIModel
 
     collected: list[RawCandidate] = []
 
@@ -348,7 +346,9 @@ def _build_live_agent(contract: AgentRuntimeContract, budget: RuntimeBudget):
             event.cancel_tool = "runtime contract exhausted (§10.1a)"
 
     agent = Agent(
-        model=BedrockModel(model_id=_MODEL_ID, max_tokens=contract.max_tokens, boto_session=bedrock_session()),
+        model=OpenAIModel(
+            client_args=opencode_go_client_args(), model_id=_MODEL_ID, params={"max_tokens": contract.max_tokens}
+        ),
         tools=[emit_candidate_opportunity],
         system_prompt=(
             "You are the Synthesis Agent. Combine the signals below using the "

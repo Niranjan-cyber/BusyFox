@@ -19,12 +19,11 @@ this produces to run its 14 checks; it does not belong here.
 
 from __future__ import annotations
 
+import json
 import os
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Callable, NamedTuple, Optional
-
-import boto3
 
 from backend.pipeline.feedback_labelling import span_found
 from backend.schemas.entities import (
@@ -40,8 +39,8 @@ from backend.schemas.entities import (
     SourceKind,
 )
 
-# See backend/agents/market_agent.py's identical env override.
-_MODEL_ID = os.environ.get("EVIDENCE_CHECK_MODEL_ID", "anthropic.claude-haiku-4-5-20251001-v1:0")
+# See backend/agents/market_agent.py's identical env override and OpenCode Go note.
+_MODEL_ID = os.environ.get("EVIDENCE_CHECK_MODEL_ID", "deepseek-v4.1-flash")
 _TOOL_NAME = "emit_claim_support"
 
 # §11.4's table is a small set of semantic categories, not a field Signal
@@ -165,7 +164,7 @@ def run_evidence_check(
 ) -> EvidenceCheckResult:
     """Entry point Task 21's orchestrator calls between Synthesis and
     Quality Gate. `semantic_check` does the one Haiku call (real Bedrock in
-    production via `bedrock_semantic_support_checker`, a fake in tests)."""
+    production via `opencode_go_semantic_support_checker`, a fake in tests)."""
 
     claims_by_id = {c.id: c for c in claims}
     candidates_by_claim: dict[str, list[EvidenceCandidate]] = {}
@@ -194,10 +193,14 @@ def run_evidence_check(
 
 
 # ---------------------------------------------------------------------------
-# Real semantic checker — Bedrock Converse, Claude Haiku 4.5, forced
-# structured output. Network/credential-dependent; tests inject a fake
-# `SemanticSupportChecker` instead, same treatment as Task 14's
-# `bedrock_labeller`.
+# Real semantic checker — OpenCode Go (OpenAI-compatible), forced tool
+# choice for structured output. Network/credential-dependent; tests inject a
+# fake `SemanticSupportChecker` instead, same treatment as Task 14's
+# `bedrock_labeller`. Was a raw Bedrock Converse call until 2026-09-19 —
+# every AWS account available to this project has a 0 req/min real-time
+# Bedrock inference quota (see backend/agents/market_agent.py::
+# opencode_go_client_args), so this now goes through OpenCode Go's gateway
+# with the `openai` SDK instead of `boto3`.
 # ---------------------------------------------------------------------------
 
 _TOOL_SCHEMA = {
@@ -211,27 +214,30 @@ _TOOL_SCHEMA = {
 }
 
 
-def bedrock_semantic_support_checker(client=None, model_id: str = _MODEL_ID) -> SemanticSupportChecker:
-    from backend.agents.market_agent import bedrock_session
+def opencode_go_semantic_support_checker(client=None, model_id: str = _MODEL_ID) -> SemanticSupportChecker:
+    from backend.agents.market_agent import opencode_go_client_args
 
-    session = bedrock_session()
-    bedrock = client or (session.client("bedrock-runtime") if session else boto3.client("bedrock-runtime"))
+    from openai import OpenAI
+
+    oai = client or OpenAI(**opencode_go_client_args())
 
     def check(claim_text: str, quote: str) -> ClaimSupport:
         prompt = f'Claim: "{claim_text}"\nQuote: "{quote}"\nDoes the quote support the claim: yes/partial/no, one-sentence reason.'
-        response = bedrock.converse(
-            modelId=model_id,
-            messages=[{"role": "user", "content": [{"text": prompt}]}],
-            toolConfig={
-                "tools": [{"toolSpec": {"name": _TOOL_NAME, "inputSchema": {"json": _TOOL_SCHEMA}}}],
-                "toolChoice": {"tool": {"name": _TOOL_NAME}},
-            },
+        response = oai.chat.completions.create(
+            model=model_id,
+            messages=[{"role": "user", "content": prompt}],
+            tools=[{"type": "function", "function": {"name": _TOOL_NAME, "parameters": _TOOL_SCHEMA}}],
+            # Not a forced tool_choice: Go's "thinking mode" models 400 on
+            # `{"type": "function", ...}` ("Thinking mode does not support
+            # this tool_choice") — "auto" with a single tool and a directive
+            # prompt gets the same real call in practice (verified live).
+            tool_choice="auto",
         )
-        for block in response["output"]["message"]["content"]:
-            if "toolUse" in block:
-                data = block["toolUse"]["input"]
-                return ClaimSupport(status=ClaimSupportStatus(data["status"]), confidence=float(data["confidence"]), reason=data["reason"])
-        return ClaimSupport(status=ClaimSupportStatus.UNSUPPORTED, confidence=0.0, reason="model returned no tool call")
+        tool_calls = response.choices[0].message.tool_calls
+        if not tool_calls:
+            return ClaimSupport(status=ClaimSupportStatus.UNSUPPORTED, confidence=0.0, reason="model returned no tool call")
+        data = json.loads(tool_calls[0].function.arguments)
+        return ClaimSupport(status=ClaimSupportStatus(data["status"]), confidence=float(data["confidence"]), reason=data["reason"])
 
     return check
 

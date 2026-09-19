@@ -25,7 +25,7 @@ import os
 from dataclasses import dataclass
 from typing import Callable, NamedTuple
 
-from backend.agents.market_agent import RuntimeBudget, bedrock_session
+from backend.agents.market_agent import RuntimeBudget, opencode_go_client_args
 from backend.schemas.entities import (
     AgentInvocation,
     AgentRuntimeContract,
@@ -40,8 +40,8 @@ from backend.schemas.entities import (
 from strands.hooks import BeforeModelCallEvent, BeforeToolCallEvent
 
 _COMPONENT = "competitor_agent"
-# See market_agent.py's identical env override.
-_MODEL_ID = os.environ.get("COMPETITOR_AGENT_MODEL_ID", "anthropic.claude-haiku-4-5-20251001-v1:0")
+# See market_agent.py's identical env override and OpenCode Go note.
+_MODEL_ID = os.environ.get("COMPETITOR_AGENT_MODEL_ID", "deepseek-v4.1-flash")
 
 # §7 S1-S3 (P0) plus S4-S5 (P1 enrichment) — never SIMULATED (§18.1/gate check 10).
 _ALLOWED_SOURCE_KINDS = frozenset(
@@ -173,7 +173,7 @@ def _build_live_agent(contract: AgentRuntimeContract, budget: RuntimeBudget, nam
     importable/testable."""
 
     from strands import Agent, tool
-    from strands.models import BedrockModel
+    from strands.models.openai import OpenAIModel
 
     from backend.collectors.app_store import fetch_app_store_signals
     from backend.collectors.github import fetch_github_signals
@@ -263,7 +263,9 @@ def _build_live_agent(contract: AgentRuntimeContract, budget: RuntimeBudget, nam
             event.cancel_tool = "runtime contract exhausted (§10.1a)"
 
     agent = Agent(
-        model=BedrockModel(model_id=_MODEL_ID, max_tokens=contract.max_tokens, boto_session=bedrock_session()),
+        model=OpenAIModel(
+            client_args=opencode_go_client_args(), model_id=_MODEL_ID, params={"max_tokens": contract.max_tokens}
+        ),
         tools=[search_web, search_hn, search_github, search_app_store, search_producthunt, emit_competitor_signal],
         system_prompt=(
             "You are the Competitor Agent. Named competitors in scope: "
