@@ -1,4 +1,4 @@
-import type { RejectedIdea } from '../../lib/viewModels'
+import { rejectionGateLabel, rejectionReasonLabel, type RejectedIdea } from '../../lib/viewModels'
 import './RejectedIdeas.css'
 
 /**
@@ -28,8 +28,8 @@ export function RejectedIdeas({
       {ideas.map((idea) => (
         <li key={idea.id} className="rejected">
           <h3>{idea.title}</h3>
-          <p className="rejected-gate">{idea.failed_gate}</p>
-          <p className="rejected-reason">{idea.rejected_because}</p>
+          <p className="rejected-gate">{rejectionGateLabel(idea.failed_gate)}</p>
+          <p className="rejected-reason">{rejectionReasonLabel(idea.rejected_because)}</p>
         </li>
       ))}
     </ul>

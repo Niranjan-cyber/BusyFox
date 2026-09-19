@@ -78,6 +78,47 @@ export interface RejectedIdea {
   failed_gate: string
 }
 
+/** `backend/pipeline/quality_gate.py`'s gate-category slugs, screen-3-facing. */
+const REJECTION_GATE_LABEL: Record<string, string> = {
+  truth: 'Evidence Check',
+  relevance: 'Relevance Check',
+  commerciality: 'Commerciality Check',
+  quality_safety: 'Quality & Safety Check',
+}
+
+/** `backend/pipeline/quality_gate.py`'s per-check failure slugs, screen-3-facing. */
+const REJECTION_REASON_LABEL: Record<string, string> = {
+  no_verified_evidence: 'No claim in this idea has verified evidence backing it.',
+  citation_exists_but_unsupported: "A cited source exists but doesn't support the claim.",
+  why_now_rests_solely_on_stale_evidence: 'The "why now" claim rests only on stale evidence.',
+  mechanism_missing: 'No mechanism statement, segment, or reason it is actionable.',
+  incomplete_opportunity: 'Missing one of the four required claim types.',
+  not_actionable: 'No concrete next step, or a narrative claim failed to verify.',
+  invented_competitor_claim: 'Cites a signal that was never actually collected.',
+  simulated_claim_attributed_to_competitor: "Attributes PulseStack's own simulated data to a competitor.",
+  account_fit_inference_without_observed_facts: 'Account fit was inferred without observed facts.',
+}
+
+function humanizeSlug(slug: string): string {
+  return slug.charAt(0).toUpperCase() + slug.slice(1).replace(/_/g, ' ')
+}
+
+/** Screen 3's rejected-gate label. Falls back to a humanized slug for anything not yet mapped,
+    so an unmapped or future gate category still renders as prose, not a blank. */
+export function rejectionGateLabel(gate: string): string {
+  return REJECTION_GATE_LABEL[gate] ?? humanizeSlug(gate)
+}
+
+/** Screen 3's rejected-reason label. `duplicate_merged_into:<id>` carries a dynamic id, so it's
+    handled separately rather than as a static lookup entry. */
+export function rejectionReasonLabel(reason: string): string {
+  const [prefix, id] = reason.split(':')
+  if (prefix === 'duplicate_merged_into' && id) {
+    return `Merged into a stronger duplicate opportunity (${id}).`
+  }
+  return REJECTION_REASON_LABEL[reason] ?? humanizeSlug(reason)
+}
+
 /**
  * `docs/contract.md:61` — `/businesses/{id}/feedback-summary` returns `Signal[]`, not a
  * bespoke summary type. Grouping those signals by aspect into themes for screen 1 is a

@@ -34,10 +34,10 @@ def get_claim_evidence(event: dict, context: object) -> dict:
     claim = dynamo_get(DynamoKeyPrefix.CLAIM, claim_id, Claim)
     if claim is not None:
         evidence = dynamo_children(f"{DynamoKeyPrefix.CLAIM.value}{claim_id}", DynamoKeyPrefix.EVIDENCE, Evidence)
-        return ok(evidence or [])
+        return ok(evidence or [], retrieval_mode=RetrievalMode.LIVE)
 
     fixture_claim = _CLAIMS_BY_ID.get(claim_id)
     if fixture_claim is None:
         return not_found(f"no claim with id {claim_id!r}")
     evidence = [EVIDENCE_BY_ID[eid] for eid in fixture_claim.evidence_ids if eid in EVIDENCE_BY_ID]
-    return ok(evidence)
+    return ok(evidence, retrieval_mode=RetrievalMode.DEMO_FIXTURE)
