@@ -44,6 +44,7 @@ from backend.agents.market_agent import RawMarketSignal, RuntimeBudget
 from backend.agents.market_agent import RawSignalCollector as MarketCollector
 from backend.agents.market_agent import build_signal as build_market_signal
 from backend.agents.market_agent import validate_claims as validate_market_claims
+from backend.agents.action_agent import RawExecutionPackCollector, run_action_agent
 from backend.agents.synthesis_agent import RawCandidateCollector, run_synthesis_agent
 from backend.db.dynamo import put_entity
 from backend.pipeline.evidence_check import EvidenceCandidate, SemanticSupportChecker, run_evidence_check
@@ -54,6 +55,7 @@ from backend.schemas.entities import (
     Business,
     DynamoKeyPrefix,
     Evidence,
+    ExecutionPack,
     Opportunity,
     RejectedCandidate,
     RetrievalMode,
@@ -343,6 +345,33 @@ def persist(table, result: PipelineResult) -> None:
         claim_id = claims_by_evidence_id.get(evidence.id)
         parent = f"{DynamoKeyPrefix.CLAIM.value}{claim_id}" if claim_id else None
         put_entity(table, evidence, parent_key=parent)
+
+
+def run_action_stage(
+    opportunities: list[Opportunity],
+    *,
+    collect: RawExecutionPackCollector,
+    contract: AgentRuntimeContract = AgentRuntimeContract(max_tokens=4096),
+) -> list[ExecutionPack]:
+    """Task 26 — one ExecutionPack per gate-passed (ranked or blocked)
+    Opportunity. Kept separate from `run_pipeline`/`PipelineResult` rather
+    than folded into the main stage list: Action Agent runs against an
+    opportunity that already exists, so nothing here changes what Synthesis/
+    Evidence Check/Quality Gate produce or their already-tested contract."""
+
+    packs = []
+    for opportunity in opportunities:
+        pack, _invocation, _rejected = run_action_agent(opportunity, contract=contract, collect=collect)
+        packs.append(pack)
+    return packs
+
+
+def persist_execution_pack(table, pack: ExecutionPack) -> None:
+    """Parented to the Opportunity (not the Business/Run) — matches how the
+    handler looks packs up: by opportunity_id, per §15's
+    `/opportunities/{id}/execution-pack`."""
+
+    put_entity(table, pack, parent_key=f"{DynamoKeyPrefix.OPPORTUNITY.value}{pack.opportunity_id}")
 
 
 if __name__ == "__main__":

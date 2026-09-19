@@ -93,8 +93,21 @@ Full detail and rationale for each task: `tasks/plan.md`. Check items off here a
 Full detail for every task below: `tasks/plan.md`, Phase 3.
 
 ### Lane A — Backend/Agents
-- [ ] Task 26: Action Agent + ExecutionPack generation, `outreach_policy` enforced in prompt
-  and post-generation check
+- [~] Task 26: Action Agent + ExecutionPack generation, `outreach_policy` enforced in prompt
+  and post-generation check — code + 15 unit tests committed
+  (`backend/agents/action_agent.py`, `backend/tests/test_action_agent.py`); orchestrator gained
+  `run_action_stage`/`persist_execution_pack`, handler reads DynamoDB first
+  (`backend/handlers/opportunities_stub.py`). Live-run-verified 2026-09-19 via
+  `scripts/run_action_agent_live.py` against `opp_run_7f023794a99d_0`: correctly refused to
+  emit any outreach draft (that opportunity has zero verified strengths, so no valid
+  `proof_point_signal_id` exists — working as designed, not yet a rehearsal of the
+  policy-violation reject path, which needs a ranked opportunity with a real strength).
+  Pack `pack_opp_run_7f023794a99d_0` persisted to the live table. Blocked on: `sam deploy` for
+  the updated `GetExecutionPack` Lambda — harness auto-mode won't script past the changeset
+  confirmation prompt, needs a human to run
+  `sam deploy --config-file infra/samconfig.toml` interactively before the deployed API
+  reflects the new handler (currently still serving the old fixture-only code). See
+  `LEARNING.md`, Day 3.
 - [ ] Task 27: Real value model computation (§13.2 formula, editable labelled range) —
   replaces Synthesis's placeholder `ValueModel`
 - [ ] Task 28: Evidence drawer Level 2 (Cached) fallback, rehearsed with a real forced

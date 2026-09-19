@@ -8,7 +8,14 @@ from __future__ import annotations
 
 from backend.fixtures.fixtures import BUSINESS, EXECUTION_PACK, OPPORTUNITY, REJECTED_IDEAS
 from backend.handlers._common import dynamo_children, dynamo_get, not_found, ok, path_param
-from backend.schemas.entities import Business, DynamoKeyPrefix, Opportunity, RejectedCandidate, RetrievalMode
+from backend.schemas.entities import (
+    Business,
+    DynamoKeyPrefix,
+    ExecutionPack,
+    Opportunity,
+    RejectedCandidate,
+    RetrievalMode,
+)
 
 
 def list_opportunities(event: dict, context: object) -> dict:
@@ -60,11 +67,16 @@ def get_opportunity(event: dict, context: object) -> dict:
 def get_execution_pack(event: dict, context: object) -> dict:
     """GET /opportunities/{id}/execution-pack
 
-    Not wired to DynamoDB (Action Agent / ExecutionPack generation is Day 3
-    work) — always the Task 2 fixture, so this is always DEMO_FIXTURE rather
-    than guessing at a tier the pipeline doesn't produce yet.
+    Task 26: reads DynamoDB first (Action Agent persists one pack per
+    gate-passed opportunity, parented to it), falling back to the Task 2
+    fixture for the demo opportunity — same treatment as the other handlers.
     """
     opportunity_id = path_param(event, "id")
+    packs = dynamo_children(
+        f"{DynamoKeyPrefix.OPPORTUNITY.value}{opportunity_id}", DynamoKeyPrefix.EXECUTION_PACK, ExecutionPack
+    )
+    if packs:
+        return ok(packs[0], retrieval_mode=RetrievalMode.LIVE)
     if opportunity_id != OPPORTUNITY.id:
         return not_found(f"no opportunity with id {opportunity_id!r}")
     return ok(EXECUTION_PACK, retrieval_mode=RetrievalMode.DEMO_FIXTURE)

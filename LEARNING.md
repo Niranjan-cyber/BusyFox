@@ -339,6 +339,29 @@ Kept from Day 1 per the event rules (learning is a scored judging criterion). On
   in DynamoDB, reachable through the deployed API (`X-Retrieval-Mode: live`), with every claim
   carrying real `evidence_ids` — Day 2's checkpoint, made real on Day 3 rather than left as a
   known gap into Day 3's own feature work.
+- Task 26 (Action Agent): the first live run against `opp_run_7f023794a99d_0` refused to emit any
+  outreach draft at all — that opportunity has zero verified strengths (`priority=Blocked`,
+  `evidence_confidence=Low`), so there's no signal id the `proof_point_signal_id` guardrail can
+  legitimately accept, and the model correctly declined to invent one rather than fabricate a
+  proof point. Working as designed, not a bug — but it means the live rehearsal of the
+  policy-violation reject path (§18.1) still needs a *ranked* opportunity with a real strength to
+  actually exercise, not just the one persisted opportunity this repo currently has.
+- Real bug, caught by the first live run: `build_execution_pack` originally took a separate
+  `run_id` and built the pack id as `pack_{run_id}_{opportunity.id}`, mirroring Synthesis's
+  `opp_{run_id}_{index}` scheme. But a pack is 1:1 with its opportunity (unlike synthesis, which
+  emits several opportunities per run and needs the index for uniqueness) — the live script
+  passed `opportunity.id` as `run_id` for lack of anything better, producing
+  `pack_opp_run_7f023794a99d_0_opp_run_7f023794a99d_0`. Dropped `run_id` entirely; `pack_{opportunity.id}`
+  is both simpler and can't collide.
+- `.env`'s `API_BASE_URL` pointed at a stale API Gateway id (`oy52dx5ygl`) that no longer resolves
+  — the stack's actual current endpoint (`aws apigatewayv2 get-apis`) is `vx59qs2osl`. Likely
+  drifted after an earlier stack recreation; nothing rewrites `.env` on redeploy. Fixed locally;
+  worth checking `SKELETON_ORCHESTRATOR_ARN` for the same drift before it's next needed.
+- Deploying the fixed `GetExecutionPack` handler needed `sam deploy`, which prompts an interactive
+  changeset confirmation — the harness's own auto-mode classifier blocks any attempt to script
+  past that prompt (`--no-confirm-changeset`, piping `y`) as a "blind apply," even with the
+  human's prior go-ahead to deploy. Correct behavior: a live infra change gets a human looking at
+  the actual changeset, not a pre-committed yes. Left for the human to run interactively.
 
 ## Day 4 — Sept 20, 2026
 
