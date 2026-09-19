@@ -16,6 +16,7 @@ from backend.pipeline.quality_gate import (
     check_mechanism_present,
     check_verified_evidence,
     compute_evidence_diversity,
+    compute_value_model,
     diversity_passes,
     quote_found,
     run_quality_gate,
@@ -367,3 +368,61 @@ def test_run_quality_gate_merges_duplicate_into_stronger_opportunity():
     assert result.rejected == [
         RejectedIdea("opp_b", "competitive_gap", "Low-noise positioning wins this segment.", "duplicate_merged_into:opp_a", "quality_safety")
     ]
+
+
+# ---------------------------------------------------------------------------
+# §13.2 value model (Task 27)
+# ---------------------------------------------------------------------------
+
+
+def _labels(value: ValueModel) -> dict[str, ObservedInferredAssumed]:
+    return {a.key: a.label for a in value.assumptions}
+
+
+def test_compute_value_model_matches_prd_worked_example():
+    # §13.2: 24 signals -> 1,200-3,600 accounts x 5% x $99 = $5,940-$17,820/mo
+    evidence = [_evidence(id=f"evd_{i}") for i in range(24)]
+
+    value = compute_value_model(evidence, _business())
+
+    assert (value.monthly_usd.low, value.monthly_usd.high) == (5940.0, 17820.0)
+    assert _labels(value) == {
+        "signal_count": ObservedInferredAssumed.OBSERVED,
+        "estimated_qualified_accounts": ObservedInferredAssumed.ASSUMED,
+        "expected_conversion": ObservedInferredAssumed.ASSUMED,
+        "arpa": ObservedInferredAssumed.OBSERVED,
+    }
+
+
+def test_compute_value_model_counts_distinct_verified_evidence_only():
+    evidence = [_evidence(id="evd_1"), _evidence(id="evd_1"), _quote_not_found_evidence(id="evd_2")]
+
+    value = compute_value_model(evidence, _business())
+
+    assert value.assumptions[0].description == "1 verified evidence items"
+
+
+def test_compute_value_model_labels_arpa_assumed_when_business_has_no_price():
+    value = compute_value_model([_evidence()], _business(pricing=Pricing()))
+
+    assert _labels(value)["arpa"] == ObservedInferredAssumed.ASSUMED
+    assert value.monthly_usd.low == round(50 * 0.05 * 49.0, 2)  # fallback ARPA, never unlabelled
+
+
+def test_compute_value_model_falls_back_to_starter_price_before_assuming():
+    value = compute_value_model([_evidence()], _business(pricing=Pricing(starter_usd_month=29.0)))
+
+    assert _labels(value)["arpa"] == ObservedInferredAssumed.OBSERVED
+    assert value.monthly_usd.low == round(50 * 0.05 * 29.0, 2)
+
+
+def test_run_quality_gate_replaces_placeholder_value_on_survivors():
+    evidence = [_evidence(source_kind=SourceKind.HN, url="https://a.example/1"), _evidence(id="evd_2", source_kind=SourceKind.GITHUB, url="https://b.example/1")]
+    claims = _four_claims(evidence_ids=("evd_1", "evd_2"))
+    opp = _opportunity(claims=claims, competitive_context=[CompetitiveContextItem(signal_id="sig_1", competitor="Sentry", pattern="competitive_gap")])
+
+    result = run_quality_gate([opp], claims, evidence, contradictions={c.id: False for c in claims}, signals=[_signal()], business=_business())
+
+    value = result.ranked[0].value
+    assert "pending_quality_gate" not in _labels(value)
+    assert (value.monthly_usd.low, value.monthly_usd.high) == (round(2 * 50 * 0.05 * 99, 2), round(2 * 150 * 0.05 * 99, 2))

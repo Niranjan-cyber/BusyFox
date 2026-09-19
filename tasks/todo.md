@@ -107,8 +107,14 @@ Full detail for every task below: `tasks/plan.md`, Phase 3.
   gap), confirmed live via `GET /opportunities/opp_run_7f023794a99d_0/execution-pack` returning
   `200`, `X-Retrieval-Mode: live`, the real pack (both `sam deploy`s run by the human; harness
   auto-mode won't script past the changeset confirmation). See `LEARNING.md`, Day 3.
-- [ ] Task 27: Real value model computation (§13.2 formula, editable labelled range) —
-  replaces Synthesis's placeholder `ValueModel`
+- [x] Task 27: Real value model computation (§13.2 formula, editable labelled range) —
+  replaces Synthesis's placeholder `ValueModel`. `compute_value_model` in
+  `backend/pipeline/quality_gate.py`, applied to every surviving opportunity; 5 new tests
+  (PRD worked example: 24 signals × $99 → $5,940–$17,820). Not yet re-verified against a fresh
+  live pipeline run — `opp_run_7f023794a99d_0`'s persisted `value` is still the old placeholder
+  until `scripts/run_live_pipeline.py` is re-run. Assumption *values* live in each
+  `ValueAssumption.description` string, so the "editable" UI in Task 31 will need either
+  structured values on the schema or client-side recompute.
 - [ ] Task 28: Evidence drawer Level 2 (Cached) fallback, rehearsed with a real forced
   failure — this closes out Day 2 checkpoint's unfinished Tavily risk-watch item, don't
   track it twice

@@ -10,9 +10,11 @@ into the inbox. It also resolves each Claim's final `status`
 (verified/hypothesis/unsupported, §14.6) — Evidence Check only fills in
 `evidence_ids`, it never touches `status`.
 
-Two things explicitly out of scope here, both flagged rather than faked:
-- §13.2's value model (`Opportunity.value`) — scheduled Day 3 (tasks/plan.md
-  Phase 3), so `value` passes through untouched from Synthesis's placeholder.
+Every surviving opportunity gets its real §13.2 value model here (Task 27),
+replacing Synthesis's placeholder — Synthesis mustn't claim a number before
+the gate has verified any evidence.
+
+One thing explicitly out of scope here, flagged rather than faked:
 - Gate check 14 (account evidence integrity, §11.4) — it gates a Target's
   `account_fit_inference` against its `observed_facts`, and no Target exists
   yet at this point in the pipeline (Action Agent is Day 3). `check_account_evidence_integrity`
@@ -35,12 +37,16 @@ from backend.schemas.entities import (
     EvidenceConfidence,
     EvidenceDiversity,
     FreshnessStatus,
+    MonthlyRange,
+    ObservedInferredAssumed,
     Opportunity,
     PainToFix,
     Priority,
     Signal,
     SourceKind,
     Target,
+    ValueAssumption,
+    ValueModel,
 )
 
 # ponytail: 1-5 scale inferred from the PRD's own worked example
@@ -52,6 +58,18 @@ _NARRATIVE_CLAIM_TYPES = frozenset({ClaimType.WHY_THIS, ClaimType.WHY_YOU, Claim
 _REQUIRED_CLAIM_TYPES = frozenset({ClaimType.WHY_THIS, ClaimType.WHY_YOU, ClaimType.WHY_NOW, ClaimType.MECHANISM})
 
 _PRIORITY_RANK = {Priority.HIGH: 0, Priority.MEDIUM: 1, Priority.LOW: 2}
+
+# §13.2 playbook defaults — the multiplier range and conversion are taken from the
+# PRD's own corrected worked example (24 signals -> 1,200-3,600 accounts = x50-x150,
+# 5% conversion), not derived from data. All ASSUMED, all shown in the range's
+# `assumptions` so the UI (Task 31) can surface and edit them.
+# ponytail: one playbook's defaults hard-coded; move to a per-playbook table when a
+# second playbook exists.
+_QUALIFIED_ACCOUNTS_PER_SIGNAL = (50, 150)
+_EXPECTED_CONVERSION = 0.05
+# Only used when the business states no price at all; labelled ASSUMED so it's
+# never mistaken for the business's own number.
+_FALLBACK_ARPA_USD = 49.0
 
 
 class RejectedIdea(NamedTuple):
@@ -221,8 +239,8 @@ def _signal_ids(opportunity: Opportunity) -> set[str]:
 def _merge_duplicates(survivors: list[Opportunity]) -> tuple[list[Opportunity], list[RejectedIdea]]:
     """Check 11 — same type, >=50% overlapping signals with a stronger
     opportunity, merges into it. "Stronger" ranks by evidence_confidence;
-    ties keep the earlier candidate, since the §13.2 value-model tie-break
-    the PRD describes doesn't exist yet (Day 3 scope, see module docstring)."""
+    ties keep the earlier candidate (the PRD's value-midpoint tie-break is
+    for ranking within a tier, not for picking a duplicate's survivor)."""
 
     confidence_rank = {EvidenceConfidence.HIGH: 2, EvidenceConfidence.MEDIUM: 1, EvidenceConfidence.LOW: 0}
     dropped: set[str] = set()
@@ -282,6 +300,43 @@ def _priority_from_rule_table(confidence: EvidenceConfidence, fix_first: bool) -
     return {EvidenceConfidence.HIGH: Priority.HIGH, EvidenceConfidence.MEDIUM: Priority.MEDIUM, EvidenceConfidence.LOW: Priority.LOW}[
         confidence
     ]
+
+
+def compute_value_model(opp_evidence: list[Evidence], business: Business) -> ValueModel:
+    """§13.2: signal_count x qualified-accounts multiplier x conversion x ARPA,
+    always a low/high range. `signal_count` is the count of distinct verified
+    evidence items (OBSERVED); ARPA is the business's own team (else starter)
+    price when stated (OBSERVED), else a labelled fallback (ASSUMED)."""
+
+    signal_count = len({e.id for e in opp_evidence if quote_found(e)})
+    accounts_low, accounts_high = (signal_count * m for m in _QUALIFIED_ACCOUNTS_PER_SIGNAL)
+
+    stated_arpa = business.pricing.team_usd_month or business.pricing.starter_usd_month
+    arpa = stated_arpa or _FALLBACK_ARPA_USD
+
+    obs, assumed = ObservedInferredAssumed.OBSERVED, ObservedInferredAssumed.ASSUMED
+    return ValueModel(
+        model="saas_arr",
+        assumptions=[
+            ValueAssumption(key="signal_count", label=obs, description=f"{signal_count} verified evidence items"),
+            ValueAssumption(
+                key="estimated_qualified_accounts",
+                label=assumed,
+                description=f"{accounts_low:,}-{accounts_high:,} — playbook multiplier applied to signal_count",
+            ),
+            ValueAssumption(key="expected_conversion", label=assumed, description=f"{_EXPECTED_CONVERSION:.0%} conversion assumption"),
+            ValueAssumption(
+                key="arpa",
+                label=obs if stated_arpa else assumed,
+                description=f"${arpa:,.0f}/month — "
+                + ("the business's own stated plan price" if stated_arpa else "no price on the business profile; playbook fallback"),
+            ),
+        ],
+        monthly_usd=MonthlyRange(
+            low=round(accounts_low * _EXPECTED_CONVERSION * arpa, 2),
+            high=round(accounts_high * _EXPECTED_CONVERSION * arpa, 2),
+        ),
+    )
 
 
 def run_quality_gate(
@@ -379,6 +434,7 @@ def run_quality_gate(
                     "evidence_diversity": diversity,
                     "evidence_confidence": confidence,
                     "priority": priority,
+                    "value": compute_value_model(opp_evidence, business),
                     "flags": flags,
                 }
             )
