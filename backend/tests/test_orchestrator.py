@@ -15,6 +15,7 @@ from backend.agents.synthesis_agent import RawCandidate
 from backend.db.dynamo import get_entity, query_children
 from backend.fixtures.fixtures import BUSINESS
 from backend.orchestrator import persist, run_pipeline
+from backend.pipeline.quality_gate import RejectedIdea
 from backend.tests.test_dynamo import _FakeTable
 from backend.schemas.entities import (
     AgentRuntimeContract,
@@ -26,6 +27,7 @@ from backend.schemas.entities import (
     Opportunity,
     Polarity,
     Priority,
+    RejectedCandidate,
     Signal,
     SourceKind,
 )
@@ -144,3 +146,23 @@ def test_persist_writes_business_run_opportunity_claims_and_evidence():
     one_claim = get_entity(table, DynamoKeyPrefix.CLAIM, opportunity.claim_ids[0], Claim)
     stored_evidence = query_children(table, f"CLAIM#{one_claim.id}", DynamoKeyPrefix.EVIDENCE)
     assert len(stored_evidence) == len(one_claim.evidence_ids)
+
+
+def test_persist_writes_rejected_candidates():
+    result = _run()._replace(
+        rejected=[RejectedIdea("opp_x", "competitive_gap", "A rejected idea's title.", "no_verified_evidence", "truth")]
+    )
+    table = _FakeTable()
+
+    persist(table, result)
+
+    stored = query_children(table, f"BIZ#{BUSINESS.id}", DynamoKeyPrefix.REJECTED_CANDIDATE)
+    assert len(stored) == 1
+    candidate = RejectedCandidate.model_validate(stored[0])
+    assert candidate == RejectedCandidate(
+        id="opp_x",
+        opportunity_type="competitive_gap",
+        title="A rejected idea's title.",
+        rejected_because="no_verified_evidence",
+        failed_gate="truth",
+    )

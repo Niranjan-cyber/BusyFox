@@ -161,6 +161,7 @@ class DynamoKeyPrefix(str, Enum):
     TARGET = "TGT#"
     EXECUTION_PACK = "PACK#"
     COMPETITOR = "CMP#"
+    REJECTED_CANDIDATE = "REJ#"
 
 
 # ---------------------------------------------------------------------------
@@ -409,6 +410,21 @@ class Opportunity(BaseModel):
     # check 4/§11.4 check 12 (contradiction / one-sided evidence), §11.4 check 13
     # (fix-first risk). Shown, never gates pass/fail.
     flags: list[str] = []
+
+
+class RejectedCandidate(BaseModel):
+    """Task 19's output for screen 3's "Ideas we rejected" (§1.3, §16.1;
+    `docs/contract.md` gap 2) — a candidate that failed Evidence Check or the
+    Quality Gate before ever becoming a stored `Opportunity`. Mirrors
+    frontend `RejectedIdea` (`frontend/src/lib/viewModels.ts`) field for
+    field; `opportunity_type` rides along for whoever wants it later, but the
+    frontend type doesn't declare it, so today it's just ignored, not read."""
+
+    id: str
+    opportunity_type: OpportunityType
+    title: str
+    rejected_because: str
+    failed_gate: str
 
 
 # ---------------------------------------------------------------------------

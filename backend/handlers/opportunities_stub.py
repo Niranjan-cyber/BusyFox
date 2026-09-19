@@ -6,9 +6,9 @@ demo business/opportunity — same treatment as `businesses_stub.py`.
 
 from __future__ import annotations
 
-from backend.fixtures.fixtures import BUSINESS, EXECUTION_PACK, OPPORTUNITY
+from backend.fixtures.fixtures import BUSINESS, EXECUTION_PACK, OPPORTUNITY, REJECTED_IDEAS
 from backend.handlers._common import dynamo_children, dynamo_get, not_found, ok, path_param
-from backend.schemas.entities import Business, DynamoKeyPrefix, Opportunity, RetrievalMode
+from backend.schemas.entities import Business, DynamoKeyPrefix, Opportunity, RejectedCandidate, RetrievalMode
 
 
 def list_opportunities(event: dict, context: object) -> dict:
@@ -26,6 +26,24 @@ def list_opportunities(event: dict, context: object) -> dict:
     if business_id != BUSINESS.id:
         return ok([], retrieval_mode=RetrievalMode.LIVE)
     return ok([OPPORTUNITY], retrieval_mode=RetrievalMode.DEMO_FIXTURE)
+
+
+def list_rejected_ideas(event: dict, context: object) -> dict:
+    """GET /businesses/{id}/rejected-ideas — docs/contract.md gap 2, closed by
+    Task 19's `RejectedCandidate` (backend/pipeline/quality_gate.py)."""
+    business_id = path_param(event, "id")
+    business = dynamo_get(DynamoKeyPrefix.BUSINESS, business_id, Business)
+    if business is None and business_id != BUSINESS.id:
+        return not_found(f"no business with id {business_id!r}")
+
+    rejected = dynamo_children(
+        f"{DynamoKeyPrefix.BUSINESS.value}{business_id}", DynamoKeyPrefix.REJECTED_CANDIDATE, RejectedCandidate
+    )
+    if rejected is not None:
+        return ok(rejected, retrieval_mode=RetrievalMode.LIVE)
+    if business_id != BUSINESS.id:
+        return ok([], retrieval_mode=RetrievalMode.LIVE)
+    return ok(REJECTED_IDEAS, retrieval_mode=RetrievalMode.DEMO_FIXTURE)
 
 
 def get_opportunity(event: dict, context: object) -> dict:

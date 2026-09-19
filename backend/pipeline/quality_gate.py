@@ -56,11 +56,14 @@ _PRIORITY_RANK = {Priority.HIGH: 0, Priority.MEDIUM: 1, Priority.LOW: 2}
 
 class RejectedIdea(NamedTuple):
     """Mirrors frontend `RejectedIdea` (`frontend/src/lib/viewModels.ts`)
-    field-for-field except `title`, which is a presentational concern for
-    whoever builds the view model, not something the gate computes."""
+    field-for-field. `title` reuses the candidate's own mechanism statement
+    (same source `lib/viewModels.ts::opportunityTitle` uses for a surviving
+    Opportunity) — the candidate is a fully-formed `Opportunity` at the point
+    of rejection, so there's nothing else worth calling a title."""
 
     opportunity_id: str
     opportunity_type: str
+    title: str
     rejected_because: str
     failed_gate: str
 
@@ -240,7 +243,15 @@ def _merge_duplicates(survivors: list[Opportunity]) -> tuple[list[Opportunity], 
                 continue
             weaker, stronger = (b, a) if confidence_rank[a.evidence_confidence] >= confidence_rank[b.evidence_confidence] else (a, b)
             dropped.add(weaker.id)
-            rejected.append(RejectedIdea(weaker.id, weaker.type.value, f"duplicate_merged_into:{stronger.id}", "quality_safety"))
+            rejected.append(
+                RejectedIdea(
+                    weaker.id,
+                    weaker.type.value,
+                    weaker.opportunity_mechanism.statement,
+                    f"duplicate_merged_into:{stronger.id}",
+                    "quality_safety",
+                )
+            )
 
     return [o for o in survivors if o.id not in dropped], rejected
 
@@ -296,14 +307,16 @@ def run_quality_gate(
         opp_claims = [claims_by_id[cid] for cid in opp.claim_ids if cid in claims_by_id]
         opp_evidence = [evidence_by_id[eid] for c in opp_claims for eid in c.evidence_ids if eid in evidence_by_id]
 
+        title = opp.opportunity_mechanism.statement
+
         failure = check_verified_evidence(opp_evidence) or check_claim_evidence_support(opp_evidence)
         if failure:
-            rejected.append(RejectedIdea(opp.id, opp.type.value, failure, "truth"))
+            rejected.append(RejectedIdea(opp.id, opp.type.value, title, failure, "truth"))
             continue
 
         failure = check_capability(opp, business) or check_mechanism_present(opp)
         if failure:
-            rejected.append(RejectedIdea(opp.id, opp.type.value, failure, "relevance"))
+            rejected.append(RejectedIdea(opp.id, opp.type.value, title, failure, "relevance"))
             continue
 
         diversity = compute_evidence_diversity(opp_evidence)
@@ -330,7 +343,9 @@ def run_quality_gate(
 
         if why_now_all_stale:
             # §11.4: stale evidence can never be the sole support for a "why now" claim.
-            rejected.append(RejectedIdea(opp.id, opp.type.value, "why_now_rests_solely_on_stale_evidence", "truth"))
+            rejected.append(
+                RejectedIdea(opp.id, opp.type.value, title, "why_now_rests_solely_on_stale_evidence", "truth")
+            )
             continue
 
         narrative_verified = _NARRATIVE_CLAIM_TYPES <= {c.type for c in opp_claims} and all(
@@ -344,7 +359,7 @@ def run_quality_gate(
         )
         if failure:
             stage = "quality_safety" if failure in {"invented_competitor_claim", "simulated_claim_attributed_to_competitor"} else "commerciality"
-            rejected.append(RejectedIdea(opp.id, opp.type.value, failure, stage))
+            rejected.append(RejectedIdea(opp.id, opp.type.value, title, failure, stage))
             continue
 
         if any(contradictions.get(c.id, False) for c in opp_claims):

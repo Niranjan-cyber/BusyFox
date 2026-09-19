@@ -15,9 +15,19 @@ import json
 import pytest
 
 from backend.db.dynamo import put_entity
-from backend.fixtures.fixtures import BUSINESS, CLAIMS, COMPETITOR_SENTRY, EVIDENCE_ALERT_NOISE, OPPORTUNITY
+from backend.fixtures.fixtures import BUSINESS, CLAIMS, COMPETITOR_SENTRY, EVIDENCE_ALERT_NOISE, OPPORTUNITY, REJECTED_IDEAS
 from backend.handlers import businesses_stub, claims_stub, competitors_stub, opportunities_stub
-from backend.schemas.entities import Business, Claim, Competitor, DynamoKeyPrefix, Evidence, ExecutionPack, Opportunity, Signal
+from backend.schemas.entities import (
+    Business,
+    Claim,
+    Competitor,
+    DynamoKeyPrefix,
+    Evidence,
+    ExecutionPack,
+    Opportunity,
+    RejectedCandidate,
+    Signal,
+)
 from backend.tests.test_dynamo import _FakeTable
 
 
@@ -49,6 +59,14 @@ def test_list_opportunities_returns_task1_shaped_payload():
     assert len(body) > 0
     for item in body:
         Opportunity.model_validate(item)
+
+
+def test_list_rejected_ideas_returns_task19_shaped_payload():
+    response = opportunities_stub.list_rejected_ideas(_event(id="biz_pulsestack"), None)
+    body = _body(response)
+    assert body == json.loads(json.dumps([r.model_dump(mode="json") for r in REJECTED_IDEAS]))
+    for item in body:
+        RejectedCandidate.model_validate(item)
 
 
 def test_get_opportunity_returns_task1_shaped_payload():
@@ -151,6 +169,16 @@ def test_list_opportunities_prefers_real_dynamo_rows_when_running_in_lambda(monk
 
     body = _body(opportunities_stub.list_opportunities(_event(id="biz_pulsestack"), None))
     assert [Opportunity.model_validate(item).id for item in body] == [OPPORTUNITY.id]
+
+
+def test_list_rejected_ideas_prefers_real_dynamo_rows_when_running_in_lambda(monkeypatch):
+    biz_key = f"{DynamoKeyPrefix.BUSINESS.value}{BUSINESS.id}"
+    table = _fake_table_with((BUSINESS, None), (REJECTED_IDEAS[0], biz_key))
+    monkeypatch.setenv("AWS_LAMBDA_FUNCTION_NAME", "test")
+    monkeypatch.setattr("backend.db.dynamo.get_table", lambda: table)
+
+    body = _body(opportunities_stub.list_rejected_ideas(_event(id="biz_pulsestack"), None))
+    assert [RejectedCandidate.model_validate(item).id for item in body] == [REJECTED_IDEAS[0].id]
 
 
 def test_list_claims_prefers_real_dynamo_rows_when_running_in_lambda(monkeypatch):

@@ -53,12 +53,14 @@ Full detail and rationale for each task: `tasks/plan.md`. Check items off here a
 
 ### Lane B — Frontend/UX
 - [~] Task 22: Screen 1 on real data — client wired to the contract routes and verified in a
-  browser against the deployed stage; blockers 1 (retrieval-mode header) and 4 (CORS) resolved.
-  Still **blocked** on 3 (real pipeline data behind the stage). See `frontend/README.md`,
+  browser against the deployed stage; blockers 1 (retrieval-mode header), 3 (table deployed +
+  wired), and 4 (CORS) resolved. All named infra blockers cleared — what's left is that the table
+  is still empty (no pipeline run has persisted anything). See `frontend/README.md`,
   "Known blockers"
 - [~] Task 23: Screen 3 on real data — inbox groups and ranks the live opportunity with its
-  claims off `/opportunities/{id}/claims`; blockers 1 and 5 resolved. Still **blocked** on 2 (no
-  rejected-candidate route, Task 19) and 3. See `frontend/README.md`, "Known blockers"
+  claims off `/opportunities/{id}/claims`; blockers 1, 2 (rejected-candidate route, Task 19), 3,
+  and 5 resolved. Same remaining gap as Task 22: an empty table, not a missing route. See
+  `frontend/README.md`, "Known blockers"
 
 ### Lane C — Floating
 - [~] Task 24: Gold-set labelling (80 sim + 20 real, independent) — corpus built

@@ -251,7 +251,9 @@ def test_run_quality_gate_rejects_opportunity_with_no_verified_evidence():
     result = run_quality_gate([opp], claims, evidence, contradictions={}, signals=[_signal()], business=_business())
 
     assert result.ranked == []
-    assert result.rejected == [RejectedIdea("opp_1", "competitive_gap", "no_verified_evidence", "truth")]
+    assert result.rejected == [
+        RejectedIdea("opp_1", "competitive_gap", "Low-noise positioning wins this segment.", "no_verified_evidence", "truth")
+    ]
 
 
 def test_run_quality_gate_single_source_kind_caps_confidence_low_not_rejected():
@@ -362,4 +364,6 @@ def test_run_quality_gate_merges_duplicate_into_stronger_opportunity():
 
     ids = {o.id for o in result.ranked}
     assert ids == {"opp_a"}  # higher confidence (2 source kinds) wins over opp_b (1 source kind)
-    assert result.rejected == [RejectedIdea("opp_b", "competitive_gap", "duplicate_merged_into:opp_a", "quality_safety")]
+    assert result.rejected == [
+        RejectedIdea("opp_b", "competitive_gap", "Low-noise positioning wins this segment.", "duplicate_merged_into:opp_a", "quality_safety")
+    ]

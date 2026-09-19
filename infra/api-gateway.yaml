@@ -43,6 +43,15 @@ Globals:
     # under Lambda's 250MB unzipped limit, so the bloat stays, uncorrected.
     # See frontend/README.md blocker 6.
     CodeUri: ../
+    # Every *_stub.py handler reads via backend/handlers/_common.py::dynamo_get/
+    # dynamo_children, which fall back to `DYNAMO_TABLE_NAME` env var (default
+    # "opportunity-engine") — the wrong, non-existent name for this stack's
+    # CloudFormation-generated table. Without this, blocker 3 (frontend/README.md)
+    # stays "resolved" on paper but every handler still 403s/falls back to the
+    # fixture, because it can neither find nor read the real table.
+    Environment:
+      Variables:
+        DYNAMO_TABLE_NAME: !Ref OpportunityEngineTable
 
 Resources:
   # Task 20: single-table design for all nine core entities, keyed on the
@@ -104,6 +113,9 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: backend.handlers.businesses_stub.get_business
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref OpportunityEngineTable
       Events:
         Api:
           Type: HttpApi
@@ -116,6 +128,9 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: backend.handlers.businesses_stub.get_feedback_summary
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref OpportunityEngineTable
       Events:
         Api:
           Type: HttpApi
@@ -128,6 +143,9 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: backend.handlers.opportunities_stub.list_opportunities
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref OpportunityEngineTable
       Events:
         Api:
           Type: HttpApi
@@ -136,10 +154,28 @@ Resources:
             Path: /businesses/{id}/opportunities
             Method: GET
 
+  ListRejectedIdeas:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: backend.handlers.opportunities_stub.list_rejected_ideas
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref OpportunityEngineTable
+      Events:
+        Api:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref OpportunityEngineApi
+            Path: /businesses/{id}/rejected-ideas
+            Method: GET
+
   GetOpportunity:
     Type: AWS::Serverless::Function
     Properties:
       Handler: backend.handlers.opportunities_stub.get_opportunity
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref OpportunityEngineTable
       Events:
         Api:
           Type: HttpApi
@@ -164,6 +200,9 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: backend.handlers.claims_stub.list_claims
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref OpportunityEngineTable
       Events:
         Api:
           Type: HttpApi
@@ -176,6 +215,9 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: backend.handlers.claims_stub.get_claim_evidence
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref OpportunityEngineTable
       Events:
         Api:
           Type: HttpApi

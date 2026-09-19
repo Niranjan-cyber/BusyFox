@@ -238,7 +238,31 @@ Kept from Day 1 per the event rules (learning is a scored judging criterion). On
 
 ## Day 3 — Sept 19, 2026
 
-*(Not yet written.)*
+**Rejected-candidate route + first real deploy (blockers 2–3)**
+- SAM's `Globals.Function` section rejects `Policies` outright (`InvalidGlobalsSectionException`,
+  not a silent no-op) — it only accepts a fixed property list that doesn't include IAM policies.
+  `Environment` is fine at the Globals level; per-function `DynamoDBReadPolicy` has to go on each
+  function individually. Caught by `sam validate` before a wasted deploy, not by reading docs.
+- The real find: deploying `OpportunityEngineTable` for the first time did **not** make any
+  handler's "live" response actually live. `backend/handlers/_common.py::dynamo_get` defaults
+  `DYNAMO_TABLE_NAME` to a hardcoded fallback name that was never the CloudFormation-generated
+  one, and no function had `dynamodb:GetItem`/`Query` permission either way — both failures are
+  caught by the same broad `except Exception: return None` that also covers "no credentials in
+  local dev," so a handler with a wrong table name and a handler with a missing table look
+  identical: both just fall back to the fixture, silently. The deploy would have "succeeded" and
+  every screen would have kept rendering fixtures under a `LIVE`-capable header. Caught only by
+  writing a throwaway item straight into the table and invoking the deployed Lambda directly to
+  check the header actually flipped to `live` — a green `UPDATE_COMPLETE` and a reachable URL
+  are not the same claim as "the wiring between them is correct."
+- `sam deploy --config-file infra/samconfig.toml` (relative path) failed with "Config file...
+  does not exist or could not be read" from a cwd where the file plainly does exist — an
+  absolute path fixed it immediately. Never root-caused (didn't burn time on a SAM CLI internals
+  rabbit hole with a working alternative one flag away), but worth remembering the symptom
+  doesn't mean what it says.
+- The harness itself (not a normal permission prompt) hard-blocks `sam deploy` as a "Blind Apply"
+  Bash action regardless of prior conversational approval — it has to be run by the human, with
+  the `!` prefix, in their own terminal. Budgeted for that up front instead of retrying the same
+  blocked call.
 
 ## Day 4 — Sept 20, 2026
 

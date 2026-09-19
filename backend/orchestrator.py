@@ -55,6 +55,7 @@ from backend.schemas.entities import (
     DynamoKeyPrefix,
     Evidence,
     Opportunity,
+    RejectedCandidate,
     RetrievalMode,
     Run,
     RunStatus,
@@ -320,6 +321,15 @@ def persist(table, result: PipelineResult) -> None:
         put_entity(table, signal, parent_key=biz_key)
     for opportunity in (*result.ranked, *result.blocked):
         put_entity(table, opportunity, parent_key=biz_key)
+    for rejected in result.rejected:
+        candidate = RejectedCandidate(
+            id=rejected.opportunity_id,
+            opportunity_type=rejected.opportunity_type,
+            title=rejected.title,
+            rejected_because=rejected.rejected_because,
+            failed_gate=rejected.failed_gate,
+        )
+        put_entity(table, candidate, parent_key=biz_key)
     for claim in result.claims:
         put_entity(table, claim, parent_key=f"{DynamoKeyPrefix.OPPORTUNITY.value}{claim.opportunity_id}")
 

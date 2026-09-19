@@ -31,6 +31,7 @@ from backend.schemas.entities import (
     OutreachDraft,
     PainToFix,
     Pricing,
+    RejectedCandidate,
     Run,
     Signal,
     SignalReason,
@@ -225,6 +226,32 @@ OPPORTUNITY = Opportunity(
         monthly_usd=MonthlyRange(low=5940, high=17820),
     ),
 )
+
+# docs/contract.md gap 2 / frontend/src/fixtures/opportunities.ts:397 — same two
+# worked examples, kept in sync by hand since the frontend fixture predates this one.
+REJECTED_IDEAS = [
+    RejectedCandidate(
+        id="opp_018",
+        opportunity_type="unmet_need",
+        title="Sell an enterprise compliance bundle",
+        rejected_because=(
+            "The only supporting quote came from a single thread and could not be matched to a "
+            "source document on re-check, so the claim failed quote-exists."
+        ),
+        failed_gate="Evidence Check — quote not found in source",
+    ),
+    RejectedCandidate(
+        id="opp_019",
+        opportunity_type="competitive_gap",
+        title="Position against a competitor recent outage",
+        rejected_because=(
+            "All four supporting evidence items trace to one news event and one domain, so "
+            "evidence diversity did not clear the bar and the claim would rest on a single "
+            "underlying event."
+        ),
+        failed_gate="Quality Gate — evidence diversity (§11.2)",
+    ),
+]
 
 COMPETITOR_SENTRY = Competitor(
     id="cmp_001",

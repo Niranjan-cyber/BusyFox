@@ -97,17 +97,22 @@ Action Agent and Competitor Agent don't persist rows yet, so that's the honest
 label rather than a guess. `frontend/src/api/client.ts` already read this
 header; nothing changed on the frontend.
 
-**2. No route for gate-rejected candidates.** Screen 3's "Ideas we rejected"
-(§1.3, §16.1) has no row in the table and no handler. It is Task 19's output —
-`RejectedIdea` lives in `frontend/src/lib/viewModels.ts` as a frontend-only shape
-precisely because no canonical entity backs it yet. The likely row, once Task 19
-decides the shape:
+**2. ~~No route for gate-rejected candidates.~~ Resolved.** Screen 3's "Ideas
+we rejected" (§1.3, §16.1) now has a real entity and handler: Task 19's
+`RejectedCandidate` (`backend/schemas/entities.py`), populated by
+`run_quality_gate` (`backend/pipeline/quality_gate.py`) and persisted by
+`orchestrator.persist` under the owning business (`DynamoKeyPrefix.REJECTED_CANDIDATE`,
+`REJ#`).
 
 | Method | Path | Purpose | Screen | Response type | Source |
 |---|---|---|---|---|---|
-| GET | `/businesses/{id}/rejected-ideas` | Candidates that failed Evidence Check or the Quality Gate, with reason and failed stage | 3 | *(Task 19)* | implied |
+| GET | `/businesses/{id}/rejected-ideas` | Candidates that failed Evidence Check or the Quality Gate, with reason and failed stage | 3 | `RejectedCandidate[]` | `backend/handlers/opportunities_stub.py::list_rejected_ideas` |
 
-Until it exists, the client calls nothing and the screen says why.
+`frontend/src/api/client.ts::fetchRejectedIdeas` calls it with the same
+live/fixture-fallback treatment as every other endpoint; `RejectedIdea`
+(`frontend/src/lib/viewModels.ts`) stays the frontend-only view-model shape —
+`title` is a presentational read of `RejectedCandidate.title`, not a separate
+field the backend invents.
 
 Stub Lambda handlers: `backend/handlers/*_stub.py`. Fixture data:
 `backend/fixtures/fixtures.py` (single source, built from the Task 1 models

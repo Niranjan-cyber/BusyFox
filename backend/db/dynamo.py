@@ -30,6 +30,7 @@ from backend.schemas.entities import (
     Evidence,
     ExecutionPack,
     Opportunity,
+    RejectedCandidate,
     Run,
     Signal,
     SourceDocument,
@@ -49,6 +50,7 @@ _PREFIX_BY_MODEL: dict[type[BaseModel], DynamoKeyPrefix] = {
     Target: DynamoKeyPrefix.TARGET,
     ExecutionPack: DynamoKeyPrefix.EXECUTION_PACK,
     Competitor: DynamoKeyPrefix.COMPETITOR,
+    RejectedCandidate: DynamoKeyPrefix.REJECTED_CANDIDATE,
 }
 
 ModelT = TypeVar("ModelT", bound=BaseModel)
