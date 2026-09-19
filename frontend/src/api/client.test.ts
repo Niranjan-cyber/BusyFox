@@ -244,15 +244,26 @@ describe('the inbox keeps opportunities and their claims consistent', () => {
 })
 
 describe('rejected ideas', () => {
-  it('states that no endpoint exists yet rather than passing fixtures off as this run', async () => {
+  it('calls the contract route and reports the declared retrieval mode', async () => {
     vi.stubEnv('VITE_API_BASE_URL', BASE)
-    const calls = stubFetch(() => jsonResponse([]))
+    const calls = stubFetch(() => jsonResponse([], { 'X-Retrieval-Mode': 'live' }))
 
     const rejected = await fetchRejectedIdeas('biz_pulsestack')
 
-    expect(calls).toEqual([])
+    expect(calls).toEqual([`${BASE}/businesses/biz_pulsestack/rejected-ideas`])
     expect(rejected.data).toEqual([])
-    expect(rejected.fallback_reason).toContain('Quality Gate')
+    expect(rejected.retrieval_mode).toBe('live')
+  })
+
+  it('falls back to the committed fixture, labelled, when the endpoint fails', async () => {
+    vi.stubEnv('VITE_API_BASE_URL', BASE)
+    stubFetch(() => new Response('{}', { status: 500 }))
+
+    const rejected = await fetchRejectedIdeas('biz_pulsestack')
+
+    expect(rejected.data).toEqual(rejectedIdeas)
+    expect(rejected.retrieval_mode).toBe('demo_fixture')
+    expect(rejected.fallback_reason).toContain('500')
   })
 })
 

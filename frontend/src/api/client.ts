@@ -194,23 +194,8 @@ export async function fetchInbox(businessId: string): Promise<Served<InboxPayloa
   }
 }
 
-/**
- * BLOCKED ON LANE A, TASK 19 (Quality Gate + Ranker).
- *
- * `docs/contract.md`'s API table has no rejected-candidate route and `backend/handlers/` has no
- * handler for one, so there is nothing to call. With no live endpoint configured the committed
- * fixture is the right answer and is labelled as such. With one configured, the honest answer
- * is nothing at all: showing fixture rejections beside a live run's opportunities would present
- * ideas this run never considered as ideas this run rejected.
- */
-export function fetchRejectedIdeas(_businessId: string): Promise<Served<RejectedIdea[]>> {
-  if (!baseUrl()) {
-    return Promise.resolve({ data: rejectedIdeas, retrieval_mode: 'demo_fixture' })
-  }
-  return Promise.resolve({
-    data: [],
-    retrieval_mode: 'demo_fixture',
-    fallback_reason:
-      'The Quality Gate does not store rejected candidates yet (Lane A, Task 19), and the contract has no route for them, so this run has none to show.',
-  })
+/** docs/contract.md gap 2, closed by Task 19's `RejectedCandidate` — same
+    live/fallback treatment as every other endpoint below. */
+export function fetchRejectedIdeas(businessId: string): Promise<Served<RejectedIdea[]>> {
+  return servedOrFixture(`/businesses/${businessId}/rejected-ideas`, rejectedIdeas)
 }
