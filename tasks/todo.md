@@ -186,21 +186,24 @@ Full detail for every task below: `tasks/plan.md`, Phase 3.
   26's known state); no console errors either way. `npm run build`/`lint` clean. (3 tests fail
   locally with "no backend configured" assertions tripped by a developer `.env.local` setting
   `VITE_API_BASE_URL` — pre-existing on `main` too, not introduced here; see LEARNING.md.)
-- [~] Task 33: `browser-testing-with-devtools` pass on all 5 screens (after 30–32) —
-  Screens 1, 3, 4, 5 clean: LIVE data end to end (`opp_run_7f023794a99d_0` through
+- [x] Task 33: `browser-testing-with-devtools` pass on all 5 screens (after 30–32) — all
+  five clean. Screens 1, 3, 4, 5: LIVE data end to end (`opp_run_7f023794a99d_0` through
   business → inbox → detail → execution pack), zero console errors, all network calls
   200. Fixed one real bug found along the way: `App.tsx`'s `UnavailableScreen` copy
   ("lands later on day 3. Screens 1, 2 and 3 are built") was stale now that 4/5 exist —
   reworded to explain screens 4/5 need an opportunity id. Screen 2 (`/investigation`)
-  still shows 4 console errors/poll (404 on `GET /businesses/{id}/signals`) — not a
-  frontend bug, the client falls back to a correctly-labelled DEMO FIXTURE exactly per
-  §7.2. Root cause: Task 30 added the route to `infra/api-gateway.yaml` and the handler
-  code (commit `2fa0e4c`) but it was never `sam deploy`ed — confirmed live via
-  `curl .../businesses/biz_pulsestack/signals` → 404 direct against API Gateway, same
-  class of gap as Task 26's IAM fix. Needs a human-run `sam deploy` (`bash
-  scripts/task6-deploy-wizard.sh` or manual) before this can check off clean; not
-  attempted here per this repo's standing rule that `sam deploy` changesets are
-  human-confirmed, not scripted by the harness.
+  initially 404'd on `GET /businesses/{id}/signals` — Task 30 added the route to
+  `infra/api-gateway.yaml`/handler code (commit `2fa0e4c`) but never `sam deploy`ed it.
+  Deploying it surfaced the real `CodeUri` bloat (see LEARNING.md, Day 3): `.aws-sam/`
+  from every prior build was riding along inside `CodeUri: ../`, snowballing to a 1.18GB
+  upload. Fixed with `rm -rf .aws-sam` before a clean rebuild (125MB, back to Day 1's
+  documented baseline) — **not** a `.samignore` file, which is confirmed inert for this
+  project (tried it, checked the build output, `frontend/`/`docs/`/`graphify-out/` were
+  still in there). Deployed via the built template (`.aws-sam/build/template.yaml`, not
+  the raw source, which re-packages unfiltered and blows the 250MB Lambda limit) with
+  `--resolve-s3 --capabilities CAPABILITY_IAM`. Live-verified 2026-09-19 20:08 UTC:
+  `X-Retrieval-Mode: live`, real signal data, Screen 2 renders with zero console errors,
+  every 4s poll returns 200.
 
 ### Lane C — Floating
 - [ ] Task 34: Demo-video shot list against §21's scene table — start now, not blocked
@@ -216,6 +219,13 @@ Full detail for every task below: `tasks/plan.md`, Phase 3.
 
 ## Phase 4 — Day 4
 
+- [ ] Add `rm -rf .aws-sam` (repo root and `infra/`) as a step before `sam build` in
+  `scripts/task6-deploy-wizard.sh` — Day 3's Task 33 deploy took ~90 min because every build
+  re-zips its own prior `.aws-sam/` output into the next one (1.5GB → 1.18GB upload for a
+  one-route change). Do **not** scope `CodeUri` down (tried and reverted Day 1 — Windows
+  `git core.symlinks=false` turns the symlink workaround into a real, driftable second copy of
+  `backend/`) or add a `.samignore` (confirmed inert twice now, Day 1 and Day 3 — see
+  `LEARNING.md`). The clean-rebuild habit is the only fix that's actually worked.
 - [ ] Re-check official schedule for actual deadline hour
 - [ ] Polish all 5 screens, fix Day 3 bugs
 - [ ] Record demo video ≤3:00 per §21 script

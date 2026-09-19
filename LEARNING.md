@@ -456,6 +456,30 @@ Kept from Day 1 per the event rules (learning is a scored judging criterion). On
   proxy's own 404 looks identical either way. Worth a standing habit: after any task that edits
   `infra/api-gateway.yaml`, curl the new route directly before checking the task off, not just
   the unit tests.
+- Chasing why that `sam deploy` took 10+ minutes, then ~90 with no end in sight: three things,
+  not one. (1) Windows Defender's real-time scanning was hammering disk I/O while `sam`
+  hashed/zipped the build dir — fixed with a per-project exclusion (`Add-MpPreference
+  -ExclusionPath`, needs an elevated shell). (2) `infra/api-gateway.yaml`'s `CodeUri: ../`
+  packages the *entire repo root* for all 12 functions, and that root includes `.aws-sam/` from
+  every prior build, so each new `sam build`/`deploy` re-zips its own previous output into the
+  next one — measured `infra/` alone at 1.5GB, a 1.18GB upload for what should be single-digit
+  MB. (3) Wasted real time re-adding `.samignore` to fix (2), not realizing Day 1's own log
+  (this file, "Actually fixing `sam build` (blocker 6)") had *already proven .samignore is
+  completely inert* for this project's `aws_lambda_builders`/`PythonPipBuilder` — checked the
+  built artifact afterward and `frontend/` (94MB), `docs/`, `graphify-out/` were all still
+  sitting inside it, exactly as that entry warned. The actual fix for (2) was just `rm -rf
+  .aws-sam` before rebuilding — nothing more — which dropped the build back to the ~128MB
+  baseline Day 1 had already established as "acceptable, don't touch." Removed the (useless)
+  `.samignore` file again rather than leave a second copy of a dead end for a future session to
+  rediscover. Lesson under time pressure: grep `LEARNING.md` for a keyword ("samignore",
+  "CodeUri") *before* re-deriving a fix from scratch — this file already had the answer, twice,
+  before tonight's third attempt. Separately: `--template-file <source>.yaml` on `sam deploy`
+  triggers its own from-scratch packaging pass that ignores whatever `sam build` already
+  produced (and hit Lambda's 250MB unzipped limit as a result, mid-deploy, with a clean
+  auto-rollback) — deploying the *built* template (`.aws-sam/build/template.yaml`) is what
+  actually uses the smaller, already-built artifact; it also needs `--resolve-s3
+  --capabilities CAPABILITY_IAM` passed explicitly since `samconfig.toml`'s defaults don't
+  fully apply once `--template-file` is overridden to a non-default path.
 
 ## Day 4 — Sept 20, 2026
 
