@@ -130,7 +130,39 @@ EVIDENCE_PRICING = Evidence(
     freshness=Freshness(status="fresh", age_days=16, limit_days=180),
 )
 
-EVIDENCE_BY_ID = {e.id: e for e in (EVIDENCE_ALERT_NOISE, EVIDENCE_PRICING)}
+# Unlike evd_001/evd_002 (Task 2 placeholders — their URL is a real HN item, but the
+# quote is not on it), this one is a real, verbatim HN comment: Tavily's extract of the
+# URL contains the quote, so the evidence drawer's live re-fetch can genuinely pass on it
+# (Task 28 rehearsal). Collected 2026-09-19 via HN Algolia. 4+ years old, hence stale.
+SOURCE_DOCUMENT_HN_SENTRY_NOISE = SourceDocument(
+    id="src_002",
+    run_id=RUN.id,
+    source_kind="hn",
+    retrieval_mode="live",
+    url="https://news.ycombinator.com/item?id=31781473",
+    fetched_at="2026-09-19T20:10:00+05:30",
+    raw_text_s3_key="s3://busyfox-runs/run_001/src_002.txt",
+    expires_at="2026-10-19T20:10:00+05:30",
+)
+
+_QUOTE_SENTRY_NOISE = "We've had scenarios like the one I mentioned (and worse) go undetected because of the noise Sentry generates."
+
+EVIDENCE_SENTRY_NOISE_HN = Evidence(
+    id="evd_hn_31781473",
+    source_document_id=SOURCE_DOCUMENT_HN_SENTRY_NOISE.id,
+    source_kind="hn",
+    retrieval_mode="live",
+    url=SOURCE_DOCUMENT_HN_SENTRY_NOISE.url,
+    retrieved_at="2026-09-19T20:10:00+05:30",
+    author="treis",
+    published_at="2022-06-17T00:00:00Z",
+    quote=_QUOTE_SENTRY_NOISE,
+    quote_hash=_quote_hash(_QUOTE_SENTRY_NOISE),
+    claim_support=ClaimSupport(status="supports", confidence=0.85, reason="Directly attributes missed incidents to the noise Sentry generates."),
+    freshness=Freshness(status="stale", age_days=1555, limit_days=180),
+)
+
+EVIDENCE_BY_ID = {e.id: e for e in (EVIDENCE_ALERT_NOISE, EVIDENCE_PRICING, EVIDENCE_SENTRY_NOISE_HN)}
 
 CLAIMS = [
     Claim(
