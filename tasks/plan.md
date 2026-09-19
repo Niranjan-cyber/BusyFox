@@ -363,14 +363,99 @@ Goal: opportunity-to-action works end to end; feature freeze at 8pm. Nothing her
 
 ---
 
-### Phase 4: Day 4 — milestone level
+### Phase 4: Day 4 — Ship
 
-- [ ] Re-check the official schedule page for the actual submission deadline hour first thing
-- [ ] Polish all five screens; fix Day 3 rehearsal bugs
-- [ ] Record demo video ≤3:00 per §21's script, showing AWS visibly
-- [ ] Write the writeup as a first-class deliverable (problem, build, AWS integration, AI tools used)
-- [ ] Finalise README.md, CREDITS.md, LEARNING.md
-- [ ] Submit; confirm registration before the deadline window closes
+Goal: Phase 3's feature freeze holds — everything left closes out the submission, it doesn't build. Single critical path, no lane split.
+
+##### Task 37: Deploy-wizard `.aws-sam` cleanup step
+
+**Description:** `scripts/task6-deploy-wizard.sh` re-zips every prior `.aws-sam/` build's output into the next `sam build`'s `CodeUri`, snowballing the upload — Task 33's one-route change took a 1.5GB→1.18GB deploy and ~90 minutes because of it. Add `rm -rf .aws-sam` (repo root and `infra/`) as a step immediately before `sam build`. Do not scope `CodeUri` down (tried and reverted Day 1 — Windows `git core.symlinks=false` turns the symlink workaround into a real, driftable second copy of `backend/`) or add a `.samignore` (confirmed inert twice, Day 1 and Day 3 — see `LEARNING.md`).
+
+**Acceptance criteria:**
+- [ ] `task6-deploy-wizard.sh` runs `rm -rf .aws-sam` (root and `infra/`) right before every `sam build`
+
+**Verification:**
+- [ ] Confirmed on the next real `sam deploy` — build stays near Day 1's ~125MB baseline, not the 1GB+ Task 33 hit
+
+**Dependencies:** None
+
+**Files likely touched:** `scripts/task6-deploy-wizard.sh`
+
+**Estimated scope:** XS
+
+##### Task 38: Confirm submission deadline
+
+**Description:** Exact deadline hour has been unpublished since Day 1 (§22, flagged in plan.md's open questions). Re-check the official schedule page first thing — this gates how the rest of the day is paced.
+
+**Acceptance criteria:**
+- [ ] Deadline hour confirmed and written down (this file's Open Questions, or wherever the team is tracking it)
+
+**Dependencies:** None — do this first
+
+**Estimated scope:** XS
+
+##### Task 39: Polish all five screens, fix Day 3 rehearsal bugs
+
+**Description:** Pass over Screens 1–5 against the live Amplify URL (not local dev — Day 3's 8pm checkpoint found the public URL silently serving fixtures for hours). Fix whatever the polish pass turns up; this is bug-fix scope only, feature freeze still holds.
+
+**Acceptance criteria:**
+- [ ] All five screens re-checked live on `https://main.dw3gwg5t169l9.amplifyapp.com/`
+- [ ] Any bugs found are fixed, not just logged
+
+**Dependencies:** Task 37 if a fix needs a redeploy
+
+**Estimated scope:** Medium
+
+##### Task 40: Record demo video
+
+**Description:** ≤3:00, per §21's scene script. `docs/demo-shot-list.md` (Task 34) already maps every scene to what's recordable; shoot against it.
+
+**Acceptance criteria:**
+- [ ] Video ≤3:00, covers §21's scene table, AWS visibly shown per the guardrail requirement
+
+**Dependencies:** Task 39 (screens should be in their final state before shooting)
+
+**Estimated scope:** Medium
+
+##### Task 41: Write the submission writeup
+
+**Description:** Problem, build, AWS integration, AI tools used — first-class deliverable, not an afterthought.
+
+**Acceptance criteria:**
+- [ ] Writeup covers all four required sections
+
+**Dependencies:** None to start; benefits from Task 40 existing for reference
+
+**Estimated scope:** Medium
+
+##### Task 42: Finalise README.md, CREDITS.md, LEARNING.md
+
+**Description:** Last pass on the three docs that are themselves submission artifacts — README's known Amplify env-var gap already fixed (Day 3 8pm checkpoint), confirm nothing else is stale.
+
+**Acceptance criteria:**
+- [ ] All three reflect current, deployed state — no stale instructions or broken links
+
+**Dependencies:** None
+
+**Estimated scope:** Small
+
+##### Task 43: Submit
+
+**Description:** Submit via the official channel; confirm registration actually went through, not just the submission form.
+
+**Acceptance criteria:**
+- [ ] Submission confirmed received
+- [ ] Registration confirmed, not assumed
+
+**Dependencies:** Tasks 38–42 all done
+
+**Estimated scope:** XS
+
+### Checkpoint: Submission complete
+- [ ] Deadline hour confirmed (Task 38) and everything below landed before it
+- [ ] Golden path still holds live on Amplify after Task 39's fixes
+- [ ] Demo video, writeup, and docs (Tasks 40–42) all committed
+- [ ] Submission + registration both confirmed (Task 43)
 
 ---
 

@@ -265,18 +265,26 @@ Full detail for every task below: `tasks/plan.md`, Phase 3.
   `LIVE RESEARCH`, every network call 200, zero console errors throughout. See `LEARNING.md`.
 - [x] No new features after this point — holding since Task 36; today's work is bug fixes only
 
-## Phase 4 — Day 4
+## Phase 4 — Day 4 (broken down into tasks 2026-09-20; full detail: `tasks/plan.md`, Phase 4)
 
-- [ ] Add `rm -rf .aws-sam` (repo root and `infra/`) as a step before `sam build` in
+### Day 4 — Ship (no lane split, single critical path)
+- [ ] Task 37: `rm -rf .aws-sam` (repo root and `infra/`) as a step before `sam build` in
   `scripts/task6-deploy-wizard.sh` — Day 3's Task 33 deploy took ~90 min because every build
   re-zips its own prior `.aws-sam/` output into the next one (1.5GB → 1.18GB upload for a
   one-route change). Do **not** scope `CodeUri` down (tried and reverted Day 1 — Windows
   `git core.symlinks=false` turns the symlink workaround into a real, driftable second copy of
   `backend/`) or add a `.samignore` (confirmed inert twice now, Day 1 and Day 3 — see
   `LEARNING.md`). The clean-rebuild habit is the only fix that's actually worked.
-- [ ] Re-check official schedule for actual deadline hour
-- [ ] Polish all 5 screens, fix Day 3 bugs
-- [ ] Record demo video ≤3:00 per §21 script
-- [ ] Write the writeup (problem, build, AWS integration, AI tools used)
-- [ ] Finalise README.md, CREDITS.md, LEARNING.md
-- [ ] Submit; confirm registration went through
+- [ ] Task 38: Re-check official schedule for actual deadline hour — do this first, it paces
+  the rest of the day
+- [ ] Task 39: Polish all 5 screens, fix Day 3 bugs — check live on Amplify, not local dev
+- [ ] Task 40: Record demo video ≤3:00 per §21 script
+- [ ] Task 41: Write the writeup (problem, build, AWS integration, AI tools used)
+- [ ] Task 42: Finalise README.md, CREDITS.md, LEARNING.md
+- [ ] Task 43: Submit; confirm registration went through
+
+### Checkpoint: Submission complete
+- [ ] Deadline hour confirmed (Task 38) and everything below landed before it
+- [ ] Golden path still holds live on Amplify after Task 39's fixes
+- [ ] Demo video, writeup, and docs (Tasks 40–42) all committed
+- [ ] Submission + registration both confirmed (Task 43)
