@@ -268,13 +268,15 @@ Full detail for every task below: `tasks/plan.md`, Phase 3.
 ## Phase 4 — Day 4 (broken down into tasks 2026-09-20; full detail: `tasks/plan.md`, Phase 4)
 
 ### Day 4 — Ship (no lane split, single critical path)
-- [ ] Task 37: `rm -rf .aws-sam` (repo root and `infra/`) as a step before `sam build` in
-  `scripts/task6-deploy-wizard.sh` — Day 3's Task 33 deploy took ~90 min because every build
-  re-zips its own prior `.aws-sam/` output into the next one (1.5GB → 1.18GB upload for a
-  one-route change). Do **not** scope `CodeUri` down (tried and reverted Day 1 — Windows
-  `git core.symlinks=false` turns the symlink workaround into a real, driftable second copy of
-  `backend/`) or add a `.samignore` (confirmed inert twice now, Day 1 and Day 3 — see
-  `LEARNING.md`). The clean-rebuild habit is the only fix that's actually worked.
+- [x] Task 37: `rm -rf .aws-sam infra/.aws-sam` added right before `sam build` in
+  `scripts/task6-deploy-wizard.sh` (Stage 5) — Day 3's Task 33 deploy took ~90 min because every
+  build re-zips its own prior `.aws-sam/` output into the next one (1.5GB → 1.18GB upload for a
+  one-route change; confirmed both a root-level and `infra/`-level `.aws-sam` exist depending on
+  how `sam build` was invoked, 1.5GB/1.6GB respectively on disk right now). Did **not** scope
+  `CodeUri` down (tried and reverted Day 1 — Windows `git core.symlinks=false` turns the symlink
+  workaround into a real, driftable second copy of `backend/`) or add a `.samignore` (confirmed
+  inert twice now, Day 1 and Day 3 — see `LEARNING.md`). Not yet re-verified on a real `sam
+  deploy` (next one will confirm the upload stays near Day 1's ~125MB baseline).
 - [ ] Task 38: Re-check official schedule for actual deadline hour — do this first, it paces
   the rest of the day
 - [ ] Task 39: Polish all 5 screens, fix Day 3 bugs — check live on Amplify, not local dev

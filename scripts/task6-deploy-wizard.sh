@@ -286,6 +286,10 @@ fi
 stage "sam build && sam deploy"
 say "Building infra/api-gateway.yaml (API Gateway routes + the Task 6 Step"
 say "Functions skeleton: one Task state → orchestrator_stub Lambda)."
+say "Clearing stale .aws-sam build output first — CodeUri is the repo root,"
+say "so a leftover .aws-sam re-zips itself into the next build and snowballs"
+say "the upload (Task 33: 1.5GB for a one-route change)."
+rm -rf .aws-sam infra/.aws-sam
 ( cd infra && sam build --template-file api-gateway.yaml )
 say "Now the guided deploy — it'll ask for a stack name, confirm the region,"
 say "and ask to auto-create the IAM role SAM needs. Accept defaults unless you"

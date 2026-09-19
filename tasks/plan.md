@@ -372,7 +372,7 @@ Goal: Phase 3's feature freeze holds — everything left closes out the submissi
 **Description:** `scripts/task6-deploy-wizard.sh` re-zips every prior `.aws-sam/` build's output into the next `sam build`'s `CodeUri`, snowballing the upload — Task 33's one-route change took a 1.5GB→1.18GB deploy and ~90 minutes because of it. Add `rm -rf .aws-sam` (repo root and `infra/`) as a step immediately before `sam build`. Do not scope `CodeUri` down (tried and reverted Day 1 — Windows `git core.symlinks=false` turns the symlink workaround into a real, driftable second copy of `backend/`) or add a `.samignore` (confirmed inert twice, Day 1 and Day 3 — see `LEARNING.md`).
 
 **Acceptance criteria:**
-- [ ] `task6-deploy-wizard.sh` runs `rm -rf .aws-sam` (root and `infra/`) right before every `sam build`
+- [x] `task6-deploy-wizard.sh` runs `rm -rf .aws-sam infra/.aws-sam` right before every `sam build`
 
 **Verification:**
 - [ ] Confirmed on the next real `sam deploy` — build stays near Day 1's ~125MB baseline, not the 1GB+ Task 33 hit
