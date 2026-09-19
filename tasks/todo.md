@@ -275,18 +275,42 @@ Full detail for every task below: `tasks/plan.md`, Phase 3.
   how `sam build` was invoked, 1.5GB/1.6GB respectively on disk right now). Did **not** scope
   `CodeUri` down (tried and reverted Day 1 — Windows `git core.symlinks=false` turns the symlink
   workaround into a real, driftable second copy of `backend/`) or add a `.samignore` (confirmed
-  inert twice now, Day 1 and Day 3 — see `LEARNING.md`). Not yet re-verified on a real `sam
-  deploy` (next one will confirm the upload stays near Day 1's ~125MB baseline).
-- [x] Task 38: Deadline confirmed — **8pm, 2026-09-20**. That's the pacing constraint for
-  everything below.
-- [ ] Task 39: Polish all 5 screens, fix Day 3 bugs — check live on Amplify, not local dev
+  inert twice now, Day 1 and Day 3 — see `LEARNING.md`). Re-verified on a real `sam deploy`
+  2026-09-20: the rebuilt `.aws-sam` still measured 1.6GB (13 functions × `CodeUri: ../` each,
+  no dedup at build time — expected, not a regression), but the actual S3 upload was ~47MB
+  because every function shares one identical content hash, so `sam deploy` uploads it once and
+  skips the rest as "File with same data already exists." Separately hit and fixed the exact
+  Day 3 `--template-file <source>.yaml` gotcha again (repackages from scratch, ignoring
+  `sam build`'s output) — deploying `.aws-sam/build/template.yaml` instead is what actually used
+  the small artifact. `LEARNING.md` had this written down already; worth grepping it before
+  handing over a deploy command, not just before writing code.
+- [x] Task 38: Deadline re-confirmed — **8pm, 2026-09-20** — unchanged from the earlier check.
+- [x] Task 39: Polish pass across all 5 screens, live on Amplify — found and fixed 2 real bugs:
+  - Screen 3 (inbox), "Ideas we rejected" (the screen's named signature moment) rendered raw
+    backend slugs verbatim (`truth`, `no_verified_evidence`) instead of readable text — the
+    fixture data used polished prose but the live pipeline never did. Added a label map in
+    `frontend/src/lib/viewModels.ts` (`rejectionGateLabel`/`rejectionReasonLabel`), same pattern
+    as the existing `CLAIM_HEADING` map, with a humanize-slug fallback for anything unmapped
+    (including the dynamic `duplicate_merged_into:<id>` case). Live-verified: now reads "Evidence
+    Check" / "No claim in this idea has verified evidence backing it."
+  - Screen 4 (opportunity detail), `GET /claims/{id}/evidence` (`backend/handlers/claims_stub.py`)
+    never set `X-Retrieval-Mode` — the one handler that skipped the label every sibling handler
+    sets — so the `ServedBanner` reported every evidence fetch as `PROVENANCE NOT STATED` even
+    when served live from DynamoDB, directly undermining the §7.2 labelling guardrail on the
+    PRD's named best-differentiator screen. Fixed by passing `retrieval_mode=LIVE`/`DEMO_FIXTURE`
+    like every other handler. Live-verified: banner now reads "LIVE RESEARCH" throughout.
+  - Both fixes: 202/202 backend tests, 139/142 frontend (3 pre-existing unrelated `.env.local`
+    failures per Task 32's note), `npm run build`/lint clean. Committed (`dd0913a`), pushed,
+    frontend redeployed via Amplify's build-on-push, backend redeployed via `sam deploy`
+    (human-run, no AWS creds in the harness — see Task 37 note above for what that deploy hit).
+  - Screens 1, 2, 5 checked clean, no bugs found.
 - [ ] Task 40: Record demo video ≤3:00 per §21 script
 - [ ] Task 41: Write the writeup (problem, build, AWS integration, AI tools used)
 - [ ] Task 42: Finalise README.md, CREDITS.md, LEARNING.md
 - [ ] Task 43: Submit; confirm registration went through
 
 ### Checkpoint: Submission complete
-- [ ] Deadline hour confirmed (Task 38) and everything below landed before it
-- [ ] Golden path still holds live on Amplify after Task 39's fixes
+- [x] Deadline hour confirmed (Task 38) and everything below landed before it
+- [x] Golden path still holds live on Amplify after Task 39's fixes
 - [ ] Demo video, writeup, and docs (Tasks 40–42) all committed
 - [ ] Submission + registration both confirmed (Task 43)

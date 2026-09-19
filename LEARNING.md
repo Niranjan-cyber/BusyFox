@@ -543,3 +543,22 @@ Kept from Day 1 per the event rules (learning is a scored judging criterion). On
   done by hand through the console. Re-verified live via Playwright immediately after: full path
   `#/business → #/investigation → #/inbox → #/opportunities/{id} → .../execution-pack`, every
   screen `LIVE RESEARCH`, zero console errors, all network calls 200.
+
+**Task 39 polish pass: two silent-substitution-adjacent bugs, one repeated deploy gotcha**
+- Two Day 3 bugs only showed up because Task 39's re-check ran against the live Amplify URL
+  again (same habit the checkpoint above established): (1) Screen 3's "Ideas we rejected" —
+  called out in its own component docstring as "screen 3's signature moment" — rendered raw
+  backend category slugs (`truth`, `no_verified_evidence`) verbatim, because the fixture data
+  used hand-written prose and the live pipeline's `quality_gate.py` never did; nothing translated
+  between them. (2) `claims_stub.py::get_claim_evidence` was the one handler across the whole
+  API that never passed `retrieval_mode` to `ok()`, so Screen 4's Evidence Check diagram —
+  the PRD's named best differentiator — showed `PROVENANCE NOT STATED` for every evidence
+  fetch even when served live. Neither was caught by any test, because no test asserts what a
+  live response's header *is*, only what a handler returns when Dynamo is (or isn't) reachable —
+  a live-URL check is still the only thing that catches "the label is technically correct but
+  the label is missing."
+- Re-deploying the backend fix hit the exact `--template-file <source>.yaml` mistake Day 3
+  already diagnosed and wrote down (repackages from scratch, ignores `sam build`'s output) —
+  handed the wrong deploy command from memory instead of grepping this file first. Confirms the
+  Day 3 entry's own lesson generalizes past "the person driving the terminal": an agent handing
+  over infra commands needs the same grep-this-file-first habit as a human would.
