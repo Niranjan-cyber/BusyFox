@@ -40,18 +40,27 @@ Full product spec: [`opportunity_engine_prd_v8.md`](opportunity_engine_prd_v8.md
 
 ```mermaid
 flowchart TD
-    FE["React frontend\nAmplify Hosting"] --> GW["API Gateway"]
-    GW --> LAM["Lambda\n13 functions"]
-    LAM --> DDB[("DynamoDB\nsingle table, 9 entities")]
-    LAM --> S3[("S3\nevidence cache")]
-    EXT["Tavily · GitHub · HN\nApp Store · Product Hunt"] --> AG
+    subgraph Client[" "]
+        FE["React frontend\nAmplify Hosting"]
+    end
 
-    AG["Market / Feedback / Competitor\nagents — Strands SDK"] --> SYN["Synthesis agent"]
-    SYN --> EC["Evidence Check"]
-    EC --> QG["Quality Gate + Ranker\nno composite score"]
+    subgraph AWSDeployed["AWS — deployed"]
+        GW["API Gateway"] --> LAM["Lambda\n13 functions"]
+        LAM --> DDB[("DynamoDB\nsingle table, 9 entities")]
+        LAM --> S3[("S3\nevidence cache")]
+    end
+
+    subgraph Pipeline["Research pipeline — local script today, not yet on Step Functions"]
+        EXT["Tavily · GitHub · HN\nApp Store · Product Hunt"] --> AG["Market / Feedback / Competitor\nagents — Strands SDK"]
+        AG --> SYN["Synthesis agent"]
+        SYN --> EC["Evidence Check"]
+        EC --> QG["Quality Gate + Ranker\nno composite score"]
+        AG -.blocked, 0 req/min quota.-> BR["Bedrock"]
+        AG --> OCG["OpenCode Go\ndeepseek-v4.1-flash"]
+    end
+
+    FE --> GW
     QG --> DDB
-    AG -.blocked, 0 req/min quota.-> BR["Bedrock"]
-    AG --> OCG["OpenCode Go\ndeepseek-v4.1-flash"]
 
     classDef aws fill:#FF9900,stroke:#232F3E,color:#111,font-weight:bold;
     classDef verify fill:#2ea44f,stroke:#1a6b34,color:#fff,font-weight:bold;
