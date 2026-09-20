@@ -45,11 +45,13 @@ flowchart TD
     EXT["External sources<br>Tavily · GitHub · HN · App Store · Product Hunt"]
 
     subgraph PIPE["Research pipeline — a local script today, not Step Functions"]
-        AG["Research agents · Market, Competitor<br>propose signals[] only"]
+        AG["Research agents · Market, Competitor<br>propose signals only"]
         SYN["Synthesis<br>signals → candidate opportunities"]
         EC["Evidence Check<br>code + one constrained model call"]
         QG["Quality Gate + Ranker<br>pure code, no composite score"]
+        OCG["OpenCode Go · deepseek-v4.1-flash<br>every model call above, not Bedrock"]
         AG --> SYN --> EC --> QG
+        SYN -.->|"model call"| OCG
     end
 
     subgraph AWS["Deployed on AWS"]
@@ -71,7 +73,7 @@ flowchart TD
     classDef model fill:#7b5fd4,stroke:#4b3a86,color:#fff,font-weight:bold;
     class GW,LAM,DDB,S3 aws;
     class EC,QG verify;
-    class AG,SYN model;
+    class AG,SYN,OCG model;
 ```
 
 **Purple = a model decides. Green = code decides.** Quality Gate is pure code, no model anywhere
