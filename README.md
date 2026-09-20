@@ -51,10 +51,10 @@ flowchart TD
     subgraph Pipeline["Research pipeline — local script today, not yet on Step Functions"]
         EXT["Tavily · GitHub · HN\nApp Store · Product Hunt"] --> AG["Market / Feedback / Competitor\nagents — Strands SDK"]
         AG --> SYN["Synthesis agent"]
-        AG --> OCG["OpenCode Go\ndeepseek-v4.1-flash"]
-        AG -.blocked, 0 req/min quota.-> BR["Bedrock"]
-        SYN --> EC["Evidence Check"]
-        EC --> QG["Quality Gate + Ranker\nno composite score"]
+        SYN --> EC["Evidence Check\ncode + one model call"]
+        EC --> QG["Quality Gate + Ranker\npure code, no composite score"]
+        AG & SYN & EC --> OCG["OpenCode Go\ndeepseek-v4.1-flash\nall 4 LLM call sites"]
+        AG & SYN & EC -.blocked, 0 req/min quota.-> BR["Bedrock"]
     end
 
     QG --> DDB
@@ -69,12 +69,17 @@ flowchart TD
     class BR blocked;
 ```
 
-Green = deterministic checks, no LLM in the decision. Purple = where a model is actually called
-— that's OpenCode Go today, not Bedrock (grey/dashed): Bedrock is IAM-wired and access-approved,
+Green = the checks that decide what reaches the inbox. Quality Gate is pure code — no model in
+that decision. Evidence Check is code *plus one constrained model call* (verifying a quote
+actually supports its claim, not just that it exists) — calling the whole thing "code
+verification" would overclaim, so it gets its own arrow into the model layer below rather than
+being lumped in as fully deterministic. Purple = every stage that actually calls a model — the
+research agents, Synthesis, and Evidence Check's semantic check all run on **OpenCode Go** today,
+not Bedrock (grey/dashed): Bedrock is IAM-wired and access-approved,
 but every AWS account hit a 0 req/min real-time inference quota, so the model call itself was
 swapped same-day without touching the surrounding agent architecture. The research pipeline
-(agents → Evidence Check → Quality Gate) runs today via a local script writing to the same live
-DynamoDB table the API reads from — it isn't wired into Step Functions yet (see
+(agents → Synthesis → Evidence Check → Quality Gate) runs today via a local script writing to the
+same live DynamoDB table the API reads from — it isn't wired into Step Functions yet (see
 [Future scope](#future-scope)). Full detail, including both drift notes spoken out for the demo
 video: [`docs/architecture-diagram.md`](docs/architecture-diagram.md).
 
