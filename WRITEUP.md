@@ -57,7 +57,7 @@ Deployed and running on AWS, not just diagrammed:
 |---|---|
 | **Amplify Hosting** | Frontend, git-connected to `main`, auto-builds on push |
 | **API Gateway** | REST surface for all five screens |
-| **Lambda** | 13 functions — every read/write handler, plus the Evidence Level 2/3 fallback |
+| **Lambda** | 12 functions — 10 read handlers, the Evidence Level 2/3 fallback, and the orchestrator stub |
 | **DynamoDB** | Single table + GSI1, all nine core entities (businesses, runs, signals, opportunities, claims, evidence, targets, execution packs, source documents) |
 | **S3** | Evidence cache bucket backing the Live → Cached → Demo Fixture ladder |
 | **Step Functions** | Orchestrator (currently the Day 1 skeleton — one Task state proving Lambda invocation; the full five-stage research pipeline that produced the one real live opportunity runs today via a local script, not yet re-wired into the state machine — shown honestly on the architecture diagram rather than left off it) |

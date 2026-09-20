@@ -32,56 +32,66 @@ Full product spec: [`opportunity_engine_prd_v8.md`](opportunity_engine_prd_v8.md
 |---|---|
 | **Flagship business** | PulseStack — simulated B2B SaaS (lightweight monitoring), competing against real named tools (Sentry, Datadog, …) |
 | **Frontend** | React on Amplify Hosting — five screens: business, live investigation, inbox, opportunity detail, execution pack |
-| **Backend** | API Gateway → 13 Lambda functions → DynamoDB (single table) + S3 |
-| **Agents** | Strands Agents SDK; Market / Feedback / Competitor research agents, Synthesis, Action — running on OpenCode Go (see [Tools we used](#tools-we-used)) |
+| **Backend** | API Gateway → 12 Lambda functions (11 read APIs + 1 orchestrator stub) → DynamoDB (single table) + S3 |
+| **Agents** | Strands Agents SDK — Market, Competitor, Synthesis, Action — running on OpenCode Go (see [Tools we used](#tools-we-used)). The feedback pipeline is pure code, not an agent |
 | **Data sources** | Tavily, GitHub REST, HN Algolia, App Store RSS, Product Hunt — every response labelled Live → Cached → Demo Fixture, never silently substituted |
 
 ## Architecture
 
+One line, top to bottom: sources in, verified opportunities out, the UI reading what survived.
+
 ```mermaid
-%%{init: {'flowchart': {'nodeSpacing': 45, 'rankSpacing': 55}}}%%
 flowchart TD
-    subgraph AWSDeployed["AWS — deployed"]
-        FE["React frontend\nAmplify Hosting"] --> GW["API Gateway"]
-        GW --> LAM["Lambda\n13 functions"]
-        LAM --> DDB[("DynamoDB\nsingle table, 9 entities")]
-        LAM --> S3[("S3\nevidence cache")]
+    EXT["External sources<br>Tavily · GitHub · HN · App Store · Product Hunt"]
+
+    subgraph PIPE["Research pipeline — a local script today, not Step Functions"]
+        AG["Research agents · Market, Competitor<br>propose signals[] only"]
+        SYN["Synthesis<br>signals → candidate opportunities"]
+        EC["Evidence Check<br>code + one constrained model call"]
+        QG["Quality Gate + Ranker<br>pure code, no composite score"]
+        AG --> SYN --> EC --> QG
     end
 
-    subgraph Pipeline["Research pipeline — local script today, not yet on Step Functions"]
-        EXT["Tavily · GitHub · HN\nApp Store · Product Hunt"] --> AG["Market / Feedback / Competitor\nagents — Strands SDK"]
-        AG --> SYN["Synthesis agent"]
-        SYN --> EC["Evidence Check\ncode + one model call"]
-        EC --> QG["Quality Gate + Ranker\npure code, no composite score"]
-        AG --> OCG["OpenCode Go\ndeepseek-v4.1-flash\ncalled by every stage above —\nagents, Synthesis, Evidence Check"]
-        AG -.blocked everywhere, 0 req/min quota.-> BR["Bedrock"]
+    subgraph AWS["Deployed on AWS"]
+        DDB[("DynamoDB<br>single table, 9 entities")]
+        S3[("S3<br>evidence cache")]
+        LAM["Lambda · 12 functions"]
+        GW["API Gateway"]
+        FE["React frontend<br>Amplify Hosting"]
+        DDB --> LAM
+        S3 --> LAM
+        LAM --> GW --> FE
     end
 
-    QG --> DDB
+    EXT --> AG
+    QG -->|"only what passes the gate"| DDB
 
     classDef aws fill:#FF9900,stroke:#232F3E,color:#111,font-weight:bold;
     classDef verify fill:#2ea44f,stroke:#1a6b34,color:#fff,font-weight:bold;
     classDef model fill:#7b5fd4,stroke:#4b3a86,color:#fff,font-weight:bold;
-    classDef blocked fill:#f2f2f2,stroke:#999,color:#777,stroke-dasharray: 4 3;
     class GW,LAM,DDB,S3 aws;
     class EC,QG verify;
-    class AG,SYN,OCG model;
-    class BR blocked;
+    class AG,SYN model;
 ```
 
-Green = the checks that decide what reaches the inbox. Quality Gate is pure code — no model in
-that decision. Evidence Check is code *plus one constrained model call* (verifying a quote
-actually supports its claim, not just that it exists) — calling the whole thing "code
-verification" would overclaim, so its label says so rather than lumping it in as fully
-deterministic. Purple = where a model is actually called — every stage in the pipeline above
-(the research agents, Synthesis, and Evidence Check's semantic check) runs on **OpenCode Go**
-today, not Bedrock (grey/dashed): Bedrock is IAM-wired and access-approved,
-but every AWS account hit a 0 req/min real-time inference quota, so the model call itself was
-swapped same-day without touching the surrounding agent architecture. The research pipeline
-(agents → Synthesis → Evidence Check → Quality Gate) runs today via a local script writing to the
-same live DynamoDB table the API reads from — it isn't wired into Step Functions yet (see
-[Future scope](#future-scope)). Full detail, including both drift notes spoken out for the demo
-video: [`docs/architecture-diagram.md`](docs/architecture-diagram.md).
+**Purple = a model decides. Green = code decides.** Quality Gate is pure code, no model anywhere
+in it. Evidence Check is code *plus one constrained model call* — checking a quote actually
+supports its claim, not just that it exists — so its label says so rather than overclaiming
+"code verification".
+
+Two things the diagram states rather than hides:
+
+- **The model is OpenCode Go (`deepseek-v4.1-flash`), not Bedrock.** Bedrock is IAM-wired and
+  access-approved, but every AWS account hit a 0 req/min real-time inference quota. Only the
+  model behind each call changed; the agent architecture didn't.
+- **The pipeline is a local script, not Step Functions.** It writes to the same live DynamoDB
+  table the API reads from. The deployed state machine is still Day 1's one-Lambda skeleton (see
+  [Future scope](#future-scope)).
+
+Not in the diagram, to keep it to one line: the PulseStack feedback pipeline (pure code —
+normalise, dedupe, redact, spam-filter) and the Action agent, which builds an execution pack for
+one gate-passed opportunity on demand. Full detail:
+[`docs/architecture-diagram.md`](docs/architecture-diagram.md).
 
 ## Submission docs
 

@@ -1,89 +1,96 @@
-# Architecture diagram (for §21, 2:40–2:50)
+# Architecture — what's actually deployed
 
-What's actually deployed and actually running, as of 2026-09-20 — not the original plan.
-Two things drifted from `tasks/plan.md`'s Day 1 architecture line during Day 3 (see
-`LEARNING.md`, Day 3/4), and this diagram shows the drift instead of hiding it: that's
-consistent with the project's own rule that a substitution is always labelled, never silent.
+As of 2026-09-20, not the original plan. Two things drifted from `tasks/plan.md`'s Day 1
+architecture line during Day 3 (see `LEARNING.md`, Day 3/4); both are labelled below rather than
+hidden, consistent with the project's own rule that a substitution is never silent.
+
+Two diagrams, because there are two separate paths: one that **produces** opportunities, one
+that **serves** them. They meet at DynamoDB and nowhere else.
+
+## 1. Producing — `scripts/run_live_pipeline.py`
 
 ```mermaid
 flowchart TD
-    subgraph Frontend
-        AMP["Amplify Hosting\nmain.dw3gwg5t169l9.amplifyapp.com"]
-    end
+    EXT["Tavily · GitHub · HN · App Store · Product Hunt"]
+    AG["Market + Competitor agents (Strands)<br>emit signals[] only"]
+    SYN["Synthesis agent (Strands)<br>signals → candidate opportunities"]
+    EC["Evidence Check<br>code + one constrained model call"]
+    QG["Quality Gate + Ranker<br>pure code, no composite score"]
+    DDB[("DynamoDB — OpportunityEngineTable<br>single table + GSI1, 9 entities")]
+    OCG["OpenCode Go · deepseek-v4.1-flash<br>every model call since Day 3"]
+    BR["Bedrock<br>IAM-wired, 0 req/min quota — blocked"]
 
-    subgraph API["API Gateway (HTTP API)"]
-        GW[OpportunityEngineApi]
-    end
+    EXT --> AG --> SYN --> EC --> QG --> DDB
+    SYN -.->|"model call"| OCG
+    OCG -.->|"replaced since Day 3"| BR
 
-    subgraph Read["10 read Lambdas"]
-        L1["GetBusiness / GetBusinessFeedbackSummary\nListBusinessSignals"]
-        L2["ListOpportunities / GetOpportunity\nListRejectedIdeas / GetExecutionPack"]
-        L3["ListClaims / GetClaimEvidence\nListCompetitors"]
-    end
+    classDef model fill:#7b5fd4,stroke:#4b3a86,color:#fff,font-weight:bold;
+    classDef verify fill:#2ea44f,stroke:#1a6b34,color:#fff,font-weight:bold;
+    classDef aws fill:#FF9900,stroke:#232F3E,color:#111,font-weight:bold;
+    classDef blocked fill:#f2f2f2,stroke:#999,color:#777,stroke-dasharray: 4 3;
+    class AG,SYN,OCG model;
+    class EC,QG verify;
+    class DDB aws;
+    class BR blocked;
+```
 
-    subgraph Evidence["Evidence Level 2/3 fallback (Task 28)"]
-        L4[GetCompetitorEvidenceLive Lambda]
-        TAV[Tavily — Level 1: Live]
-        S3C[S3 EvidenceCacheBucket — Level 2: Cached]
-        FIX[Demo fixture — Level 3]
-    end
+A local script, **not** the deployed state machine. It produced `opp_run_7f023794a99d_0` and
+wrote it to the same live DynamoDB table the API reads from.
 
-    subgraph Data["DynamoDB — OpportunityEngineTable"]
-        DDB[(Single table, GSI1\nall 9 core entities)]
-    end
+Purple = a model decides; green = code decides. The dashed edge into OpenCode Go stands for
+every model call in the pipeline, not just Synthesis's — drawing one edge per call site is what
+made the earlier version of this diagram unreadable.
 
-    subgraph Skeleton["Deployed but NOT the real pipeline"]
-        SFN["Step Functions: SkeletonOrchestrator\n(Day 1 skeleton — one Task state,\nproves Lambda invocation works)"]
-        STUB[RunOrchestratorStub Lambda]
-    end
+The Action agent (execution packs) runs separately, per-opportunity, via
+`scripts/run_action_agent_live.py`.
 
-    subgraph RealPipeline["The real pipeline, as it actually runs today"]
-        SCRIPT["scripts/run_live_pipeline.py\n(local script, NOT Step Functions)"]
-        AGENTS["Market / Competitor / Synthesis agents\n(Strands)"]
-        BEDROCK["Bedrock\nIAM-wired, quota-approved —\nblocked by a 0 req/min real-time\ninference quota since Day 3"]
-        OCG["OpenCode Go (deepseek-v4.1-flash)\nactual inference for all 4 LLM\ncall sites since Day 3"]
-        CODE["Evidence Check + Quality Gate\n(plain code, not agents)"]
-    end
+## 2. Serving — API Gateway → Lambda → UI
+
+```mermaid
+flowchart TD
+    AMP["Amplify Hosting<br>main.dw3gwg5t169l9.amplifyapp.com"]
+    GW["API Gateway — OpportunityEngineApi"]
+    READ["10 read Lambdas<br>business · opportunities · claims · competitors"]
+    LIVE["GetCompetitorEvidenceLive Lambda"]
+    DDB[("DynamoDB — OpportunityEngineTable")]
+    TAV["Tavily — Level 1: Live"]
+    S3C["S3 EvidenceCacheBucket — Level 2: Cached"]
+    FIX["Demo fixture — Level 3"]
 
     AMP --> GW
-    GW --> L1 & L2 & L3 & L4
-    L1 & L2 & L3 --> DDB
-    L4 --> TAV
-    TAV -.fails.-> S3C
-    S3C -.empty.-> FIX
-    L4 --> S3C
+    GW --> READ --> DDB
+    GW --> LIVE --> TAV
+    TAV -.->|"fails"| S3C
+    S3C -.->|"empty"| FIX
 
-    SFN --> STUB
-    STUB -.smoke test only.-> DDB
-
-    SCRIPT --> AGENTS
-    AGENTS -.attempted, blocked.-> BEDROCK
-    AGENTS --> OCG
-    AGENTS --> CODE
-    CODE --> DDB
+    classDef aws fill:#FF9900,stroke:#232F3E,color:#111,font-weight:bold;
+    class GW,READ,LIVE,DDB,S3C aws;
 ```
+
+11 read Lambdas in total. The 12th deployed function, `RunOrchestratorStub`, is invoked only by
+the Day 1 Step Functions skeleton (`SkeletonOrchestrator`, one Task state) — a wiring smoke test,
+not on any user-facing path, which is why it isn't drawn above.
 
 ## The two honesty notes, spoken plainly for narration
 
 1. **Bedrock vs. OpenCode Go.** Bedrock access was confirmed and IAM-wired on Day 1. Day 3
    root-caused why every agent call was silently timing out: the account's real-time inference
    quota is 0 req/min for every Bedrock model, with no ETA on an increase. Rather than block on
-   an AWS support ticket, all four LLM call sites (Market Agent, Competitor Agent, Synthesis
-   Agent, Evidence Check's semantic-support check) were switched same-day to OpenCode Go
-   (deepseek-v4.1-flash), an already-paid-for subscription. That's what's actually generating
-   every real signal, claim, and evidence verdict in the live demo.
+   an AWS support ticket, every LLM call site — Market, Competitor, Synthesis and Action agents,
+   Evidence Check's semantic-support check, and the feedback labeller — was switched same-day to
+   OpenCode Go (`deepseek-v4.1-flash`), an already-paid-for subscription. That's what's actually
+   generating every real signal, claim, and evidence verdict in the live demo. Only the model
+   behind each call changed; the surrounding agent architecture didn't.
 2. **Step Functions vs. the real pipeline.** The deployed state machine is still Day 1's
    skeleton — one Task state invoking one stub Lambda, proving Step Functions → Lambda deploys
    and runs. The real five-stage graph (parallel research → Synthesis → Evidence Check → Quality
-   Gate → DynamoDB) that produced `opp_run_7f023794a99d_0` ran via
-   `scripts/run_live_pipeline.py`, a local script writing to the same live DynamoDB table —
-   not through the deployed state machine.
+   Gate → DynamoDB) ran via the local script in diagram 1.
 
 Both are framed as "what we found and adapted to," not hidden — the Learning criterion rewards
 exactly this, and it pre-empts a judge finding either gap by reading the code instead of hearing
 it from us first.
 
-## What to actually show on screen
+## What to actually show on screen (§21, 2:40–2:50)
 
 Not a screen recording — this file, opened in a Markdown/Mermaid preview (GitHub renders it
 natively), or exported to an image if the mermaid render looks better full-screen. Pair with the
