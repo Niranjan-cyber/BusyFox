@@ -39,13 +39,11 @@ Full product spec: [`opportunity_engine_prd_v8.md`](opportunity_engine_prd_v8.md
 ## Architecture
 
 ```mermaid
+%%{init: {'flowchart': {'nodeSpacing': 45, 'rankSpacing': 55}}}%%
 flowchart TD
-    subgraph Client[" "]
-        FE["React frontend\nAmplify Hosting"]
-    end
-
     subgraph AWSDeployed["AWS — deployed"]
-        GW["API Gateway"] --> LAM["Lambda\n13 functions"]
+        FE["React frontend\nAmplify Hosting"] --> GW["API Gateway"]
+        GW --> LAM["Lambda\n13 functions"]
         LAM --> DDB[("DynamoDB\nsingle table, 9 entities")]
         LAM --> S3[("S3\nevidence cache")]
     end
@@ -53,13 +51,12 @@ flowchart TD
     subgraph Pipeline["Research pipeline — local script today, not yet on Step Functions"]
         EXT["Tavily · GitHub · HN\nApp Store · Product Hunt"] --> AG["Market / Feedback / Competitor\nagents — Strands SDK"]
         AG --> SYN["Synthesis agent"]
+        AG --> OCG["OpenCode Go\ndeepseek-v4.1-flash"]
+        AG -.blocked, 0 req/min quota.-> BR["Bedrock"]
         SYN --> EC["Evidence Check"]
         EC --> QG["Quality Gate + Ranker\nno composite score"]
-        AG -.blocked, 0 req/min quota.-> BR["Bedrock"]
-        AG --> OCG["OpenCode Go\ndeepseek-v4.1-flash"]
     end
 
-    FE --> GW
     QG --> DDB
 
     classDef aws fill:#FF9900,stroke:#232F3E,color:#111,font-weight:bold;
