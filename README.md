@@ -36,6 +36,42 @@ Full product spec: [`opportunity_engine_prd_v8.md`](opportunity_engine_prd_v8.md
 | **Agents** | Strands Agents SDK; Market / Feedback / Competitor research agents, Synthesis, Action — running on OpenCode Go (see [Tools we used](#tools-we-used)) |
 | **Data sources** | Tavily, GitHub REST, HN Algolia, App Store RSS, Product Hunt — every response labelled Live → Cached → Demo Fixture, never silently substituted |
 
+## Architecture
+
+```mermaid
+flowchart TD
+    FE["React frontend\nAmplify Hosting"] --> GW["API Gateway"]
+    GW --> LAM["Lambda\n13 functions"]
+    LAM --> DDB[("DynamoDB\nsingle table, 9 entities")]
+    LAM --> S3[("S3\nevidence cache")]
+    EXT["Tavily · GitHub · HN\nApp Store · Product Hunt"] --> AG
+
+    AG["Market / Feedback / Competitor\nagents — Strands SDK"] --> SYN["Synthesis agent"]
+    SYN --> EC["Evidence Check"]
+    EC --> QG["Quality Gate + Ranker\nno composite score"]
+    QG --> DDB
+    AG -.blocked, 0 req/min quota.-> BR["Bedrock"]
+    AG --> OCG["OpenCode Go\ndeepseek-v4.1-flash"]
+
+    classDef aws fill:#FF9900,stroke:#232F3E,color:#111,font-weight:bold;
+    classDef verify fill:#2ea44f,stroke:#1a6b34,color:#fff,font-weight:bold;
+    classDef model fill:#7b5fd4,stroke:#4b3a86,color:#fff,font-weight:bold;
+    classDef blocked fill:#f2f2f2,stroke:#999,color:#777,stroke-dasharray: 4 3;
+    class GW,LAM,DDB,S3 aws;
+    class EC,QG verify;
+    class AG,SYN,OCG model;
+    class BR blocked;
+```
+
+Green = deterministic checks, no LLM in the decision. Purple = where a model is actually called
+— that's OpenCode Go today, not Bedrock (grey/dashed): Bedrock is IAM-wired and access-approved,
+but every AWS account hit a 0 req/min real-time inference quota, so the model call itself was
+swapped same-day without touching the surrounding agent architecture. The research pipeline
+(agents → Evidence Check → Quality Gate) runs today via a local script writing to the same live
+DynamoDB table the API reads from — it isn't wired into Step Functions yet (see
+[Future scope](#future-scope)). Full detail, including both drift notes spoken out for the demo
+video: [`docs/architecture-diagram.md`](docs/architecture-diagram.md).
+
 ## Submission docs
 
 | Doc | What's in it |
@@ -82,3 +118,31 @@ Bedrock model access, and `sam deploy` for `infra/api-gateway.yaml`. Run it from
 ```bash
 bash scripts/task6-deploy-wizard.sh
 ```
+
+## Future scope
+
+What's deliberately out of scope for the four-day event, not forgotten:
+
+- **Wire the real pipeline into Step Functions.** The five-stage research pipeline that
+  produces real opportunities runs today via `scripts/run_live_pipeline.py`, a local script
+  writing to the live DynamoDB table — the deployed state machine is still Day 1's one-Lambda
+  skeleton. Re-platforming that script onto Step Functions is the natural next step, not a
+  redesign.
+- **Move inference back to Bedrock** once real-time quota is granted. The agent architecture
+  (Strands SDK, the four call sites) never changed — only the model behind them did — so this is
+  a config swap, not new code.
+- **Resume the gold-set evaluation** (deferred Tasks 24/29): 100-row manual labelling against
+  planted truths/red herrings, corpus and blank sheets already committed
+  (`tasks/gold_set/`), to turn "we planted opportunities and the engine found them" into the
+  three named headline metrics (§19.1) instead of a qualitative claim.
+- **The other two PRD verticals** — Anveshan Precision (manufacturing job-shop) and Koa Studio
+  (D2C fashion), §3.2 P1/P2 — to demonstrate the vertical-agnostic claim on more than one
+  business.
+- **Persist edited value assumptions.** Screen 4's value-range editor (`EditableValueRange`) is
+  session-only today; there's no route yet to save an owner's edited assumption back to the
+  opportunity.
+- **A dedicated cost panel** (CloudWatch + Budgets, §17.2) — today the per-run cost story is
+  narrated from logs for the demo video rather than shown on a live screen.
+- **Broaden the Evidence Level 2/3 rehearsal** (Task 28) past the one competitor it's been
+  exercised against, and extend the same Live → Cached → Demo Fixture ladder to App Store and
+  Product Hunt, which are enrichment-only today.
